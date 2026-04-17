@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DropScout — Trend Radar</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+  // Tema anında uygula (FOUC/flaş önleme)
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<link rel="stylesheet" href="/src/css/main.css">
+<script type="module" src="/src/js/main.js"></script>
+  <style>
+    /* ═══════════════════════════════════
+       TREND RADAR — Page-Specific Styles
+       ═══════════════════════════════════ */
+    .app{min-height:100vh;}
+    .main{padding-bottom:28px;}
+    .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;}
+    .topbar-left{display:flex;align-items:flex-start;gap:12px;}
+    .page-title{font-size:19px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px;}
+    .page-meta{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.5px;line-height:1.7;}
+    .page-description{font-size:12px;color:var(--muted);line-height:1.7;margin-top:8px;max-width:780px;}
+    .top-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end;}
+    .btn{padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-size:10px;font-family:'Geist Mono',monospace;color:var(--muted);cursor:pointer;transition:all 0.15s;box-shadow:var(--key-shadow);}
+    .btn:hover{border-color:rgba(37,99,235,0.16);color:var(--blue);background:var(--blue-dim);}
+    .btn.primary{background:var(--blue);color:#fff;border-color:transparent;box-shadow:var(--button-shadow);}
+
+    .card{background:var(--surface);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:14px;box-shadow:var(--key-shadow);}
+    .stat-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:var(--key-shadow);}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;}
+    .stat-card.accent-green::before{background:linear-gradient(90deg,var(--green),transparent);}
+    .stat-card.accent-blue::before{background:linear-gradient(90deg,var(--blue),transparent);}
+    .stat-card.accent-orange::before{background:linear-gradient(90deg,var(--orange),transparent);}
+    .stat-card.accent-yellow::before{background:linear-gradient(90deg,var(--yellow),transparent);}
+    .stat-card.accent-purple::before{background:linear-gradient(90deg,var(--purple),transparent);}
+    .live{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(5,150,105,.28);animation:pulse 1.8s infinite;flex-shrink:0;}
+    @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(5,150,105,.28)}70%{box-shadow:0 0 0 8px rgba(5,150,105,0)}100%{box-shadow:0 0 0 0 rgba(5,150,105,0)}}
+    .stat-label{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+    .stat-value{font-size:22px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:5px;}
+    .stat-value.green{color:var(--green)} .stat-value.blue{color:var(--blue)} .stat-value.orange{color:var(--orange)} .stat-value.yellow{color:var(--yellow)} .stat-value.purple{color:var(--purple)}
+    .stat-sub{font-size:10px;color:var(--muted2);}
+
+    .section{padding:18px;}
+    .section-head,.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+    .section-head{margin-bottom:14px;}
+    .section-title,.card-head h3{margin:0;font-size:13px;font-weight:700;}
+    .tag{padding:3px 8px;border-radius:4px;font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:.5px;}
+    .tag.green{background:var(--green-dim);color:var(--green)}
+    .tag.blue{background:var(--blue-dim);color:var(--blue)}
+    .tag.orange{background:var(--orange-dim);color:var(--orange)}
+
+    .content{display:grid;grid-template-columns:minmax(0,1.26fr) minmax(320px,.94fr);gap:14px;align-items:start;}
+    .right-col{position:sticky;top:24px;max-height:calc(100vh - 48px);overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:12px;}
+    .right-col::-webkit-scrollbar{display:none;}
+
+    .toolbar-wrap{position:relative;margin-bottom:12px;}
+    .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    .filter-chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:linear-gradient(180deg,var(--nav-item-bg-start) 0%, var(--nav-item-bg-end) 100%);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.18s;box-shadow:var(--key-shadow);}
+    .filter-chip:hover{border-color:rgba(37,99,235,0.16);background:var(--blue-dim);color:var(--blue);}
+    .filter-chip.active{background:var(--blue-dim);border-color:rgba(37,99,235,0.18);color:var(--blue);box-shadow:var(--key-shadow-strong);}
+    .chip-count{font-family:'Geist Mono',monospace;font-size:8px;padding:2px 6px;border-radius:999px;background:color-mix(in srgb, var(--text) 6%, transparent);color:var(--muted);}
+    .filter-chip.active .chip-count{background:rgba(37,99,235,0.12);color:var(--blue);}
+    .platform-dropdown{position:relative;}
+    .caret{font-size:10px;line-height:1;color:var(--muted2);transition:.18s;}
+    .dropdown-panel{position:absolute;top:44px;right:0;min-width:250px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 22px 46px -28px rgba(15,23,42,.26);backdrop-filter:blur(12px);z-index:20;}
+    .dropdown-title{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+    .dropdown-list{display:grid;gap:6px;}
+    .dropdown-option{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:.18s;font-size:11px;font-weight:700;color:var(--text);}
+    .dropdown-option:hover,.dropdown-option.active{border-color:rgba(37,99,235,.16);background:var(--blue-dim);}
+    .check-badge{padding:4px 8px;border-radius:999px;background:var(--blue-dim);color:var(--blue);font-family:'Geist Mono',monospace;font-size:8px;}
+    .dropdown-actions{display:flex;gap:8px;margin-top:10px;}
+    .dropdown-btn{flex:1;height:34px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);font-size:10px;font-weight:800;cursor:pointer;transition:.15s;color:var(--text);}
+    .dropdown-btn:hover{border-color:rgba(37,99,235,.16);background:var(--blue-dim);color:var(--blue);}
+    .dropdown-btn.primary{background:var(--blue);color:#fff;border:none;}
+
+    .listing-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+    .listing-count{font-size:11px;color:var(--muted);}
+    .listing-count strong{color:var(--text);}
+    .listing-sort{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);}
+    .product-list{display:grid;gap:10px;}
+    .product{display:grid;grid-template-columns:88px 1fr 124px;gap:14px;padding:14px;border-radius:16px;border:1px solid var(--border);background:linear-gradient(180deg,var(--surface),var(--surface2));box-shadow:var(--key-shadow);transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;cursor:pointer;}
+    .product:hover{transform:translateY(-2px);box-shadow:var(--key-shadow-strong);border-color:rgba(37,99,235,.16);}
+    .product.active{border-color:rgba(37,99,235,.26);box-shadow:0 16px 40px -24px rgba(37,99,235,.32);background:linear-gradient(180deg,rgba(37,99,235,.08),var(--surface) 24%,var(--surface2));}
+    .thumb{width:88px;height:88px;border-radius:14px;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(99,102,241,.20));display:flex;align-items:flex-end;justify-content:flex-start;padding:9px;flex-shrink:0;}
+    .thumb::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%, rgba(255,255,255,.32), transparent 44%);}
+    .thumb-label{position:relative;z-index:1;color:rgba(255,255,255,.9);font-weight:800;font-size:10px;letter-spacing:.2px;line-height:1.3;}
+    .p-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px;}
+    .p-title{font-size:13px;font-weight:800;letter-spacing:-.3px;}
+    .pill{padding:4px 8px;border-radius:999px;font-family:'Geist Mono',monospace;font-size:8px;}
+    .pill.blue{background:var(--blue-dim);color:var(--blue)} .pill.green{background:var(--green-dim);color:var(--green)} .pill.orange{background:var(--orange-dim);color:var(--orange)} .pill.red{background:var(--red-dim);color:var(--red)}
+    .p-desc{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:9px;}
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+    .metric{padding:7px 9px;border-radius:11px;background:var(--surface);border:1px solid var(--border);}
+    .metric small{display:block;font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
+    .metric strong{font-size:12px;} .metric strong.green{color:var(--green)} .metric strong.orange{color:var(--orange)} .metric strong.blue{color:var(--blue)} .metric strong.red{color:var(--red)} .metric strong.yellow{color:var(--yellow)}
+    .p-side{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:8px;}
+    .score{min-width:88px;text-align:right;padding:10px 11px;border-radius:15px;background:rgba(5,150,105,.06);border:1px solid rgba(5,150,105,.14);}
+    .score small{display:block;font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
+    .score strong{font-size:26px;color:var(--green);letter-spacing:-1px;}
+    .score.yellow{background:rgba(217,119,6,.06);border-color:rgba(217,119,6,.14)} .score.yellow strong{color:var(--yellow)}
+    .score.orange{background:rgba(234,88,12,.06);border-color:rgba(234,88,12,.14)} .score.orange strong{color:var(--orange)}
+    .verdict{font-size:11px;font-weight:800;}
+    .verdict.good{color:var(--green)} .verdict.mid{color:var(--yellow)} .verdict.bad{color:var(--orange)}
+    .p-link{padding:8px 11px;border-radius:12px;border:1px solid rgba(99,102,241,.14);background:var(--purple-dim);color:var(--purple);font-size:10px;font-weight:800;cursor:pointer;transition:.15s;text-align:center;white-space:nowrap;}
+    .p-link:hover{background:rgba(99,102,241,.18);}
+
+    .empty-state{padding:40px 20px;text-align:center;color:var(--muted);}
+    .empty-state .empty-icon{font-size:28px;margin-bottom:10px;}
+    .empty-state strong{display:block;font-size:14px;color:var(--text);margin-bottom:6px;}
+    .empty-state p{font-size:12px;line-height:1.7;margin:0;}
+
+    .pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap;}
+    .page-btn{min-width:36px;height:36px;padding:0 10px;border-radius:12px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:800;color:var(--muted);cursor:pointer;box-shadow:var(--key-shadow);transition:.15s;}
+    .page-btn.active,.page-btn:hover{background:var(--blue-dim);border-color:rgba(37,99,235,.18);color:var(--blue);}
+    .page-info{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);padding:0 4px;}
+
+    .selected-head,.rail-card,.signal-card{padding:15px;border-radius:16px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--key-shadow);}
+    .selected-head{margin-bottom:0;}
+    .selected-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
+    .selected-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+    .selected-title strong{font-size:14px;letter-spacing:-.3px;}
+    .selected-sub{font-size:11px;color:var(--muted);line-height:1.7;}
+    .insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .rail-card{display:flex;flex-direction:column;}
+    .rail-body{display:flex;flex-direction:column;gap:8px;flex:1;}
+    .analysis{padding:11px 13px;border-radius:13px;background:var(--surface2);border-left:2px solid var(--green);font-size:11px;line-height:1.8;color:var(--muted);}
+    .analysis.orange{border-left-color:var(--orange)} .analysis.red{border-left-color:var(--red)}
+    .kv{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 11px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);font-size:11px;}
+    .kv span:first-child{color:var(--muted)}
+    .kv strong.green{color:var(--green)} .kv strong.orange{color:var(--orange)} .kv strong.blue{color:var(--blue)} .kv strong.yellow{color:var(--yellow)}
+    .action-list{display:grid;gap:7px;margin-top:10px;}
+    .action{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-radius:13px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;gap:8px;}
+    .action:hover{border-color:rgba(37,99,235,.16);background:var(--blue-dim);color:var(--blue);}
+    .action-arrow{color:var(--muted2);font-size:11px;flex-shrink:0;transition:.15s;}
+    .action:hover .action-arrow{color:var(--blue);transform:translateX(2px);}
+    .signal-bars{display:grid;gap:11px;}
+    .bar-item .top{display:flex;justify-content:space-between;gap:8px;font-size:11px;margin-bottom:5px;}
+    .bar-item .top span:first-child{color:var(--muted)}
+    .bar-item .top strong{font-family:'Geist Mono',monospace;font-size:9px;}
+    .bar-track{height:7px;border-radius:999px;background:color-mix(in srgb, var(--text) 8%, transparent);overflow:hidden;}
+    .bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .4s cubic-bezier(.34,1.56,.64,1);}
+    .bar-fill.risk{background:linear-gradient(90deg,var(--yellow),var(--red));}
+    @keyframes panelFade{0%{opacity:.6;transform:translateY(3px)}100%{opacity:1;transform:translateY(0)}}
+    .panel-flash{animation:panelFade .25s ease forwards;}
+
+    @media (max-width:1260px){
+      .content{grid-template-columns:1fr;}
+      .right-col{position:static;max-height:none;overflow-y:visible;}
+      .stat-bar{grid-template-columns:repeat(3,1fr);}
+      .insight-grid{grid-template-columns:1fr 1fr;}
+    }
+    @media (max-width:900px){
+      .topbar{flex-direction:column;gap:14px;}
+      .stat-bar{grid-template-columns:repeat(2,1fr);}
+      .metrics,.insight-grid{grid-template-columns:1fr;}
+      .product{grid-template-columns:1fr;}
+      .p-side{align-items:flex-start;flex-direction:row;}
+      .dropdown-panel{left:0;right:auto;min-width:100%;}
+    }
+    @media (max-width:700px){
+      .stat-bar{grid-template-columns:1fr;}
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+  <div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo"><a class="logo-link" href="./dropscout.html"><div class="logo-icon">🎯</div><div class="logo-text">Drop<span>Scout</span></div></a></div>
+
+      <div class="nav-group">
+        <div class="nav-label">Keşif</div>
+        <a class="nav-item active" href="./trend-radar.html"><span class="nav-icon">📡</span>Trend Radar</a>
+        <a class="nav-item" href="./gap-radar.html"><span class="nav-icon">🌍</span>Gap Radar <span class="nav-badge nb-purple">YENİ</span></a>
+        <a class="nav-item" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi <span class="nav-badge nb-blue">YENİ</span></a>
+        <a class="nav-item" href="./rakip-analizi.html"><span class="nav-icon">🔬</span>Rakip Analizi</a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Araçlar</div>
+        <a class="nav-item" href="./net-kar.html"><span class="nav-icon">💰</span>Net Kâr Hesabı</a>
+        <a class="nav-item" href="./takip-listem.html"><span class="nav-icon">⭐</span>Takip Listem</a>
+        <a class="nav-item" href="./yasal-kontrol.html"><span class="nav-icon">⚖️</span>Yasal Kontrol</a>
+        <a class="nav-item" href="./tedarikci-bul.html"><span class="nav-icon">🔗</span>Tedarikçi Bul</a>
+        <a class="nav-item" href="./raporlar.html"><span class="nav-icon">📊</span>Raporlar</a>
+      </div>
+      <div class="nav-group">
+        <div class="nav-label">Platform</div>
+        <a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a>
+        <a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a>
+        <a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a>
+        <a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="theme-toggle-wrap">
+          <div class="theme-toggle-head">
+            <div class="theme-toggle-copy">
+              <div class="theme-toggle-label">Tema</div>
+              <div class="theme-toggle-sub">LIGHT / DARK MODE</div>
+              <div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div>
+            </div>
+            <label class="theme-switch" aria-label="Tema değiştir">
+              <input type="checkbox" id="themeToggle">
+              <span class="theme-slider">
+                <span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span>
+                <span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span>
+                <span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span>
+              </span>
+            </label>
+          </div>
+        </div>
+        <div class="plan-card">
+          <div class="plan-tier">Pro Plan</div>
+          <div class="plan-name">Trend Radar Aktif ✓</div>
+          <div class="plan-meta"><span>₺499/ay · Canlı analiz</span><div class="upgrade-btn">Yönet</div></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+      <!-- Topbar -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+          <div>
+            <div class="page-title">Trend Radar</div>
+            <div class="page-meta">DASHBOARD / TREND RADAR / LIVE FLOW</div>
+            <div class="page-description">Taranan ürünleri tek akışta karşılaştır, filtreleri daralt ve sağ panelde kâr, risk, sezon ve giriş zamanını genel dashboard diliyle aynı görsel sistem içinde değerlendir.</div>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="btn">KAYDEDİLMİŞ FİLTRELER</button>
+          <button class="btn">PDF ÖZET</button>
+          <button class="btn primary">↻ CANLI TARAMA BAŞLAT</button>
+        </div>
+      </div>
+
+      <!-- Stat bar -->
+      <div class="stat-bar">
+        <div class="stat-card accent-green">
+          <div class="stat-label"><span class="live"></span> Fırsat Skoru</div>
+          <div class="stat-value green" id="avgScore">—</div>
+          <div class="stat-sub" id="avgLabel">Hesaplanıyor</div>
+        </div>
+        <div class="stat-card accent-blue">
+          <div class="stat-label">Taranan</div>
+          <div class="stat-value blue" id="heroScanned">—</div>
+          <div class="stat-sub" id="heroHigh">— yüksek fırsat</div>
+        </div>
+        <div class="stat-card accent-orange">
+          <div class="stat-label">Riskli Ürün</div>
+          <div class="stat-value orange" id="heroRisk">—</div>
+          <div class="stat-sub">Yüksek doygunluk</div>
+        </div>
+        <div class="stat-card accent-yellow">
+          <div class="stat-label">Ort. Net Marj</div>
+          <div class="stat-value yellow" id="avgMargin">—</div>
+          <div class="stat-sub" id="avgRisk">— risk</div>
+        </div>
+        <div class="stat-card accent-purple">
+          <div class="stat-label">Platform</div>
+          <div class="stat-value purple" id="heroPlatform" style="font-size:16px;letter-spacing:-.3px">Tümü</div>
+          <div class="stat-sub" id="avgEntry">— giriş penceresi</div>
+        </div>
+      </div>
+
+      <!-- Content: list + right panel -->
+      <section class="content">
+
+        <!-- Left: Product list -->
+        <div>
+          <div class="card section">
+            <div class="section-head">
+              <h3 class="section-title">Canlı Fırsat Akışı</h3>
+              <span class="tag blue" id="streamStatus">AKIŞ CANLI</span>
+            </div>
+
+            <div class="toolbar-wrap" id="toolbarWrap"></div>
+
+            <div class="listing-meta">
+              <div class="listing-count"><strong id="visibleCount">0</strong> ürün &middot; <span id="selectedPlatformText">Tümü</span></div>
+              <div class="listing-sort">AI Skor ↓</div>
+            </div>
+
+            <div class="product-list" id="productList"></div>
+            <div class="pagination" id="pagination"></div>
+          </div>
+        </div>
+
+        <!-- Right: Analysis panel -->
+        <div class="right-col">
+
+          <div class="selected-head" id="selectedHead">
+            <div class="selected-label">Seçili Ürün</div>
+            <div class="selected-title">
+              <strong id="selectedName">—</strong>
+              <span class="pill blue" id="selectedCategory">Kategori</span>
+              <span class="pill green" id="selectedDecision">Karar</span>
+            </div>
+            <div class="selected-sub" id="selectedDesc">Bir ürün seçin; analiz paneli anında güncellenir.</div>
+          </div>
+
+          <div class="insight-grid" id="insightGrid">
+            <!-- Rakip Özeti -->
+            <div class="rail-card">
+              <div class="card-head"><h3>Rakip Özeti</h3><span class="tag green">LIVE</span></div>
+              <div class="rail-body">
+                <div class="kv"><span>Fiyat bandı</span><strong class="blue" id="compPrice">—</strong></div>
+                <div class="kv"><span>Yorum baskısı</span><strong class="orange" id="compReview">—</strong></div>
+                <div class="kv"><span>Görsel kalite</span><strong class="green" id="compVisual">—</strong></div>
+                <div class="analysis" id="compNote">—</div>
+              </div>
+            </div>
+
+            <!-- Kâr Simülasyonu -->
+            <div class="rail-card">
+              <div class="card-head"><h3>Kâr Simülasyonu</h3><span class="tag green">MARGIN</span></div>
+              <div class="rail-body">
+                <div class="kv"><span>Satış fiyatı</span><strong class="blue" id="profitSale">—</strong></div>
+                <div class="kv"><span>Toplam maliyet</span><strong class="orange" id="profitCost">—</strong></div>
+                <div class="kv"><span>Ön net marj</span><strong class="green" id="profitMargin">—</strong></div>
+                <div class="analysis" id="profitNote">—</div>
+              </div>
+            </div>
+
+            <!-- Risk ve Sezon -->
+            <div class="rail-card">
+              <div class="card-head"><h3>Risk ve Sezon</h3><span class="tag orange">RISK</span></div>
+              <div class="rail-body">
+                <div class="kv"><span>Platform riski</span><strong class="green" id="riskPlatform">—</strong></div>
+                <div class="kv"><span>İade hassasiyeti</span><strong class="orange" id="riskReturn">—</strong></div>
+                <div class="kv"><span>Sezon etkisi</span><strong class="blue" id="riskSeason">—</strong></div>
+                <div class="analysis" id="riskNote">—</div>
+              </div>
+            </div>
+
+            <!-- Hızlı Aksiyonlar -->
+            <div class="rail-card">
+              <div class="card-head"><h3>Hızlı Aksiyonlar</h3><span class="tag blue">NEXT STEP</span></div>
+              <div class="action-list">
+                <div class="action"><span id="action1">—</span><span class="action-arrow">→</span></div>
+                <div class="action"><span id="action2">—</span><span class="action-arrow">→</span></div>
+                <div class="action"><span id="action3">—</span><span class="action-arrow">→</span></div>
+                <div class="action"><span id="action4">—</span><span class="action-arrow">→</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Signal bars -->
+          <div class="signal-card">
+            <div class="card-head"><h3>Fırsat Sinyali Dağılımı</h3><span class="tag green">SCORE MAP</span></div>
+            <div class="signal-bars">
+              <div class="bar-item">
+                <div class="top"><span>Talep potansiyeli</span><strong id="sigDemandLabel">—</strong></div>
+                <div class="bar-track"><div class="bar-fill" id="sigDemand" style="width:0%"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="top"><span>Rekabet açığı</span><strong id="sigGapLabel">—</strong></div>
+                <div class="bar-track"><div class="bar-fill" id="sigGap" style="width:0%"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="top"><span>Net kâr uygunluğu</span><strong id="sigProfitLabel">—</strong></div>
+                <div class="bar-track"><div class="bar-fill" id="sigProfit" style="width:0%"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="top"><span>Giriş zamanı</span><strong id="sigEntryLabel">—</strong></div>
+                <div class="bar-track"><div class="bar-fill" id="sigEntry" style="width:0%"></div></div>
+              </div>
+              <div class="bar-item">
+                <div class="top"><span>Risk / uyarı seviyesi</span><strong id="sigRiskLabel">—</strong></div>
+                <div class="bar-track"><div class="bar-fill bar-fill risk" id="sigRisk" style="width:0%"></div></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    const pageSize = 6;
+    const platformOptions = ['Trendyol','Hepsiburada','Amazon TR','n11'];
+    const filterOptions = [
+      { key:'all',         label:'Tümü' },
+      { key:'gap',         label:'Yeni Boşluklar' },
+      { key:'margin',      label:'Yüksek Marj' },
+      { key:'competition', label:'Düşük Rekabet' },
+      { key:'risk',        label:'Riskli Ürünler' },
+    ];
+
+    const products = [
+      {
+        id:1, platform:'Trendyol', title:'Minimal Masaüstü Köpük Sabunluk', category:'Ev & Yaşam', tag:'Düşük rekabet', tagColor:'green',
+        desc:'Görsel dili güçlü, fiyat bandı erişilebilir ve aynı segmentte satıcı yoğunluğu henüz kritik seviyeye ulaşmamış.',
+        saturation:42, competition:'Düşük', margin:27.4, entry:'7 gün', score:91, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(37,99,235,.18),rgba(99,102,241,.28))',
+        competitor:{ price:'₺219 – ₺349', review:'Orta', visual:'Düşük / Orta', note:'Rakiplerde görsel kalite zayıf; premium sunum ile ayrışmak mümkün.' },
+        profit:{ sale:'₺329', cost:'₺241', margin:'%26.7', note:'İlk deneme kampanyalarında marj alanı korunabiliyor.' },
+        risk:{ platform:'Düşük', return:'Orta', season:'Düşük', note:'Sezonsal baskı az, iade riski yönetilebilir seviyede.' },
+        actions:['Takip listesine ekle','Net Kâr analizine gönder','Gap Radar ile eşleştir','Tedarikçi araştırmasını başlat'],
+        signals:{ demand:88, gap:73, profit:81, entry:76, risk:24 }
+      },
+      {
+        id:2, platform:'Trendyol', title:'Katlanır Dar Alan Temizlik Seti', category:'Pratik Ürün', tag:'Orta rekabet', tagColor:'orange',
+        desc:'Kitleye hızlı anlatılabilen bir ürün. Hacim avantajı var ancak rakip sayısı yükseldiği için giriş hızı kritik.',
+        saturation:58, competition:'Orta', margin:22.1, entry:'4 gün', score:78, verdict:'İZLENMELİ', verdictClass:'mid', thumb:'linear-gradient(135deg,rgba(5,150,105,.18),rgba(37,99,235,.22))',
+        competitor:{ price:'₺189 – ₺289', review:'Orta / Yüksek', visual:'Orta', note:'Rakiplerde açıklama dili benzer; pakette ekstra değer vurgusu gerektiriyor.' },
+        profit:{ sale:'₺259', cost:'₺201', margin:'%22.1', note:'Reklam maliyeti yükselirse marj hızlı daralabilir.' },
+        risk:{ platform:'Düşük', return:'Orta', season:'Düşük', note:'Stok çevrimi hızlı olursa risk seviyesi kabul edilebilir kalır.' },
+        actions:['Takibe al','Net Kâr ekranında kontrol et','Gap Radar ile kıyasla','Tedarikçi alternatiflerini incele'],
+        signals:{ demand:79, gap:62, profit:68, entry:84, risk:37 }
+      },
+      {
+        id:3, platform:'Amazon TR', title:'Manyetik Dokunmatik LED Gece Lambası', category:'Elektronik Aksesuar', tag:'Aşırı doygun', tagColor:'red',
+        desc:'Görsel olarak çekici olsa da aynı ürün ailesi çok sayıda satıcı tarafından sunuluyor. Marj hızlı eriyebilir.',
+        saturation:84, competition:'Yüksek', margin:13.8, entry:'Geç kalınmış', score:54, verdict:'ATLANMALI', verdictClass:'bad', thumb:'linear-gradient(135deg,rgba(234,88,12,.18),rgba(239,68,68,.24))',
+        competitor:{ price:'₺149 – ₺259', review:'Yüksek', visual:'Orta / İyi', note:'Rakip baskısı çok yüksek, farklılaşma alanı sınırlı.' },
+        profit:{ sale:'₺219', cost:'₺189', margin:'%13.8', note:'Fiyat savaşı devam ederse kârlılık tatmin edici değil.' },
+        risk:{ platform:'Orta', return:'Orta', season:'Düşük', note:'Giriş için geç kalınmış bir kategori hissi var.' },
+        actions:['Risk notuna ekle','Net Kâr ile tekrar doğrula','Rakip fiyat alarmı kur','14 gün bekle ve izle'],
+        signals:{ demand:63, gap:28, profit:39, entry:21, risk:76 }
+      },
+      {
+        id:4, platform:'Hepsiburada', title:'Kablosuz Şarjlı Mini Blender', category:'Mutfak', tag:'Yüksek marj', tagColor:'green',
+        desc:'Video içeriklerde iyi performans verebilecek bir ürün. Hediye ve yaşam tarzı kurgusuyla sunulduğunda talep üretebilir.',
+        saturation:49, competition:'Orta', margin:29.2, entry:'9 gün', score:86, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(37,99,235,.18),rgba(5,150,105,.24))',
+        competitor:{ price:'₺449 – ₺649', review:'Orta', visual:'Düşük / Orta', note:'Rakiplerde görsel kalite ve videolu sunum zayıf, öne geçmek kolay.' },
+        profit:{ sale:'₺579', cost:'₺410', margin:'%29.2', note:'Ürün maliyeti yüksek ama marj alanı tatmin edici.' },
+        risk:{ platform:'Düşük', return:'Orta', season:'Düşük', note:'İyi bir kargo yönetimi ile iade baskısı azaltılabilir.' },
+        actions:['Takip listesine ekle','Net Kâr simülasyonu aç','Video kreatif önerilerini incele','Tedarikçi pazarlığı başlat'],
+        signals:{ demand:84, gap:69, profit:86, entry:72, risk:31 }
+      },
+      {
+        id:5, platform:'n11', title:'Silikon Kapı Altı Toz Engelleyici', category:'Ev Düzeni', tag:'Düşük fiyatlı giriş', tagColor:'blue',
+        desc:'Hızlı karar verilebilen, anlatımı kolay bir ürün. Uygun fiyatlı giriş testi için değerlendirilebilir.',
+        saturation:55, competition:'Orta', margin:19.4, entry:'5 gün', score:74, verdict:'İZLENMELİ', verdictClass:'mid', thumb:'linear-gradient(135deg,rgba(99,102,241,.18),rgba(37,99,235,.24))',
+        competitor:{ price:'₺79 – ₺139', review:'Düşük / Orta', visual:'Düşük', note:'Rakiplerde görsel kalite zayıf fakat fiyat kırılması sık görülüyor.' },
+        profit:{ sale:'₺119', cost:'₺96', margin:'%19.4', note:'Kargo ve komisyon dikkatli hesaplanmalı.' },
+        risk:{ platform:'Düşük', return:'Düşük', season:'Düşük', note:'Düşük biletli ürün olduğu için test girişine uygun.' },
+        actions:['Deneme listesine ekle','Marjı tekrar hesapla','Rakip açıklamalarını tara','Düşük bütçeli reklam planla'],
+        signals:{ demand:72, gap:58, profit:61, entry:78, risk:29 }
+      },
+      {
+        id:6, platform:'Amazon TR', title:'Vakumlu Buzdolabı Düzenleyici Set', category:'Mutfak Düzeni', tag:'Yeni boşluk', tagColor:'green',
+        desc:'Özellikle düzen odaklı kullanıcılar için çekici. Benzer ürünlerde güçlü görsel hikâye eksikliği göze çarpıyor.',
+        saturation:39, competition:'Düşük', margin:24.9, entry:'11 gün', score:89, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(5,150,105,.18),rgba(99,102,241,.24))',
+        competitor:{ price:'₺279 – ₺399', review:'Düşük', visual:'Düşük / Orta', note:'Rakipler ürün faydasını iyi anlatamıyor; kullanım senaryosu ile öne çıkılabilir.' },
+        profit:{ sale:'₺359', cost:'₺270', margin:'%24.9', note:'Hızlı giriş için güvenli bir marj bandı mevcut.' },
+        risk:{ platform:'Düşük', return:'Düşük', season:'Düşük', note:'Sezonsallık baskısı düşük ve anlatımı kolay.' },
+        actions:['Öncelikli listeye ekle','Net Kâr ekranını aç','Gap Radar boşluk haritasına ekle','Tedarikçi karşılaştırması yap'],
+        signals:{ demand:86, gap:81, profit:78, entry:68, risk:22 }
+      },
+      {
+        id:7, platform:'Hepsiburada', title:'Portatif Evcil Hayvan Tüy Toplayıcı', category:'Pet', tag:'Geniş kitle', tagColor:'blue',
+        desc:'Pet ürünleri kitlesinde hızlı kabul görebilir. Ancak yaratıcı içerik kalitesi ürünü belirgin şekilde etkiler.',
+        saturation:61, competition:'Orta', margin:21.7, entry:'6 gün', score:77, verdict:'İZLENMELİ', verdictClass:'mid', thumb:'linear-gradient(135deg,rgba(37,99,235,.18),rgba(217,119,6,.22))',
+        competitor:{ price:'₺149 – ₺239', review:'Orta', visual:'Orta', note:'Rakipler ürün faydasını anlatıyor ama güven duygusu zayıf.' },
+        profit:{ sale:'₺209', cost:'₺164', margin:'%21.7', note:'Paket avantajı ile marj iyileştirilebilir.' },
+        risk:{ platform:'Düşük', return:'Orta', season:'Düşük', note:'İçerik kalitesi düşük kalırsa dönüşüm sınırlı olabilir.' },
+        actions:['İzleme listesine ekle','Rakip yorumlarını tara','Pet kategorisiyle eşleştir','Mini reklam planı oluştur'],
+        signals:{ demand:75, gap:56, profit:64, entry:74, risk:34 }
+      },
+      {
+        id:8, platform:'Trendyol', title:'Katlanabilir Laptop Yükseltici Stand', category:'Ofis', tag:'Kalıcı talep', tagColor:'green',
+        desc:'Çalışma masası düzeni ve ergonomi temasıyla kalıcı talep yaratabilir. Kitle anlatımı net ve ürün faydası güçlü.',
+        saturation:52, competition:'Orta', margin:25.5, entry:'8 gün', score:85, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(99,102,241,.18),rgba(37,99,235,.24))',
+        competitor:{ price:'₺249 – ₺419', review:'Orta', visual:'Düşük / Orta', note:'Rakip tasarımlar benzer; kullanım senaryosu ile ayrışmak mümkün.' },
+        profit:{ sale:'₺349', cost:'₺260', margin:'%25.5', note:'Kurumsal/ev-ofis anlatısıyla güçlü bir teklif çıkabilir.' },
+        risk:{ platform:'Düşük', return:'Düşük', season:'Düşük', note:'Zamansız ürün yapısı nedeniyle güvenli adaylar arasında.' },
+        actions:['Öncelikli ürün listesine ekle','Net Kâr hesabını aç','Rakip görsellerini incele','İçerik briefi oluştur'],
+        signals:{ demand:82, gap:67, profit:79, entry:70, risk:25 }
+      },
+      {
+        id:9, platform:'Amazon TR', title:'Araç İçi Manyetik Kablo Düzenleyici', category:'Oto Aksesuar', tag:'Hızlı test', tagColor:'blue',
+        desc:'Düşük maliyetli ve anlatımı kolay bir ürün. Ancak uzun vadede rakip yoğunluğu artabilir.',
+        saturation:64, competition:'Orta / Yüksek', margin:18.2, entry:'3 gün', score:69, verdict:'İZLENMELİ', verdictClass:'mid', thumb:'linear-gradient(135deg,rgba(37,99,235,.16),rgba(234,88,12,.22))',
+        competitor:{ price:'₺89 – ₺159', review:'Orta', visual:'Düşük', note:'Rakipler fiyat odaklı, marka hissi neredeyse yok.' },
+        profit:{ sale:'₺129', cost:'₺106', margin:'%18.2', note:'Giriş için ucuz ama fiyat baskısı nedeniyle uzun ömürlü olmayabilir.' },
+        risk:{ platform:'Orta', return:'Düşük', season:'Düşük', note:'Kısa dönem test için uygun, uzun dönem için dikkatli olunmalı.' },
+        actions:['Hızlı teste ekle','Marj alarmı kur','Rakip fiyat izlemesi aç','14 gün izle'],
+        signals:{ demand:68, gap:49, profit:53, entry:88, risk:41 }
+      },
+      {
+        id:10, platform:'n11', title:'Bambu Çekmece İçi Bölücü Set', category:'Ev Düzeni', tag:'Premium giriş', tagColor:'green',
+        desc:'Premium hissi olan düzenleyici ürünler arasında. Rakiplerin çoğunda görsel dil zayıf ve ürün hikâyesi eksik.',
+        saturation:46, competition:'Düşük / Orta', margin:28.8, entry:'10 gün', score:90, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(5,150,105,.18),rgba(37,99,235,.24))',
+        competitor:{ price:'₺299 – ₺459', review:'Düşük', visual:'Düşük', note:'Rakiplerde premium konumlama zayıf; bu alanda net fırsat var.' },
+        profit:{ sale:'₺399', cost:'₺284', margin:'%28.8', note:'Yüksek marjlı ve orta vadeli potansiyele sahip.' },
+        risk:{ platform:'Düşük', return:'Düşük', season:'Düşük', note:'Düşük sezon etkisi ve premium anlatı avantajı var.' },
+        actions:['Öncelikli sıraya al','Kâr simülasyonunu kaydet','Premium rakipleri tara','Tedarikçi teklifleri al'],
+        signals:{ demand:84, gap:79, profit:88, entry:66, risk:20 }
+      },
+      {
+        id:11, platform:'Hepsiburada', title:'Seyahat Tipi Kozmetik Sızdırmaz Şişe Seti', category:'Seyahat', tag:'Sürekli talep', tagColor:'blue',
+        desc:'Seyahat ve düzen kategorisi arasında köprü kuruyor. Anlatımı kolay ancak ürün fotoğraf kalitesi kritik.',
+        saturation:57, competition:'Orta', margin:23.6, entry:'7 gün', score:80, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(99,102,241,.18),rgba(5,150,105,.24))',
+        competitor:{ price:'₺129 – ₺199', review:'Orta', visual:'Düşük / Orta', note:'Rakiplerde paketleme dili zayıf, güven veren içerik fark yaratır.' },
+        profit:{ sale:'₺179', cost:'₺137', margin:'%23.6', note:'Düşük iade riski sayesinde marj korunabilir.' },
+        risk:{ platform:'Düşük', return:'Düşük', season:'Düşük', note:'Seyahat dönemlerinde talep artışı destekleyici olabilir.' },
+        actions:['Takip listesine ekle','Paket varyasyonu dene','Rakip görselleri karşılaştır','Sezon kampanyası planla'],
+        signals:{ demand:77, gap:61, profit:72, entry:73, risk:27 }
+      },
+      {
+        id:12, platform:'Trendyol', title:'Ayarlanabilir Baharat Raf Organizeri', category:'Mutfak Düzeni', tag:'Yeni boşluk', tagColor:'green',
+        desc:'Mutfak düzeni içerikleriyle güçlü uyum sağlıyor. Kullanım öncesi/sonrası anlatımı ile dönüşüm yükseltilebilir.',
+        saturation:44, competition:'Düşük / Orta', margin:26.1, entry:'8 gün', score:88, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(37,99,235,.16),rgba(5,150,105,.24))',
+        competitor:{ price:'₺239 – ₺359', review:'Düşük', visual:'Düşük / Orta', note:'Rakipler ürünün dönüşüm yaratan görsel faydasını göstermiyor.' },
+        profit:{ sale:'₺319', cost:'₺236', margin:'%26.1', note:'Düzen kategorisinde güvenli marj alanı sunuyor.' },
+        risk:{ platform:'Düşük', return:'Düşük', season:'Düşük', note:'Evergreen yapıda, satış sonrası problem potansiyeli düşük.' },
+        actions:['Öncelikli gruba taşı','Net Kâr ekranını aç','Görsel brief oluştur','İlk stok testini planla'],
+        signals:{ demand:85, gap:76, profit:80, entry:69, risk:23 }
+      }
+    ];
+
+    let state = {
+      filter: 'all',
+      selectedPlatforms: [...platformOptions],
+      page: 1,
+      selectedId: products[0].id,
+      dropdownOpen: false
+    };
+
+    const productList  = document.getElementById('productList');
+    const pagination   = document.getElementById('pagination');
+    const toolbarWrap  = document.getElementById('toolbarWrap');
+
+    /* ── helpers ── */
+    function getSelectedPlatformLabel(){
+      if(state.selectedPlatforms.length === platformOptions.length) return 'Tümü';
+      if(state.selectedPlatforms.length === 1) return state.selectedPlatforms[0];
+      return `${state.selectedPlatforms[0]} +${state.selectedPlatforms.length - 1}`;
+    }
+
+    function applyFilterLogic(list, filterKey){
+      const key = filterKey || state.filter;
+      if(key === 'all')         return list;
+      if(key === 'gap')         return list.filter(p => p.signals.gap >= 70 || p.tag.includes('Yeni boşluk') || p.tag.includes('Yeni Boşluk'));
+      if(key === 'margin')      return list.filter(p => p.margin >= 25);
+      if(key === 'competition') return list.filter(p => p.competition.includes('Düşük'));
+      if(key === 'risk')        return list.filter(p => p.signals.risk >= 35 || p.saturation >= 70 || p.verdict === 'ATLANMALI');
+      return list;
+    }
+
+    function getPlatformFiltered(){
+      return products.filter(p => state.selectedPlatforms.includes(p.platform));
+    }
+
+    function getFilteredProducts(){
+      return applyFilterLogic(getPlatformFiltered()).sort((a,b) => b.score - a.score);
+    }
+
+    function getFilterCount(key){
+      return applyFilterLogic(getPlatformFiltered(), key).length;
+    }
+
+    function getPageCount(list){ return Math.max(1, Math.ceil(list.length / pageSize)); }
+    function getVisibleProducts(list){
+      const start = (state.page - 1) * pageSize;
+      return list.slice(start, start + pageSize);
+    }
+    function scoreStyle(score){
+      if(score >= 85) return 'score';
+      if(score >= 70) return 'score yellow';
+      return 'score orange';
+    }
+
+    /* ── toolbar ── */
+    function renderToolbar(){
+      toolbarWrap.innerHTML = `
+        <div class="toolbar">
+          ${filterOptions.map(opt => {
+            const count = getFilterCount(opt.key);
+            return `<button class="filter-chip ${opt.key === state.filter ? 'active' : ''}" data-filter="${opt.key}">
+              ${opt.label}
+              <span class="chip-count">${count}</span>
+            </button>`;
+          }).join('')}
+          <div class="platform-dropdown">
+            <button class="filter-chip platform-trigger ${state.dropdownOpen ? 'active' : ''}" id="platformTrigger">
+              Platform: ${getSelectedPlatformLabel()} <span class="caret">▾</span>
+            </button>
+            ${state.dropdownOpen ? `
+              <div class="dropdown-panel" id="dropdownPanel">
+                <div class="dropdown-title">Platform Seçimi</div>
+                <div class="dropdown-list">
+                  <div class="dropdown-option ${state.selectedPlatforms.length === platformOptions.length ? 'active' : ''}" data-platform-all="true">
+                    <span>Tümü</span>
+                    ${state.selectedPlatforms.length === platformOptions.length ? '<span class="check-badge">aktif</span>' : ''}
+                  </div>
+                  ${platformOptions.map(platform => `
+                    <div class="dropdown-option ${state.selectedPlatforms.includes(platform) ? 'active' : ''}" data-platform="${platform}">
+                      <span>${platform}</span>
+                      ${state.selectedPlatforms.includes(platform) ? '<span class="check-badge">seçili</span>' : ''}
+                    </div>
+                  `).join('')}
+                </div>
+                <div class="dropdown-actions">
+                  <button class="dropdown-btn" id="clearPlatforms">Temizle</button>
+                  <button class="dropdown-btn primary" id="applyPlatforms">Uygula</button>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+
+      toolbarWrap.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.filter = btn.dataset.filter;
+          state.page = 1;
+          syncSelectedToFilter();
+          render();
+        });
+      });
+
+      const trigger = document.getElementById('platformTrigger');
+      if(trigger){
+        trigger.addEventListener('click', e => {
+          e.stopPropagation();
+          state.dropdownOpen = !state.dropdownOpen;
+          renderToolbar();
+          bindDropdownEvents();
+        });
+      }
+      bindDropdownEvents();
+    }
+
+    function bindDropdownEvents(){
+      const panel = document.getElementById('dropdownPanel');
+      if(!panel) return;
+
+      panel.querySelector('[data-platform-all]')?.addEventListener('click', e => {
+        e.stopPropagation();
+        state.selectedPlatforms = [...platformOptions];
+        renderToolbar(); bindDropdownEvents();
+      });
+
+      panel.querySelectorAll('[data-platform]').forEach(item => {
+        item.addEventListener('click', e => {
+          e.stopPropagation();
+          const p = item.dataset.platform;
+          if(state.selectedPlatforms.includes(p)){
+            if(state.selectedPlatforms.length > 1)
+              state.selectedPlatforms = state.selectedPlatforms.filter(x => x !== p);
+          } else {
+            state.selectedPlatforms = [...state.selectedPlatforms, p];
+          }
+          renderToolbar(); bindDropdownEvents();
+        });
+      });
+
+      document.getElementById('clearPlatforms')?.addEventListener('click', e => {
+        e.stopPropagation();
+        state.selectedPlatforms = [...platformOptions];
+        renderToolbar(); bindDropdownEvents();
+      });
+
+      document.getElementById('applyPlatforms')?.addEventListener('click', e => {
+        e.stopPropagation();
+        state.dropdownOpen = false;
+        state.page = 1;
+        syncSelectedToFilter();
+        render();
+      });
+    }
+
+    document.addEventListener('click', e => {
+      if(state.dropdownOpen && !toolbarWrap.contains(e.target)){
+        state.dropdownOpen = false;
+        renderToolbar();
+      }
+    });
+
+    /* ── products ── */
+    function renderProducts(list){
+      const visible = getVisibleProducts(list);
+
+      if(!visible.length){
+        productList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">🔍</div>
+            <strong>Bu filtreye uyan ürün bulunamadı</strong>
+            <p>Platform seçimini veya kategori filtresini değiştirerek tekrar deneyin.</p>
+          </div>
+        `;
+        return;
+      }
+
+      productList.innerHTML = visible.map(p => `
+        <article class="product ${p.id === state.selectedId ? 'active' : ''}" data-id="${p.id}">
+          <div class="thumb" style="background:${p.thumb}">
+            <span class="thumb-label">${p.category}</span>
+          </div>
+          <div>
+            <div class="p-top">
+              <div class="p-title">${p.title}</div>
+              <span class="pill ${p.tagColor}">${p.tag}</span>
+              <span class="pill blue">${p.platform}</span>
+            </div>
+            <div class="p-desc">${p.desc}</div>
+            <div class="metrics">
+              <div class="metric">
+                <small>Doygunluk</small>
+                <strong class="${p.saturation >= 75 ? 'red' : p.saturation >= 55 ? 'orange' : 'green'}">%${p.saturation}</strong>
+              </div>
+              <div class="metric">
+                <small>Rekabet</small>
+                <strong class="${p.competition.includes('Düşük') ? 'green' : p.competition.includes('Yüksek') ? 'red' : 'orange'}">${p.competition}</strong>
+              </div>
+              <div class="metric">
+                <small>Net Marj</small>
+                <strong class="${p.margin >= 25 ? 'green' : p.margin >= 18 ? 'yellow' : 'orange'}">%${p.margin.toFixed(1)}</strong>
+              </div>
+            </div>
+          </div>
+          <div class="p-side">
+            <div class="${scoreStyle(p.score)}">
+              <small>AI SKOR</small>
+              <strong>${p.score}</strong>
+            </div>
+            <div class="verdict ${p.verdictClass}">${p.verdict}</div>
+            <button class="p-link">Analiz Et →</button>
+          </div>
+        </article>
+      `).join('');
+
+      productList.querySelectorAll('.product').forEach(card => {
+        card.addEventListener('click', () => {
+          state.selectedId = Number(card.dataset.id);
+          renderProducts(list);
+          renderSelectedPanel(true);
+        });
+      });
+    }
+
+    /* ── pagination ── */
+    function renderPagination(list){
+      const total   = getPageCount(list);
+      const current = Math.min(state.page, total);
+      state.page = current;
+
+      if(total <= 1){ pagination.innerHTML = ''; return; }
+
+      let html = '';
+      for(let i = 1; i <= total; i++){
+        html += `<button class="page-btn ${i === current ? 'active' : ''}" data-page="${i}">${i}</button>`;
+      }
+      html += `<span class="page-info">${current} / ${total}</span>`;
+      pagination.innerHTML = html;
+
+      pagination.querySelectorAll('.page-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.page = Number(btn.dataset.page);
+          render();
+        });
+      });
+    }
+
+    /* ── sync selection ── */
+    function syncSelectedToFilter(){
+      const filtered = getFilteredProducts();
+      if(!filtered.length){ state.selectedId = products[0].id; return; }
+      if(!filtered.find(p => p.id === state.selectedId)){
+        state.selectedId = filtered[0].id;
+      }
+    }
+
+    /* ── right panel ── */
+    function renderSelectedPanel(animated){
+      const p = products.find(x => x.id === state.selectedId) || products[0];
+
+      // Flash animation on update
+      if(animated){
+        const els = ['selectedHead','insightGrid'];
+        els.forEach(id => {
+          const el = document.getElementById(id);
+          if(!el) return;
+          el.classList.remove('panel-flash');
+          void el.offsetWidth;
+          el.classList.add('panel-flash');
+        });
+      }
+
+      document.getElementById('selectedName').textContent     = p.title;
+      document.getElementById('selectedCategory').textContent = p.category;
+      document.getElementById('selectedDecision').textContent = p.verdict;
+      document.getElementById('selectedDecision').className   = `pill ${p.verdictClass === 'good' ? 'green' : p.verdictClass === 'mid' ? 'orange' : 'red'}`;
+      document.getElementById('selectedDesc').textContent     = p.desc;
+
+      document.getElementById('compPrice').textContent  = p.competitor.price;
+      document.getElementById('compReview').textContent = p.competitor.review;
+      document.getElementById('compVisual').textContent = p.competitor.visual;
+      document.getElementById('compNote').textContent   = p.competitor.note;
+      // Dynamic border color on compNote based on verdict
+      const compNote = document.getElementById('compNote');
+      compNote.className = `analysis ${p.verdictClass === 'bad' ? 'red' : p.verdictClass === 'mid' ? 'orange' : ''}`;
+
+      document.getElementById('profitSale').textContent   = p.profit.sale;
+      document.getElementById('profitCost').textContent   = p.profit.cost;
+      document.getElementById('profitMargin').textContent = p.profit.margin;
+      document.getElementById('profitNote').textContent   = p.profit.note;
+
+      document.getElementById('riskPlatform').textContent = p.risk.platform;
+      document.getElementById('riskReturn').textContent   = p.risk.return;
+      document.getElementById('riskSeason').textContent   = p.risk.season;
+      document.getElementById('riskNote').textContent     = p.risk.note;
+
+      document.getElementById('action1').textContent = p.actions[0];
+      document.getElementById('action2').textContent = p.actions[1];
+      document.getElementById('action3').textContent = p.actions[2];
+      document.getElementById('action4').textContent = p.actions[3];
+
+      const signalMap = [
+        ['demand','sigDemand','sigDemandLabel'],
+        ['gap',   'sigGap',   'sigGapLabel'],
+        ['profit','sigProfit','sigProfitLabel'],
+        ['entry', 'sigEntry', 'sigEntryLabel'],
+        ['risk',  'sigRisk',  'sigRiskLabel']
+      ];
+      signalMap.forEach(([key, barId, labelId]) => {
+        const val = p.signals[key];
+        document.getElementById(barId).style.width        = `${val}%`;
+        document.getElementById(labelId).textContent      = `${val}/100`;
+      });
+    }
+
+    /* ── hero summary ── */
+    function renderHeroSummary(list){
+      const avg = (arr, key) => arr.length ? arr.reduce((s,x) => s + x[key], 0) / arr.length : 0;
+      const scoreAvg      = Math.round(avg(list,'score'));
+      const marginAvg     = avg(list,'margin').toFixed(1);
+      const saturationAvg = Math.round(avg(list,'saturation'));
+      const highCount     = list.filter(p => p.score >= 80).length;
+      const riskCount     = list.filter(p => p.saturation >= 70).length;
+      const entryValues   = list.map(p => parseInt(p.entry)).filter(v => !isNaN(v));
+      const entryMin      = entryValues.length ? Math.min(...entryValues) : 0;
+      const entryMax      = entryValues.length ? Math.max(...entryValues) : 0;
+      const riskLabel     = saturationAvg >= 70 ? 'Yüksek risk' : saturationAvg >= 50 ? 'Orta risk' : 'Düşük risk';
+      const platformLabel = getSelectedPlatformLabel();
+
+      document.getElementById('heroScanned').textContent   = products.length;
+      document.getElementById('heroHigh').textContent      = `${highCount} yüksek fırsat`;
+      document.getElementById('heroRisk').textContent      = riskCount;
+      document.getElementById('heroPlatform').textContent  = platformLabel;
+      document.getElementById('avgScore').textContent      = scoreAvg || 0;
+      document.getElementById('avgMargin').textContent     = `%${marginAvg}`;
+      document.getElementById('avgEntry').textContent      = entryValues.length ? `${entryMin}–${entryMax} gün giriş` : '—';
+      document.getElementById('avgRisk').textContent       = riskLabel;
+      document.getElementById('avgLabel').textContent      = scoreAvg >= 85 ? 'Güçlü sinyal' : scoreAvg >= 72 ? 'Seçimli giriş' : 'Temkinli izle';
+      document.getElementById('visibleCount').textContent  = list.length;
+      document.getElementById('selectedPlatformText').textContent = platformLabel;
+    }
+
+    /* ── main render ── */
+    function render(){
+      const filtered  = getFilteredProducts();
+      const pageCount = getPageCount(filtered);
+      if(state.page > pageCount) state.page = pageCount;
+      syncSelectedToFilter();
+      renderToolbar();
+      renderHeroSummary(filtered);
+      renderProducts(filtered);
+      renderPagination(filtered);
+      renderSelectedPanel(false);
+    }
+
+    render();
+  
+
+</script>
+</body>
+</html>

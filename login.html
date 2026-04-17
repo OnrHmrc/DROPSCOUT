@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropScout TR — Giriş Yap</title>
+<meta name="description" content="DropScout TR hesabınıza giriş yapın veya yeni hesap oluşturun.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<link rel="stylesheet" href="/src/css/main.css">
+<style>
+/* ═══════════════════════════════════
+   LOGIN / REGISTER PAGE
+   ═══════════════════════════════════ */
+body{display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;background:var(--bg)}
+
+.auth-container{width:100%;max-width:420px}
+
+.auth-logo{text-align:center;margin-bottom:32px}
+.auth-logo-icon{font-size:42px;margin-bottom:8px}
+.auth-logo-text{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--text)}
+.auth-logo-text span{color:var(--orange)}
+.auth-logo-sub{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+
+.auth-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:28px 24px;box-shadow:var(--key-shadow);position:relative;overflow:hidden}
+.auth-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--orange),var(--yellow),transparent)}
+
+.auth-tabs{display:flex;gap:4px;margin-bottom:24px;background:var(--surface2);border-radius:12px;padding:4px;border:1px solid var(--border)}
+.auth-tab{flex:1;padding:10px;text-align:center;font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;cursor:pointer;border-radius:9px;transition:all .2s;color:var(--muted);border:none;background:none}
+.auth-tab.active{background:var(--surface);color:var(--text);box-shadow:var(--soft-shadow)}
+.auth-tab:hover:not(.active){color:var(--text)}
+
+.auth-form{display:flex;flex-direction:column;gap:14px}
+.auth-form[hidden]{display:none}
+
+.af-group{display:flex;flex-direction:column;gap:5px}
+.af-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.af-input{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'Inter',sans-serif;width:100%}
+.af-input:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
+.af-input::placeholder{color:var(--muted2);font-size:12px}
+
+.auth-btn{padding:13px;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Geist Mono',monospace;border:none;width:100%;transition:all .2s;margin-top:4px;letter-spacing:.5px}
+.auth-btn.primary{background:linear-gradient(135deg,var(--orange),#ff8a00);color:#fff;box-shadow:0 2px 10px rgba(255,106,0,0.3)}
+.auth-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(255,106,0,0.4)}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+
+.auth-divider{display:flex;align-items:center;gap:12px;margin:4px 0}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.auth-divider span{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:1px}
+
+.auth-btn.google{background:var(--surface2);color:var(--text);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;gap:10px}
+.auth-btn.google:hover{border-color:var(--focus-blue-border);background:color-mix(in srgb,var(--blue-dim) 30%,var(--surface2))}
+.auth-btn.google svg{width:18px;height:18px}
+
+.auth-msg{font-size:11px;text-align:center;padding:10px 14px;border-radius:10px;font-weight:600;display:none}
+.auth-msg.error{display:block;background:var(--orange-dim);color:var(--orange)}
+.auth-msg.success{display:block;background:var(--green-dim);color:var(--green)}
+
+.auth-link{text-align:center;margin-top:4px}
+.auth-link a{font-size:11px;color:var(--blue);text-decoration:none;font-weight:600;cursor:pointer}
+.auth-link a:hover{text-decoration:underline}
+
+.auth-footer{text-align:center;margin-top:20px;font-size:10px;color:var(--muted2);line-height:1.6}
+
+/* Theme toggle mini */
+.theme-mini{position:fixed;top:16px;right:16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 12px;cursor:pointer;font-size:16px;box-shadow:var(--soft-shadow);transition:all .15s;z-index:10}
+.theme-mini:hover{transform:scale(1.05);border-color:var(--focus-blue-border)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.auth-container{animation:fadeUp .4s ease both}
+
+@media(max-width:480px){
+  .auth-card{padding:22px 18px;border-radius:16px}
+  .auth-logo-text{font-size:20px}
+}
+</style>
+</head>
+<body>
+
+<button class="theme-mini" id="themeMini" aria-label="Tema değiştir">☀️</button>
+
+<div class="auth-container">
+  <div class="auth-logo">
+    <div class="auth-logo-icon">🎯</div>
+    <div class="auth-logo-text">Drop<span>Scout</span> TR</div>
+    <div class="auth-logo-sub">AI Destekli Ürün Keşif Platformu</div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin">GİRİŞ YAP</button>
+      <button class="auth-tab" id="tabRegister">KAYIT OL</button>
+    </div>
+
+    <div class="auth-msg" id="authMsg"></div>
+
+    <!-- LOGIN FORM -->
+    <form class="auth-form" id="loginForm">
+      <div class="af-group">
+        <div class="af-label">E-posta Adresi</div>
+        <input class="af-input" id="loginEmail" type="email" placeholder="ornek@firma.com" required autocomplete="email">
+      </div>
+      <div class="af-group">
+        <div class="af-label">Şifre</div>
+        <input class="af-input" id="loginPass" type="password" placeholder="Şifrenizi girin" required autocomplete="current-password">
+      </div>
+      <button class="auth-btn primary" type="submit" id="loginBtn">GİRİŞ YAP</button>
+      <div class="auth-link"><a id="forgotLink">Şifremi unuttum</a></div>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form class="auth-form" id="registerForm" hidden>
+      <div class="af-group">
+        <div class="af-label">Ad Soyad</div>
+        <input class="af-input" id="regName" type="text" placeholder="Ad Soyad" required autocomplete="name">
+      </div>
+      <div class="af-group">
+        <div class="af-label">E-posta Adresi</div>
+        <input class="af-input" id="regEmail" type="email" placeholder="ornek@firma.com" required autocomplete="email">
+      </div>
+      <div class="af-group">
+        <div class="af-label">Telefon Numarası</div>
+        <input class="af-input" id="regPhone" type="tel" placeholder="05XX XXX XX XX" required autocomplete="tel" pattern="[0-9]{10,11}" title="Geçerli bir telefon numarası girin (10-11 haneli)">
+      </div>
+      <div class="af-group">
+        <div class="af-label">Şifre</div>
+        <input class="af-input" id="regPass" type="password" placeholder="En az 6 karakter" required minlength="6" autocomplete="new-password">
+      </div>
+      <div class="af-group">
+        <div class="af-label">Şifre Tekrar</div>
+        <input class="af-input" id="regPassConfirm" type="password" placeholder="Şifrenizi tekrar girin" required minlength="6" autocomplete="new-password">
+      </div>
+      <button class="auth-btn primary" type="submit" id="regBtn">HESAP OLUŞTUR</button>
+    </form>
+
+    <!-- FORGOT PASSWORD FORM -->
+    <form class="auth-form" id="forgotForm" hidden>
+      <div class="af-group">
+        <div class="af-label">E-posta Adresi</div>
+        <input class="af-input" id="forgotEmail" type="email" placeholder="Kayıtlı e-posta adresiniz" required autocomplete="email">
+      </div>
+      <button class="auth-btn primary" type="submit" id="forgotBtn">ŞİFRE SIFIRLAMA LİNKİ GÖNDER</button>
+      <div class="auth-link"><a id="backToLogin">← Giriş ekranına dön</a></div>
+    </form>
+  </div>
+
+  <div class="auth-footer">
+    DropScout TR — Tüm hakları saklıdır. © 2026<br>
+    Hesap oluşturarak <a href="#" style="color:var(--blue)">Kullanım Koşulları</a>'nı kabul etmiş olursunuz.
+  </div>
+</div>
+
+<script type="module">
+import { login, register, resetPassword, redirectIfAuthenticated } from '/src/js/auth.js';
+import { createUserProfile } from '/src/js/store.js';
+
+// Zaten giris yapildiysa dashboard'a yonlendir
+redirectIfAuthenticated();
+
+const msg = document.getElementById('authMsg');
+const loginForm = document.getElementById('loginForm');
+const registerForm = document.getElementById('registerForm');
+const forgotForm = document.getElementById('forgotForm');
+const tabLogin = document.getElementById('tabLogin');
+const tabRegister = document.getElementById('tabRegister');
+const tabs = document.querySelector('.auth-tabs');
+
+function showMsg(text, type = 'error') {
+  msg.textContent = text;
+  msg.className = 'auth-msg ' + type;
+}
+function clearMsg() {
+  msg.className = 'auth-msg';
+  msg.textContent = '';
+}
+function showForm(name) {
+  loginForm.hidden = name !== 'login';
+  registerForm.hidden = name !== 'register';
+  forgotForm.hidden = name !== 'forgot';
+  tabLogin.classList.toggle('active', name === 'login');
+  tabRegister.classList.toggle('active', name === 'register');
+  tabs.style.display = name === 'forgot' ? 'none' : '';
+  clearMsg();
+}
+
+tabLogin.addEventListener('click', () => showForm('login'));
+tabRegister.addEventListener('click', () => showForm('register'));
+document.getElementById('forgotLink').addEventListener('click', () => showForm('forgot'));
+document.getElementById('backToLogin').addEventListener('click', () => showForm('login'));
+
+// Giris yap
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearMsg();
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = 'GİRİŞ YAPILIYOR...';
+
+  try {
+    await login(
+      document.getElementById('loginEmail').value.trim(),
+      document.getElementById('loginPass').value
+    );
+    // Basarili - yonlendir
+    const params = new URLSearchParams(window.location.search);
+    window.location.href = params.get('redirect') || './dropscout.html';
+  } catch (err) {
+    const messages = {
+      'auth/user-not-found':        'Bu e-posta adresiyle kayıtlı hesap bulunamadı.',
+      'auth/wrong-password':         'Şifre hatalı. Tekrar deneyin.',
+      'auth/invalid-email':          'Geçersiz e-posta adresi.',
+      'auth/too-many-requests':      'Çok fazla deneme. Lütfen bir süre bekleyin.',
+      'auth/invalid-credential':     'E-posta veya şifre hatalı.',
+      'auth/network-request-failed': 'Bağlantı hatası. İnternet bağlantınızı kontrol edin.'
+    };
+    showMsg(messages[err.code] || 'Giriş başarısız: ' + (err.message || err.code));
+    btn.disabled = false;
+    btn.textContent = 'GİRİŞ YAP';
+  }
+});
+
+// Kayit ol
+registerForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearMsg();
+  const pass = document.getElementById('regPass').value;
+  const passConfirm = document.getElementById('regPassConfirm').value;
+
+  if (pass !== passConfirm) {
+    showMsg('Şifreler eşleşmiyor.');
+    return;
+  }
+
+  const btn = document.getElementById('regBtn');
+  btn.disabled = true;
+  btn.textContent = 'HESAP OLUŞTURULUYOR...';
+
+  try {
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const phone = document.getElementById('regPhone').value.trim();
+    const user = await register(email, pass, name);
+
+    // Firestore'da kullanici profili olustur
+    await createUserProfile(user.uid, {
+      displayName: name,
+      email: email,
+      phone: phone
+    });
+
+    // Basarili bildirimi goster
+    showMsg('Hesabınız başarıyla oluşturuldu! Yönlendiriliyorsunuz...', 'success');
+    btn.textContent = 'HESAP OLUŞTURULDU ✓';
+
+    // 2 saniye bekleyip onboarding'e yonlendir
+    setTimeout(() => {
+      window.location.href = './onboarding.html';
+    }, 2000);
+  } catch (err) {
+    const messages = {
+      'auth/email-already-in-use':   'Bu e-posta adresi zaten kayıtlı.',
+      'auth/weak-password':           'Şifre en az 6 karakter olmalıdır.',
+      'auth/invalid-email':           'Geçersiz e-posta adresi.',
+      'auth/network-request-failed':  'Bağlantı hatası. İnternet bağlantınızı kontrol edin.'
+    };
+    showMsg(messages[err.code] || 'Kayıt başarısız: ' + (err.message || err.code));
+    btn.disabled = false;
+    btn.textContent = 'HESAP OLUŞTUR';
+  }
+});
+
+// Sifre sifirlama
+forgotForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  clearMsg();
+  const btn = document.getElementById('forgotBtn');
+  btn.disabled = true;
+
+  try {
+    await resetPassword(document.getElementById('forgotEmail').value.trim());
+    showMsg('Şifre sıfırlama linki e-posta adresinize gönderildi.', 'success');
+  } catch (err) {
+    showMsg('Hata: ' + (err.message || err.code));
+  }
+
+  btn.disabled = false;
+});
+
+// Tema toggle (mini)
+const themeMini = document.getElementById('themeMini');
+function updateThemeIcon() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  themeMini.textContent = isDark ? '🌙' : '☀️';
+}
+updateThemeIcon();
+themeMini.addEventListener('click', () => {
+  const root = document.documentElement;
+  const current = root.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  localStorage.setItem('dropscout-theme-preference', next);
+  updateThemeIcon();
+});
+
+// URL parametresine gore sekme ac (?tab=register)
+const urlTab = new URLSearchParams(window.location.search).get('tab');
+if (urlTab === 'register') showForm('register');
+</script>
+</body>
+</html>

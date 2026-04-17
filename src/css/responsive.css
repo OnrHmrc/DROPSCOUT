@@ -1,0 +1,36 @@
+/* ══════════════════════════════════════
+   DropScout TR — Responsive Breakpoints
+   ══════════════════════════════════════ */
+
+@media (max-width:900px) {
+  .mobile-menu-btn { display:flex; }
+  .sidebar {
+    transform:translateX(-110%);
+    transition:transform .24s ease;
+    will-change:transform;
+    width:min(82vw, 300px);
+    height:100dvh;
+    overflow-y:auto;
+  }
+  .sidebar.open { transform:translateX(0); }
+  .main { margin-left:0; padding:18px 16px 26px; }
+  .topbar {
+    gap:14px; align-items:flex-start; flex-wrap:wrap;
+  }
+  .topbar-left { width:100%; }
+  .topbar-right { width:100%; justify-content:space-between; flex-wrap:wrap; }
+  .stat-strip { grid-template-columns:repeat(2, minmax(0,1fr)); }
+}
+
+@media (max-width:700px) {
+  .page-title { font-size:17px; line-height:1.2; }
+  .stat-strip { grid-template-columns:1fr; }
+  .toolbar, .top-actions { width:100%; }
+  .btn { flex:1 1 calc(50% - 5px); text-align:center; }
+}
+
+@media (max-width:480px) {
+  .main { padding:14px 12px 22px; }
+  .sidebar { width:min(88vw, 300px); padding:18px 12px; }
+  .sb-value { font-size:20px; }
+}

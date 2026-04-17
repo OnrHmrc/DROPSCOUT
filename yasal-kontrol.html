@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropScout TR — Yasal Kontrol</title>
+<meta name="description" content="Ürünlerin yasal durumunu kontrol edin. TİTCK, CE, ithalat kısıtları ve kategori bazlı yasal risk analizi yapın.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  // Tema anında uygula (FOUC/flaş önleme)
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<link rel="stylesheet" href="/src/css/main.css">
+<script type="module" src="/src/js/main.js"></script>
+<style>
+/* Page-Specific Styles */
+
+/* SEARCH MODULE */
+.search-module{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:18px;box-shadow:var(--key-shadow);position:relative;overflow:hidden}
+.search-module::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--purple),var(--blue),transparent)}
+.sm-row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.sm-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:180px}
+.sm-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.sm-input{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.sm-input:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
+.sm-select{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:12px;color:var(--text);font-family:'Geist Mono',monospace;cursor:pointer;outline:none;appearance:none;width:100%;transition:border-color .2s}
+.sm-btn{padding:11px 20px;background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Geist Mono',monospace;border:none;white-space:nowrap;box-shadow:var(--button-shadow);transition:all .2s}
+.sm-btn:hover{transform:translateY(-1px)}
+
+/* CONTENT GRID */
+.content-grid{display:grid;grid-template-columns:minmax(0,1.5fr) 360px;gap:14px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--key-shadow);overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.card-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.ct-tag{font-family:'Geist Mono',monospace;font-size:8px;padding:3px 8px;border-radius:999px;font-weight:700}
+.tag-blue{background:var(--blue-dim);color:var(--blue)}
+.tag-green{background:var(--green-dim);color:var(--green)}
+.tag-yellow{background:var(--yellow-dim);color:var(--yellow)}
+.tag-red{background:var(--red-dim);color:var(--red)}
+.tag-purple{background:var(--purple-dim);color:var(--purple)}
+
+/* PRODUCT LEGAL LIST */
+.legal-list{display:flex;flex-direction:column;gap:10px;padding:16px 18px}
+.legal-card{padding:14px;border-radius:14px;border:1px solid var(--border);background:linear-gradient(180deg,var(--surface2),color-mix(in srgb,var(--surface2) 72%,var(--panel-highlight)));box-shadow:var(--soft-shadow);cursor:pointer;transition:all .18s}
+.legal-card:hover{transform:translateY(-1px);box-shadow:var(--key-shadow-strong);border-color:var(--focus-blue-border)}
+.legal-card.selected{border-color:var(--focus-blue-border);box-shadow:var(--key-shadow-strong);background:color-mix(in srgb,var(--blue-dim) 30%,var(--surface2))}
+.lc-top{display:grid;grid-template-columns:42px 1fr auto;gap:12px;align-items:center;margin-bottom:10px}
+.lc-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid var(--border)}
+.lc-icon.safe{background:var(--green-dim)}
+.lc-icon.warn{background:var(--yellow-dim)}
+.lc-icon.danger{background:var(--red-dim)}
+.lc-info{min-width:0}
+.lc-name{font-size:13px;font-weight:700;letter-spacing:-.2px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc-cat{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2)}
+.lc-risk{padding:4px 8px;border-radius:999px;font-size:9px;font-weight:700;font-family:'Geist Mono',monospace}
+.risk-safe{background:var(--green-dim);color:var(--green)}
+.risk-warn{background:var(--yellow-dim);color:var(--yellow)}
+.risk-danger{background:var(--red-dim);color:var(--red)}
+
+/* CHECK BARS */
+.lc-checks{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.lc-check{padding:8px;background:var(--surface);border-radius:9px;border:1px solid var(--border)}
+.lcc-label{font-family:'Geist Mono',monospace;font-size:7.5px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+.lcc-val{font-size:11px;font-weight:700;display:flex;align-items:center;gap:4px}
+.lcc-val.pass{color:var(--green)}.lcc-val.fail{color:var(--red)}.lcc-val.warn{color:var(--yellow)}.lcc-val.na{color:var(--muted2)}
+.lc-note{font-size:10px;color:var(--muted);padding:7px 10px;background:color-mix(in srgb,var(--text) 3%,transparent);border-radius:8px;line-height:1.5}
+
+/* SIDE PANEL */
+.side-stack{display:flex;flex-direction:column;gap:12px;position:sticky;top:24px}
+.detail-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--key-shadow)}
+.dc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.dc-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.dc-live{display:flex;align-items:center;gap:5px;font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2)}
+.dc-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* RISK HERO */
+.risk-hero{display:flex;align-items:center;gap:14px;padding:14px;border-radius:14px;margin-bottom:12px}
+.risk-hero.safe{background:var(--green-dim);border:1px solid var(--focus-green-border)}
+.risk-hero.warn{background:var(--yellow-dim);border:1px solid color-mix(in srgb,var(--yellow) 18%,transparent)}
+.risk-hero.danger{background:var(--red-dim);border:1px solid color-mix(in srgb,var(--red) 18%,transparent)}
+.rh-shield{font-size:36px;line-height:1}
+.rh-info{flex:1}
+.rh-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+.rh-status{font-family:'Poppins',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.5px}
+.rh-status.g{color:var(--green)}.rh-status.y{color:var(--yellow)}.rh-status.r{color:var(--red)}
+
+/* REGULATION GRID */
+.reg-grid{display:flex;flex-direction:column;gap:7px;margin-bottom:12px}
+.reg-row{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-radius:10px;background:var(--surface2);border:1px solid var(--border)}
+.reg-name{font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px}
+.reg-name .reg-icon{font-size:12px}
+.reg-status{font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:999px}
+.reg-pass{background:var(--green-dim);color:var(--green)}
+.reg-fail{background:var(--red-dim);color:var(--red)}
+.reg-na{background:color-mix(in srgb,var(--text) 5%,transparent);color:var(--muted2)}
+.reg-check{background:var(--yellow-dim);color:var(--yellow)}
+
+/* AI LEGAL ADVICE */
+.advice-text{font-size:11.5px;color:var(--muted);line-height:1.75;padding:12px;background:var(--surface2);border-radius:10px;border-left:2px solid var(--purple);margin-bottom:10px}
+.advice-text strong{color:var(--text)}
+.advice-actions{display:flex;flex-direction:column;gap:7px}
+.aa-item{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;gap:8px}
+.aa-item:hover{border-color:var(--focus-blue-border);background:var(--blue-dim);color:var(--blue)}
+.aa-arrow{color:var(--muted2);font-size:10px;transition:.15s}
+.aa-item:hover .aa-arrow{color:var(--blue);transform:translateX(2px)}
+
+/* ANIMATION */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade1{animation:fadeUp .35s ease both}
+.fade2{animation:fadeUp .35s .05s ease both}
+.fade3{animation:fadeUp .35s .1s ease both}
+.fade4{animation:fadeUp .35s .15s ease both}
+@keyframes panelFade{0%{opacity:.6;transform:translateY(3px)}100%{opacity:1;transform:translateY(0)}}
+.panel-flash{animation:panelFade .25s ease forwards}
+
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+@media(max-width:1200px){.content-grid{grid-template-columns:1fr 340px}}
+@media(max-width:1100px){.content-grid{grid-template-columns:1fr}.side-stack{position:static}}
+@media(max-width:900px){
+  .mobile-menu-btn{display:flex}
+  .sidebar{transform:translateX(-110%);transition:transform .24s;will-change:transform;width:min(82vw,300px);height:100dvh;overflow-y:auto}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;padding:18px 16px 26px}
+  .stat-strip{grid-template-columns:repeat(2,1fr)}
+  .sm-row{flex-direction:column}
+  .sm-group{min-width:0}
+}
+@media(max-width:700px){
+  .stat-strip{grid-template-columns:1fr}
+  .lc-checks{grid-template-columns:1fr 1fr}
+  .page-title{font-size:17px}
+}
+@media(max-width:480px){.main{padding:14px 12px 22px}.sb-value{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="logo"><a class="logo-link" href="./dropscout.html"><div class="logo-icon">🎯</div><div class="logo-text">Drop<span>Scout</span></div></a></div>
+  <div class="nav-group">
+    <div class="nav-label">Keşif</div>
+    <a class="nav-item" href="./trend-radar.html"><span class="nav-icon">📡</span>Trend Radar</a>
+    <a class="nav-item" href="./gap-radar.html"><span class="nav-icon">🌍</span>Gap Radar <span class="nav-badge nb-purple">YENİ</span></a>
+    <a class="nav-item" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi <span class="nav-badge nb-blue">YENİ</span></a>
+    <a class="nav-item" href="./rakip-analizi.html"><span class="nav-icon">🔬</span>Rakip Analizi</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Araçlar</div>
+    <a class="nav-item" href="./net-kar.html"><span class="nav-icon">💰</span>Net Kâr Hesabı</a>
+    <a class="nav-item" href="./takip-listem.html"><span class="nav-icon">⭐</span>Takip Listem</a>
+    <a class="nav-item active" href="./yasal-kontrol.html"><span class="nav-icon">⚖️</span>Yasal Kontrol</a>
+    <a class="nav-item" href="./tedarikci-bul.html"><span class="nav-icon">🔗</span>Tedarikçi Bul</a>
+    <a class="nav-item" href="./raporlar.html"><span class="nav-icon">📊</span>Raporlar</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Platform</div>
+    <a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a>
+    <a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a>
+    <a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a>
+    <a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="theme-toggle-wrap">
+      <div class="theme-toggle-head">
+        <div class="theme-toggle-copy">
+          <div class="theme-toggle-label">Tema</div>
+          <div class="theme-toggle-sub">LIGHT / DARK MODE</div>
+          <div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div>
+        </div>
+        <label class="theme-switch" aria-label="Tema değiştir">
+          <input type="checkbox" id="themeToggle">
+          <span class="theme-slider">
+            <span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span>
+            <span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span>
+            <span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span>
+          </span>
+        </label>
+      </div>
+    </div>
+    <div class="plan-card">
+      <div class="plan-tier">Pro Plan</div>
+      <div class="plan-name">Yasal Kontrol Aktif ✓</div>
+      <div class="plan-meta"><span>₺499/ay · Gelişmiş analiz</span><div class="upgrade-btn">Yönet</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar fade1">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div>
+        <div class="page-title">⚖️ Yasal Kontrol</div>
+        <div class="page-meta">// TİTCK · CE BELGESİ · İTHALAT KISITLARI · KATEGORİ YASAKLARI · AI YASAL ANALİZ</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn">↻ Güncelle</button>
+      <button class="icon-btn">📥 Rapor İndir</button>
+      <button class="icon-btn primary">+ Yeni Ürün Sorgula</button>
+    </div>
+  </div>
+
+  <div class="stat-strip fade2" id="kpiStrip">
+    <div class="stat-box g"><div class="sb-label">Serbest</div><div class="sb-value g" id="kpiSafe">5</div><div class="sb-sub">Satılabilir ürün</div></div>
+    <div class="stat-box y"><div class="sb-label">Dikkat</div><div class="sb-value y" id="kpiWarn">2</div><div class="sb-sub">Belge gerekli</div></div>
+    <div class="stat-box r"><div class="sb-label">Yasak</div><div class="sb-value r" id="kpiDanger">1</div><div class="sb-sub">Satılamaz ürün</div></div>
+    <div class="stat-box p"><div class="sb-label">Toplam Sorgu</div><div class="sb-value p" id="kpiTotal">8</div><div class="sb-sub">Son 30 gün</div></div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-module fade3">
+    <div class="sm-row">
+      <div class="sm-group" style="flex:2">
+        <div class="sm-label">Ürün Adı veya Link</div>
+        <input class="sm-input" id="searchInput" value="Minimal Masaüstü Köpük Sabunluk" placeholder="Ürün adı veya link girin...">
+      </div>
+      <div class="sm-group" style="flex:.7">
+        <div class="sm-label">Kategori</div>
+        <select class="sm-select" id="searchCategory">
+          <option selected>Tümü</option><option>Ev & Yaşam</option><option>Kozmetik</option><option>Elektronik</option><option>Gıda Takviye</option><option>Oyuncak</option><option>Oto Aksesuar</option>
+        </select>
+      </div>
+      <div class="sm-group" style="flex:.6">
+        <div class="sm-label">Hedef Pazar</div>
+        <select class="sm-select" id="searchMarket">
+          <option>Türkiye</option><option>AB</option><option>ABD</option>
+        </select>
+      </div>
+      <button class="sm-btn" onclick="renderAll()">⚖️ Kontrol Et</button>
+    </div>
+  </div>
+
+  <section class="content-grid fade4">
+    <div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Yasal Durum Listesi</div>
+          <div class="ct-tag tag-purple" id="listCount">8 ÜRÜN</div>
+        </div>
+        <div class="legal-list" id="legalList"></div>
+      </div>
+    </div>
+
+    <aside class="side-stack">
+      <!-- RISK STATUS -->
+      <div class="detail-card" id="riskPanel">
+        <div class="dc-head"><div class="dc-title">Risk Durumu</div><div class="dc-live"><div class="dc-dot"></div>CANLI</div></div>
+        <div id="riskHero"></div>
+        <div class="reg-grid" id="regGrid"></div>
+      </div>
+      <!-- REGULATION DETAIL -->
+      <div class="detail-card" id="regPanel">
+        <div class="dc-head"><div class="dc-title">Mevzuat Detayı</div><div class="ct-tag tag-yellow">DÜZENLEME</div></div>
+        <div id="regDetail"></div>
+      </div>
+      <!-- AI ADVICE -->
+      <div class="detail-card" id="advicePanel">
+        <div class="dc-head"><div class="dc-title">AI Yasal Öneri</div><div class="ct-tag tag-green">TAVSİYE</div></div>
+        <div class="advice-text" id="adviceText"></div>
+        <div class="advice-actions" id="adviceActions"></div>
+      </div>
+    </aside>
+  </section>
+</main>
+
+<script>
+/* ── DEMO DATA ── */
+const products = [
+  { id:1, name:'Minimal Masaüstü Köpük Sabunluk', category:'Ev & Yaşam', emoji:'🧴', risk:'safe', riskLabel:'SERBEST',
+    checks:{titck:'N/A',ce:'N/A',ithalat:'SERBEST',kategori:'SERBEST'},
+    note:'Bu ürün herhangi bir yasal kısıtlamaya tabi değildir. Kozmetik içerik barındırmayan sabunluk kategorisinde serbest satılabilir.',
+    regs:[{name:'TİTCK Kaydı',status:'na',label:'GEREKMİYOR'},{name:'CE Belgesi',status:'na',label:'GEREKMİYOR'},{name:'İthalat İzni',status:'pass',label:'SERBEST'},{name:'Kategori Kısıtı',status:'pass',label:'YOK'},{name:'Gümrük Kodu',status:'pass',label:'3924.90'},{name:'KDV Oranı',status:'pass',label:'%20'}],
+    advice:'Bu ürün yasal açıdan tamamen serbest. Herhangi bir belge veya izin gerekmeksizin tüm pazaryerlerinde satılabilir. Standart gümrük işlemleri uygulanır.',
+    actions:['Gümrük kodu detayını görüntüle','KDV hesaplaması yap','Benzer ürünleri tara'] },
+  { id:2, name:'Doğal Cilt Bakım Serumu', category:'Kozmetik', emoji:'💧', risk:'warn', riskLabel:'BELGE GEREKLİ',
+    checks:{titck:'GEREKLİ',ce:'N/A',ithalat:'KOŞULLU',kategori:'DİKKAT'},
+    note:'Kozmetik ürün olarak TİTCK (Türkiye İlaç ve Tıbbi Cihaz Kurumu) bildirimi zorunludur. Üretici/ithalatçı sorumlu kişi atamalıdır.',
+    regs:[{name:'TİTCK Kaydı',status:'fail',label:'ZORUNLU'},{name:'GMP Sertifikası',status:'fail',label:'ZORUNLU'},{name:'CPNP Bildirimi',status:'check',label:'KONTROL ET'},{name:'Sorumlu Kişi Atama',status:'fail',label:'ZORUNLU'},{name:'Etiket Uygunluğu',status:'check',label:'KONTROL ET'},{name:'Güvenlik Değerlendirmesi',status:'fail',label:'ZORUNLU'}],
+    advice:'<strong>Dikkat!</strong> Bu ürün kozmetik mevzuatına tabidir. TİTCK\'ya bildirim yapmadan ve sorumlu kişi atamadan satış yapılamaz. GMP sertifikalı üretim tesisi şarttır. İhlal durumunda <strong>₺150.000\'e kadar para cezası</strong> uygulanabilir.',
+    actions:['TİTCK başvuru sürecini gör','GMP sertifika gereksinimlerini incele','Sorumlu kişi atama prosedürünü öğren','Etiket uygunluk şablonunu indir'] },
+  { id:3, name:'Kablosuz Bluetooth Kulaklık', category:'Elektronik', emoji:'🎧', risk:'warn', riskLabel:'BELGE GEREKLİ',
+    checks:{titck:'N/A',ce:'GEREKLİ',ithalat:'KOŞULLU',kategori:'DİKKAT'},
+    note:'Radyo frekansı yayan elektronik cihaz olarak CE/RED belgesi zorunludur. BTK (Bilgi Teknolojileri ve İletişim Kurumu) onayı gerekir.',
+    regs:[{name:'CE Belgesi',status:'fail',label:'ZORUNLU'},{name:'RED Direktifi',status:'fail',label:'ZORUNLU'},{name:'BTK Onayı',status:'fail',label:'ZORUNLU'},{name:'AEEE Kaydı',status:'check',label:'KONTROL ET'},{name:'Garanti Belgesi',status:'check',label:'ÖNERİLİR'},{name:'TSE Uygunluğu',status:'na',label:'İSTEĞE BAĞLI'}],
+    advice:'<strong>Bluetooth cihaz!</strong> RF yayan ürünler RED (Radio Equipment Directive) kapsamındadır. CE belgesi ve BTK tip onayı olmadan ithalat ve satış yasaktır. AEEE kaydı da zorunludur.',
+    actions:['CE belgelendirme sürecini incele','BTK tip onay başvurusunu görüntüle','AEEE kayıt prosedürünü öğren','RED uyumluluk testlerini listele'] },
+  { id:4, name:'Vakumlu Buzdolabı Düzenleyici', category:'Ev & Yaşam', emoji:'📦', risk:'safe', riskLabel:'SERBEST',
+    checks:{titck:'N/A',ce:'N/A',ithalat:'SERBEST',kategori:'SERBEST'},
+    note:'Plastik ev eşyası kategorisinde yasal kısıtlama bulunmamaktadır. Gıda temasına uygun malzeme olması önerilir.',
+    regs:[{name:'TİTCK Kaydı',status:'na',label:'GEREKMİYOR'},{name:'CE Belgesi',status:'na',label:'GEREKMİYOR'},{name:'İthalat İzni',status:'pass',label:'SERBEST'},{name:'Gıda Temas Onayı',status:'check',label:'ÖNERİLİR'},{name:'Gümrük Kodu',status:'pass',label:'3924.10'},{name:'KDV Oranı',status:'pass',label:'%20'}],
+    advice:'Yasal açıdan serbest. Ancak buzdolabı içinde gıda ile temas edeceği için BPA-Free ve FDA/gıda güvenliği sertifikası almak rekabet avantajı sağlar.',
+    actions:['Gıda temas sertifikası önerilerini gör','BPA-Free test raporlarını incele','Gümrük kodu detayını görüntüle'] },
+  { id:5, name:'Bitkisel Zayıflama Çayı', category:'Gıda Takviye', emoji:'🍵', risk:'danger', riskLabel:'YASAK / RİSKLİ',
+    checks:{titck:'GEREKLİ',ce:'N/A',ithalat:'YASAK',kategori:'YASAK'},
+    note:'⚠️ "Zayıflama" iddiası taşıyan gıda takviye ürünleri Türkiye\'de reklam yasağına tabidir. Takviye edici gıda olarak satılması için Tarım Bakanlığı onayı zorunludur.',
+    regs:[{name:'Tarım Bakanlığı İzni',status:'fail',label:'ZORUNLU'},{name:'Sağlık Beyanı Onayı',status:'fail',label:'YASAK'},{name:'TİTCK Kontrolü',status:'fail',label:'RİSKLİ'},{name:'Reklam Yasağı',status:'fail',label:'KAPSAMDA'},{name:'İthalat İzni',status:'fail',label:'ÖZEL İZİN'},{name:'Etiket Kontrolü',status:'fail',label:'ZORUNLU'}],
+    advice:'<strong>🚨 Yüksek Risk!</strong> Bu ürün birden fazla yasal kısıtlamaya tabidir. "Zayıflama" beyanı taşıyan ürünler reklam ve satış yasağı kapsamında olabilir. Pazaryerlerinde listeleme reddedilme ihtimali yüksektir. <strong>Bu ürünü satmanız önerilmez.</strong>',
+    actions:['Yasaklı beyan listesini görüntüle','Alternatif ürün önerisi al','Gıda takviye mevzuatını incele'] },
+  { id:6, name:'Katlanabilir Laptop Stand', category:'Ev & Yaşam', emoji:'💻', risk:'safe', riskLabel:'SERBEST',
+    checks:{titck:'N/A',ce:'N/A',ithalat:'SERBEST',kategori:'SERBEST'},
+    note:'Mekanik aksesuar olarak herhangi bir yasal kısıtlamaya tabi değildir. Tüm platformlarda serbest satılabilir.',
+    regs:[{name:'TİTCK Kaydı',status:'na',label:'GEREKMİYOR'},{name:'CE Belgesi',status:'na',label:'GEREKMİYOR'},{name:'İthalat İzni',status:'pass',label:'SERBEST'},{name:'Kategori Kısıtı',status:'pass',label:'YOK'},{name:'Gümrük Kodu',status:'pass',label:'7326.90'},{name:'KDV Oranı',status:'pass',label:'%20'}],
+    advice:'Tamamen serbest ürün. Yasal açıdan hiçbir engel yok. Metal yapıda olması halinde TSE kalite belgesi istenmesi müşteri güvenini artırır.',
+    actions:['Gümrük kodu detayını görüntüle','TSE belge başvurusunu incele','KDV hesaplaması yap'] },
+  { id:7, name:'USB Şarjlı Mini Fan', category:'Elektronik', emoji:'🌀', risk:'warn', riskLabel:'BELGE GEREKLİ',
+    checks:{titck:'N/A',ce:'GEREKLİ',ithalat:'KOŞULLU',kategori:'DİKKAT'},
+    note:'Elektrikli ev aleti olarak LVD (Düşük Gerilim Direktifi) kapsamında CE belgesi gereklidir. Lityum pil içeriyorsa ek taşımacılık kuralları uygulanır.',
+    regs:[{name:'CE Belgesi',status:'fail',label:'ZORUNLU'},{name:'LVD Direktifi',status:'fail',label:'ZORUNLU'},{name:'EMC Uygunluğu',status:'check',label:'KONTROL ET'},{name:'Lityum Pil Kuralları',status:'check',label:'KONTROL ET'},{name:'AEEE Kaydı',status:'check',label:'ÖNERİLİR'},{name:'Garanti Belgesi',status:'check',label:'ÖNERİLİR'}],
+    advice:'CE belgesi zorunlu. Lityum pil içermesi durumunda UN38.3 test raporu ve MSDS belgesi gerekir. Hava kargo ile gönderilecekse IATA DGR kurallarına uyum şarttır.',
+    actions:['CE belgelendirme sürecini incele','Lityum pil mevzuatını gör','UN38.3 test gereksinimlerini listele','AEEE kayıt prosedürünü öğren'] },
+  { id:8, name:'Doğal Bambu Diş Fırçası', category:'Ev & Yaşam', emoji:'🪥', risk:'safe', riskLabel:'SERBEST',
+    checks:{titck:'N/A',ce:'N/A',ithalat:'SERBEST',kategori:'SERBEST'},
+    note:'Kişisel bakım aksesuarı olarak serbest kategoridir. Tıbbi cihaz veya kozmetik olarak değerlendirilmez. Normal gümrük işlemleri uygulanır.',
+    regs:[{name:'TİTCK Kaydı',status:'na',label:'GEREKMİYOR'},{name:'CE Belgesi',status:'na',label:'GEREKMİYOR'},{name:'İthalat İzni',status:'pass',label:'SERBEST'},{name:'Kategori Kısıtı',status:'pass',label:'YOK'},{name:'Gümrük Kodu',status:'pass',label:'9603.21'},{name:'KDV Oranı',status:'pass',label:'%20'}],
+    advice:'Yasal açıdan serbest. Sürdürülebilir ürün konumlandırması ile pazarlama avantajı elde edilebilir. "Doğal" etiketini kullanmak için içerik şeffaflığı sağlanması yeterlidir.',
+    actions:['Gümrük kodu detayını görüntüle','Sürdürülebilirlik sertifikalarını incele','KDV hesaplaması yap'] }
+];
+
+let selectedId = 1;
+
+function checkIcon(status){
+  if(status==='pass') return '✅';
+  if(status==='fail') return '❌';
+  if(status==='check') return '⚠️';
+  return '—';
+}
+
+function renderLegalList(){
+  const host = document.getElementById('legalList');
+  host.innerHTML = products.map(p => `
+    <div class="legal-card${p.id === selectedId ? ' selected' : ''}" onclick="selectProduct(${p.id})">
+      <div class="lc-top">
+        <div class="lc-icon ${p.risk}">${p.emoji}</div>
+        <div class="lc-info">
+          <div class="lc-name">${p.name}</div>
+          <div class="lc-cat">${p.category}</div>
+        </div>
+        <div class="lc-risk risk-${p.risk}">${p.riskLabel}</div>
+      </div>
+      <div class="lc-checks">
+        <div class="lc-check"><div class="lcc-label">TİTCK</div><div class="lcc-val ${p.checks.titck==='N/A'?'na':p.checks.titck==='SERBEST'?'pass':'warn'}">${p.checks.titck}</div></div>
+        <div class="lc-check"><div class="lcc-label">CE</div><div class="lcc-val ${p.checks.ce==='N/A'?'na':p.checks.ce==='SERBEST'?'pass':'warn'}">${p.checks.ce}</div></div>
+        <div class="lc-check"><div class="lcc-label">İthalat</div><div class="lcc-val ${p.checks.ithalat==='SERBEST'?'pass':p.checks.ithalat==='YASAK'?'fail':'warn'}">${p.checks.ithalat}</div></div>
+        <div class="lc-check"><div class="lcc-label">Kategori</div><div class="lcc-val ${p.checks.kategori==='SERBEST'?'pass':p.checks.kategori==='YASAK'?'fail':'warn'}">${p.checks.kategori}</div></div>
+      </div>
+      <div class="lc-note">${p.note}</div>
+    </div>
+  `).join('');
+}
+
+function selectProduct(id){
+  selectedId = id;
+  renderLegalList();
+  renderDetail();
+}
+
+function renderDetail(){
+  const p = products.find(x => x.id === selectedId);
+  if(!p) return;
+
+  const shieldEmoji = p.risk==='safe' ? '🛡️' : p.risk==='warn' ? '⚠️' : '🚫';
+  const statusText = p.risk==='safe' ? 'Güvenli' : p.risk==='warn' ? 'Dikkat Gerekli' : 'Yüksek Risk';
+  const statusColor = p.risk==='safe' ? 'g' : p.risk==='warn' ? 'y' : 'r';
+
+  document.getElementById('riskHero').innerHTML = `
+    <div class="risk-hero ${p.risk}">
+      <div class="rh-shield">${shieldEmoji}</div>
+      <div class="rh-info">
+        <div class="rh-label">Yasal Risk Seviyesi</div>
+        <div class="rh-status ${statusColor}">${statusText}</div>
+      </div>
+    </div>`;
+
+  document.getElementById('regGrid').innerHTML = p.regs.map(r => `
+    <div class="reg-row">
+      <div class="reg-name"><span class="reg-icon">${checkIcon(r.status)}</span>${r.name}</div>
+      <div class="reg-status reg-${r.status}">${r.label}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('regDetail').innerHTML = `
+    <div style="padding:12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
+      <div style="font-size:14px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px">${p.emoji} ${p.name}</div>
+      <div style="font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:8px;letter-spacing:.5px">${p.category} · ${p.riskLabel}</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.7">${p.note}</div>
+    </div>`;
+
+  document.getElementById('adviceText').innerHTML = p.advice;
+  document.getElementById('adviceActions').innerHTML = p.actions.map(a => `
+    <div class="aa-item"><span>${a}</span><span class="aa-arrow">→</span></div>
+  `).join('');
+
+  document.querySelectorAll('#riskPanel,#regPanel,#advicePanel').forEach(el => {
+    el.classList.remove('panel-flash');
+    void el.offsetWidth;
+    el.classList.add('panel-flash');
+  });
+}
+
+function updateKPIs(){
+  document.getElementById('kpiSafe').textContent = products.filter(p=>p.risk==='safe').length;
+  document.getElementById('kpiWarn').textContent = products.filter(p=>p.risk==='warn').length;
+  document.getElementById('kpiDanger').textContent = products.filter(p=>p.risk==='danger').length;
+  document.getElementById('kpiTotal').textContent = products.length;
+  document.getElementById('listCount').textContent = products.length + ' ÜRÜN';
+}
+
+function renderAll(){
+  updateKPIs();
+  renderLegalList();
+  renderDetail();
+}
+renderAll();
+
+</script>
+</body>
+</html>

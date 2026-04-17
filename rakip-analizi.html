@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropScout TR — Rakip Analizi</title>
+<meta name="description" content="Rakip mağazaları analiz edin, fiyat-yorum-görsel karşılaştırması yapın ve pazar konumunuzu belirleyin.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  // Tema anında uygula (FOUC/flaş önleme)
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<link rel="stylesheet" href="/src/css/main.css">
+<script type="module" src="/src/js/main.js"></script>
+<style>
+/* ═══════════════════════════════════
+   RAKİP ANALİZİ — Page-Specific Styles
+   ═══════════════════════════════════ */
+.stat-strip{grid-template-columns:repeat(4,1fr)}
+
+/* SEARCH MODULE */
+.search-module{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:18px;box-shadow:var(--key-shadow);position:relative;overflow:hidden}
+.search-module::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--blue),var(--purple),transparent)}
+.sm-row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.sm-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:180px}
+.sm-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.sm-input{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.sm-input:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
+.sm-select{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:12px;color:var(--text);font-family:'Geist Mono',monospace;cursor:pointer;outline:none;appearance:none;width:100%;transition:border-color .2s}
+.sm-btn{padding:11px 20px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Geist Mono',monospace;border:none;white-space:nowrap;box-shadow:var(--button-shadow);transition:all .2s}
+.sm-btn:hover{transform:translateY(-1px)}
+
+/* CONTENT GRID */
+.content-grid{display:grid;grid-template-columns:minmax(0,1.5fr) 360px;gap:14px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--key-shadow);overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.card-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.ct-tag{font-family:'Geist Mono',monospace;font-size:8px;padding:3px 8px;border-radius:999px;font-weight:700}
+.tag-blue{background:var(--blue-dim);color:var(--blue)}
+.tag-green{background:var(--green-dim);color:var(--green)}
+.tag-yellow{background:var(--yellow-dim);color:var(--yellow)}
+.tag-red{background:var(--red-dim);color:var(--red)}
+
+/* COMPETITOR LIST */
+.comp-list{display:flex;flex-direction:column;gap:10px;padding:16px 18px}
+.comp-card{padding:14px;border-radius:14px;border:1px solid var(--border);background:linear-gradient(180deg,var(--surface2),color-mix(in srgb,var(--surface2) 72%,var(--panel-highlight)));box-shadow:var(--soft-shadow);cursor:pointer;transition:all .18s}
+.comp-card:hover{transform:translateY(-1px);box-shadow:var(--key-shadow-strong);border-color:var(--focus-blue-border)}
+.comp-card.selected{border-color:var(--focus-blue-border);box-shadow:var(--key-shadow-strong);background:color-mix(in srgb,var(--blue-dim) 30%,var(--surface2))}
+.cc-top{display:grid;grid-template-columns:42px 1fr auto;gap:12px;align-items:center;margin-bottom:10px}
+.cc-avatar{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,var(--blue-dim),var(--purple-dim));border:1px solid var(--border)}
+.cc-info{min-width:0}
+.cc-name{font-size:13px;font-weight:700;letter-spacing:-.2px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cc-platform{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2)}
+.cc-strength{padding:4px 8px;border-radius:999px;font-size:9px;font-weight:700;font-family:'Geist Mono',monospace}
+.str-strong{background:var(--red-dim);color:var(--red)}
+.str-medium{background:var(--yellow-dim);color:var(--yellow)}
+.str-weak{background:var(--green-dim);color:var(--green)}
+.cc-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.ccm{padding:8px;background:var(--surface);border-radius:9px;border:1px solid var(--border)}
+.ccm-label{font-family:'Geist Mono',monospace;font-size:7.5px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+.ccm-value{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;letter-spacing:-.3px}
+.ccm-value.g{color:var(--green)}.ccm-value.o{color:var(--orange)}.ccm-value.b{color:var(--blue)}.ccm-value.y{color:var(--yellow)}.ccm-value.r{color:var(--red)}
+.cc-bar-wrap{display:flex;align-items:center;gap:8px}
+.cc-bar-label{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);min-width:65px}
+.cc-bar-track{flex:1;height:5px;background:color-mix(in srgb,var(--text) 6%,transparent);border-radius:3px;overflow:hidden}
+.cc-bar-fill{height:100%;border-radius:3px;transition:width .4s ease}
+.cc-bar-fill.sat{background:linear-gradient(90deg,var(--yellow),var(--red))}
+.cc-bar-fill.vis{background:linear-gradient(90deg,var(--blue),var(--green))}
+.cc-bar-val{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);min-width:25px;text-align:right}
+
+/* RIGHT PANEL */
+.side-stack{display:flex;flex-direction:column;gap:12px;position:sticky;top:24px}
+.detail-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--key-shadow)}
+.dc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.dc-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.dc-live{display:flex;align-items:center;gap:5px;font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2)}
+.dc-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* PRICE COMPARE BARS */
+.price-bars{display:flex;flex-direction:column;gap:9px;margin-bottom:12px}
+.pb-row{display:flex;align-items:center;gap:8px}
+.pb-name{font-size:10px;color:var(--muted);min-width:60px;text-align:right}
+.pb-track{flex:1;height:22px;background:color-mix(in srgb,var(--text) 5%,transparent);border-radius:8px;overflow:hidden;position:relative}
+.pb-fill{height:100%;border-radius:8px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;color:#fff;transition:width .5s ease}
+.pb-fill.mine{background:linear-gradient(90deg,var(--blue),var(--purple))}
+.pb-fill.comp{background:linear-gradient(90deg,var(--orange),var(--yellow))}
+.pb-fill.avg{background:linear-gradient(90deg,var(--green),color-mix(in srgb,var(--green) 60%,var(--blue)))}
+.pb-marker{position:absolute;top:0;bottom:0;width:2px;background:var(--text);opacity:.15;border-radius:1px}
+
+/* REVIEW ANALYSIS */
+.review-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.rv{padding:10px;border-radius:10px;background:var(--surface2);border:1px solid var(--border)}
+.rv-label{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.rv-value{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700}
+.rv-value.g{color:var(--green)}.rv-value.o{color:var(--orange)}.rv-value.r{color:var(--red)}.rv-value.b{color:var(--blue)}
+.rv-sub{font-size:9px;color:var(--muted2);margin-top:2px}
+
+/* AI STRATEGY */
+.strategy-text{font-size:11.5px;color:var(--muted);line-height:1.75;padding:12px;background:var(--surface2);border-radius:10px;border-left:2px solid var(--purple);margin-bottom:10px}
+.strategy-text strong{color:var(--text)}
+.strategy-actions{display:flex;flex-direction:column;gap:7px}
+.sa-item{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;gap:8px}
+.sa-item:hover{border-color:var(--focus-blue-border);background:var(--blue-dim);color:var(--blue)}
+.sa-arrow{color:var(--muted2);font-size:10px;transition:.15s}
+.sa-item:hover .sa-arrow{color:var(--blue);transform:translateX(2px)}
+
+/* ANIMATION */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade1{animation:fadeUp .35s ease both}
+.fade2{animation:fadeUp .35s .05s ease both}
+.fade3{animation:fadeUp .35s .1s ease both}
+.fade4{animation:fadeUp .35s .15s ease both}
+@keyframes panelFade{0%{opacity:.6;transform:translateY(3px)}100%{opacity:1;transform:translateY(0)}}
+.panel-flash{animation:panelFade .25s ease forwards}
+
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+@media(max-width:1200px){.content-grid{grid-template-columns:1fr 340px}}
+@media(max-width:1100px){.content-grid{grid-template-columns:1fr}.side-stack{position:static}}
+@media(max-width:900px){
+  .mobile-menu-btn{display:flex}
+  .sidebar{transform:translateX(-110%);transition:transform .24s;will-change:transform;width:min(82vw,300px);height:100dvh;overflow-y:auto}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;padding:18px 16px 26px}
+  .stat-strip{grid-template-columns:repeat(2,1fr)}
+  .sm-row{flex-direction:column}
+  .sm-group{min-width:0}
+}
+@media(max-width:700px){
+  .stat-strip{grid-template-columns:1fr}
+  .cc-metrics{grid-template-columns:1fr 1fr}
+  .review-grid{grid-template-columns:1fr}
+  .page-title{font-size:17px}
+}
+@media(max-width:480px){.main{padding:14px 12px 22px}.sb-value{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="logo"><a class="logo-link" href="./dropscout.html"><div class="logo-icon">🎯</div><div class="logo-text">Drop<span>Scout</span></div></a></div>
+  <div class="nav-group">
+    <div class="nav-label">Keşif</div>
+    <a class="nav-item" href="./trend-radar.html"><span class="nav-icon">📡</span>Trend Radar</a>
+    <a class="nav-item" href="./gap-radar.html"><span class="nav-icon">🌍</span>Gap Radar <span class="nav-badge nb-purple">YENİ</span></a>
+    <a class="nav-item" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi <span class="nav-badge nb-blue">YENİ</span></a>
+    <a class="nav-item active" href="./rakip-analizi.html"><span class="nav-icon">🔬</span>Rakip Analizi</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Araçlar</div>
+    <a class="nav-item" href="./net-kar.html"><span class="nav-icon">💰</span>Net Kâr Hesabı</a>
+    <a class="nav-item" href="./takip-listem.html"><span class="nav-icon">⭐</span>Takip Listem</a>
+    <a class="nav-item" href="./yasal-kontrol.html"><span class="nav-icon">⚖️</span>Yasal Kontrol</a>
+    <a class="nav-item" href="./tedarikci-bul.html"><span class="nav-icon">🔗</span>Tedarikçi Bul</a>
+    <a class="nav-item" href="./raporlar.html"><span class="nav-icon">📊</span>Raporlar</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Platform</div>
+    <a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a>
+    <a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a>
+    <a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a>
+    <a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="theme-toggle-wrap">
+      <div class="theme-toggle-head">
+        <div class="theme-toggle-copy">
+          <div class="theme-toggle-label">Tema</div>
+          <div class="theme-toggle-sub">LIGHT / DARK MODE</div>
+          <div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div>
+        </div>
+        <label class="theme-switch" aria-label="Tema değiştir">
+          <input type="checkbox" id="themeToggle">
+          <span class="theme-slider">
+            <span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span>
+            <span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span>
+            <span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span>
+          </span>
+        </label>
+      </div>
+    </div>
+    <div class="plan-card">
+      <div class="plan-tier">Pro Plan</div>
+      <div class="plan-name">Rakip Radar Aktif ✓</div>
+      <div class="plan-meta"><span>₺499/ay · Canlı analiz</span><div class="upgrade-btn">Yönet</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar fade1">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div>
+        <div class="page-title">🔬 Rakip Analizi</div>
+        <div class="page-meta">// MAĞAZA KARŞILAŞTIRMA · FİYAT + YORUM + GÖRSEL ANALİZ · AI STRATEJİ ÖNERİSİ</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn">↻ Güncelle</button>
+      <button class="icon-btn">📥 Rapor İndir</button>
+      <button class="icon-btn primary">+ Yeni Ürün Tara</button>
+    </div>
+  </div>
+
+  <div class="stat-strip fade2" id="kpiStrip">
+    <div class="stat-box b"><div class="sb-label">İzlenen Rakip</div><div class="sb-value b" id="kpiTotal">8</div><div class="sb-sub">Aktif takip edilen</div></div>
+    <div class="stat-box y"><div class="sb-label">Ort. Fiyat Bandı</div><div class="sb-value y" id="kpiPrice">₺289</div><div class="sb-sub">Kategori ortalaması</div></div>
+    <div class="stat-box o"><div class="sb-label">Yorum Baskısı</div><div class="sb-value o" id="kpiReview">Orta</div><div class="sb-sub">Pazar ortalama basıncı</div></div>
+    <div class="stat-box p"><div class="sb-label">Doygunluk</div><div class="sb-value p" id="kpiSat">%47</div><div class="sb-sub">Kategori doygunluğu</div></div>
+  </div>
+
+  <!-- SEARCH -->
+  <div class="search-module fade3">
+    <div class="sm-row">
+      <div class="sm-group" style="flex:2">
+        <div class="sm-label">Ürün veya Kategori</div>
+        <input class="sm-input" id="searchInput" value="Minimal Masaüstü Köpük Sabunluk" placeholder="Ürün adı veya link girin...">
+      </div>
+      <div class="sm-group" style="flex:.7">
+        <div class="sm-label">Platform</div>
+        <select class="sm-select" id="searchPlatform">
+          <option selected>Tümü</option><option>Trendyol</option><option>Hepsiburada</option><option>N11</option><option>Amazon TR</option>
+        </select>
+      </div>
+      <div class="sm-group" style="flex:.6">
+        <div class="sm-label">Sıralama</div>
+        <select class="sm-select" id="searchSort">
+          <option>AI Skoru ↓</option><option>Fiyat ↑</option><option>Yorum ↓</option><option>Tehdit Düzeyi ↓</option>
+        </select>
+      </div>
+      <button class="sm-btn" onclick="renderAll()">🔍 Tara</button>
+    </div>
+  </div>
+
+  <section class="content-grid fade4">
+    <div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Rakip Mağaza Listesi</div>
+          <div class="ct-tag tag-blue" id="compCount">8 RAKIP</div>
+        </div>
+        <div class="comp-list" id="compList"></div>
+      </div>
+    </div>
+
+    <aside class="side-stack">
+      <!-- PRICE POSITION -->
+      <div class="detail-card" id="pricePanel">
+        <div class="dc-head"><div class="dc-title">Fiyat Pozisyonu</div><div class="ct-tag tag-blue">BENCHMARK</div></div>
+        <div class="price-bars" id="priceBars"></div>
+      </div>
+      <!-- REVIEW ANALYSIS -->
+      <div class="detail-card" id="reviewPanel">
+        <div class="dc-head"><div class="dc-title">Yorum Analizi</div><div class="dc-live"><div class="dc-dot"></div>CANLI</div></div>
+        <div class="review-grid" id="reviewGrid"></div>
+      </div>
+      <!-- AI STRATEGY -->
+      <div class="detail-card" id="strategyPanel">
+        <div class="dc-head"><div class="dc-title">AI Strateji Önerisi</div><div class="ct-tag tag-green">TAKTİK</div></div>
+        <div class="strategy-text" id="strategyText"></div>
+        <div class="strategy-actions" id="strategyActions"></div>
+      </div>
+    </aside>
+  </section>
+</main>
+
+<script>
+/* ── DEMO DATA ── */
+const competitors = [
+  { id:1, name:'Zen Yaşam Shop', platform:'Trendyol', emoji:'🏪', price:279, reviews:342, rating:4.6, visual:72, saturation:41, strength:'medium', strengthLabel:'Orta Tehdit',
+    pos:'Pozitif: Hızlı kargo ve paketleme · Negatif: Boyut uyumsuzluğu şikâyetleri', strategy:'Bu rakip orta segment fiyatlama yapıyor, ancak görsel kalitesi düşük. Lifestyle fotoğraflar ve video içerikle net şekilde öne geçilebilir.',
+    actions:['Görsel benchmark raporu indir','Fiyat alarmı kur','Yorum analizini detaylandır'] },
+  { id:2, name:'Premium Ev Dekor', platform:'Trendyol', emoji:'✨', price:349, reviews:128, rating:4.8, visual:88, saturation:35, strength:'strong', strengthLabel:'Güçlü Tehdit',
+    pos:'Pozitif: Premium sunum + yüksek puan · Negatif: Düşük hacim', strategy:'Premium konumlanmış ve görsel dili güçlü. Doğrudan fiyat savaşı yerine, set ürün stratejisi ve paketleme farkı ile ayrışmak gerekir.',
+    actions:['Premium segment analizi yap','Paket strateji önerisi al','Hedef kitle farklılaştır'] },
+  { id:3, name:'Hızlı Kargo Dünyası', platform:'Hepsiburada', emoji:'📦', price:219, reviews:812, rating:4.2, visual:54, saturation:62, strength:'strong', strengthLabel:'Güçlü Tehdit',
+    pos:'Pozitif: Yüksek hacim + hızlı teslimat · Negatif: Ucuz hissi, düşük görsel kalite', strategy:'Hacim liderliği artık fiyat kıran bir rakip yaratıyor. Bu mağazayla fiyat yarışmak yerine niş ve premium alana kayılmalı.',
+    actions:['Fiyat karşılaştırması detaylandır','Hacim analizi yap','Niş segment fırsatı ara'] },
+  { id:4, name:'EcoLiving TR', platform:'N11', emoji:'🌿', price:299, reviews:67, rating:4.5, visual:78, saturation:28, strength:'weak', strengthLabel:'Zayıf Tehdit',
+    pos:'Pozitif: Sürdürülebilir mesaj · Negatif: Düşük bilinirlik, az yorum', strategy:'Yeni girenlerden biri. Niş ekosistem teklifleri güçlü ancak hacim düşük. Market büyürse orta vadede tehdit olabilir.',
+    actions:['İzlemeye al','Eko segment trendini takip et','Fiyat alarmı kur'] },
+  { id:5, name:'Casa Minimal', platform:'Trendyol', emoji:'🏠', price:329, reviews:215, rating:4.7, visual:82, saturation:38, strength:'medium', strengthLabel:'Orta Tehdit',
+    pos:'Pozitif: Marka hikâyesi güçlü · Negatif: Teslimat süreleri uzun', strategy:'Minimalist konumlanma doğru ama lojistik zayıf. Hızlı kargo ve profesyonel paketleme vurgusunda avantaj yakalanabilir.',
+    actions:['Teslimat süresi karşılaştır','Marka analizi yap','Ürün listing optimizasyonu öner'] },
+  { id:6, name:'DekorPunkt', platform:'Amazon TR', emoji:'🎨', price:259, reviews:156, rating:4.3, visual:65, saturation:49, strength:'medium', strengthLabel:'Orta Tehdit',
+    pos:'Pozitif: Amazon güvenilirliği · Negatif: Ortalama sunum kalitesi', strategy:'Amazon altyapısını kullanan rakip. Fiyat esnekliği var ama listing kalitesi orta. Daha iyi A+ içerik ile ayrışmak mümkün.',
+    actions:['Amazon listing analizi','A+ içerik önerisi al','Cross-platform fiyat takibi'] },
+  { id:7, name:'Stil Ev Market', platform:'N11', emoji:'🔖', price:289, reviews:94, rating:4.4, visual:71, saturation:33, strength:'weak', strengthLabel:'Zayıf Tehdit',
+    pos:'Pozitif: Hediye segmentinde güçlü · Negatif: Platform trafiği düşük', strategy:'N11 nişinde konumlanmış. Platform trafiği düşük olsa da hediye dönemi satışlarında ivme kazanabilir. Özel gün kampanyalarında izlenmeli.',
+    actions:['Hediye segmenti analizi','Kampanya takvimi çıkar','Fiyat alarmı kur'] },
+  { id:8, name:'MegaStore Online', platform:'Hepsiburada', emoji:'🏬', price:199, reviews:1240, rating:3.9, visual:42, saturation:74, strength:'strong', strengthLabel:'Güçlü Tehdit',
+    pos:'Pozitif: En yüksek hacim + en düşük fiyat · Negatif: Düşük puan, kalite şikâyetleri', strategy:'Fiyat kırıcı ve yüksek hacimli ama kalite algısı düşük. Bu rakiple asla fiyat yarışına girilmemeli. Kalite + sunum ile tamamen farklı segmentte konumlanılmalı.',
+    actions:['Kalite şikâyetlerini analiz et','Fiyat alt limitini belirle','Premium konumlanma stratejisi oluştur'] }
+];
+
+let selectedId = 1;
+
+function renderCompList(){
+  const host = document.getElementById('compList');
+  host.innerHTML = competitors.map(c => `
+    <div class="comp-card${c.id === selectedId ? ' selected' : ''}" onclick="selectComp(${c.id})">
+      <div class="cc-top">
+        <div class="cc-avatar">${c.emoji}</div>
+        <div class="cc-info">
+          <div class="cc-name">${c.name}</div>
+          <div class="cc-platform">${c.platform} · ⭐ ${c.rating}</div>
+        </div>
+        <div class="cc-strength ${c.strength === 'strong' ? 'str-strong' : c.strength === 'medium' ? 'str-medium' : 'str-weak'}">${c.strengthLabel}</div>
+      </div>
+      <div class="cc-metrics">
+        <div class="ccm"><div class="ccm-label">Fiyat</div><div class="ccm-value b">₺${c.price}</div></div>
+        <div class="ccm"><div class="ccm-label">Yorum</div><div class="ccm-value ${c.reviews > 500 ? 'o' : 'g'}">${c.reviews}</div></div>
+        <div class="ccm"><div class="ccm-label">Görsel</div><div class="ccm-value ${c.visual >= 75 ? 'g' : c.visual >= 55 ? 'y' : 'o'}">${c.visual}/100</div></div>
+        <div class="ccm"><div class="ccm-label">Doygunluk</div><div class="ccm-value ${c.saturation >= 60 ? 'r' : c.saturation >= 40 ? 'y' : 'g'}">%${c.saturation}</div></div>
+      </div>
+      <div class="cc-bar-wrap">
+        <div class="cc-bar-label">Doygunluk</div>
+        <div class="cc-bar-track"><div class="cc-bar-fill sat" style="width:${c.saturation}%"></div></div>
+        <div class="cc-bar-val">${c.saturation}%</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function selectComp(id){
+  selectedId = id;
+  renderCompList();
+  renderDetail();
+}
+
+function renderDetail(){
+  const c = competitors.find(x => x.id === selectedId);
+  if(!c) return;
+
+  const avgPrice = Math.round(competitors.reduce((a,b) => a+b.price,0) / competitors.length);
+  const maxPrice = Math.max(...competitors.map(x => x.price));
+  const myPrice = 329;
+
+  document.getElementById('priceBars').innerHTML = `
+    <div class="pb-row"><div class="pb-name" style="font-weight:700;color:var(--blue)">Senin</div><div class="pb-track"><div class="pb-fill mine" style="width:${(myPrice/maxPrice*100).toFixed(0)}%">₺${myPrice}</div></div></div>
+    <div class="pb-row"><div class="pb-name">${c.name.split(' ')[0]}</div><div class="pb-track"><div class="pb-fill comp" style="width:${(c.price/maxPrice*100).toFixed(0)}%">₺${c.price}</div></div></div>
+    <div class="pb-row"><div class="pb-name">Ort.</div><div class="pb-track"><div class="pb-fill avg" style="width:${(avgPrice/maxPrice*100).toFixed(0)}%">₺${avgPrice}</div></div></div>
+  `;
+
+  const posParts = c.pos.split(' · ');
+  document.getElementById('reviewGrid').innerHTML = `
+    <div class="rv"><div class="rv-label">Toplam Yorum</div><div class="rv-value b">${c.reviews}</div><div class="rv-sub">${c.platform}</div></div>
+    <div class="rv"><div class="rv-label">Ortalama Puan</div><div class="rv-value ${c.rating >= 4.5 ? 'g' : c.rating >= 4 ? 'y' : 'o'}">⭐ ${c.rating}</div><div class="rv-sub">${c.rating >= 4.5 ? 'Çok iyi' : c.rating >= 4 ? 'İyi' : 'Orta'}</div></div>
+    <div class="rv"><div class="rv-label">Pozitif Sinyal</div><div class="rv-value g" style="font-size:11px;font-weight:600">${posParts[0]?.replace('Pozitif: ','')}</div></div>
+    <div class="rv"><div class="rv-label">Negatif Sinyal</div><div class="rv-value o" style="font-size:11px;font-weight:600">${posParts[1]?.replace('Negatif: ','')}</div></div>
+  `;
+
+  document.getElementById('strategyText').innerHTML = c.strategy;
+  document.getElementById('strategyActions').innerHTML = c.actions.map(a => `
+    <div class="sa-item"><span>${a}</span><span class="sa-arrow">→</span></div>
+  `).join('');
+
+  document.querySelectorAll('#pricePanel,#reviewPanel,#strategyPanel').forEach(el => {
+    el.classList.remove('panel-flash');
+    void el.offsetWidth;
+    el.classList.add('panel-flash');
+  });
+}
+
+function updateKPIs(){
+  const avgPrice = Math.round(competitors.reduce((a,b) => a+b.price,0) / competitors.length);
+  const avgSat = Math.round(competitors.reduce((a,b) => a+b.saturation,0) / competitors.length);
+  const avgReviews = Math.round(competitors.reduce((a,b) => a+b.reviews,0) / competitors.length);
+  document.getElementById('kpiTotal').textContent = competitors.length;
+  document.getElementById('kpiPrice').textContent = '₺' + avgPrice;
+  document.getElementById('kpiReview').textContent = avgReviews > 400 ? 'Yüksek' : avgReviews > 200 ? 'Orta' : 'Düşük';
+  document.getElementById('kpiSat').textContent = '%' + avgSat;
+  document.getElementById('compCount').textContent = competitors.length + ' RAKİP';
+}
+
+function renderAll(){
+  updateKPIs();
+  renderCompList();
+  renderDetail();
+}
+renderAll();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropScout TR — Net Kâr Hesabı</title>
+<meta name="description" content="Komisyon, kargo, vergi ve ürün maliyetine göre gerçek net kârlılığı hesaplayın. DropScout TR net kâr motoru.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  // Tema anında uygula (FOUC/flaş önleme)
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<link rel="stylesheet" href="/src/css/main.css">
+<script type="module" src="/src/js/main.js"></script>
+<style>
+/* ═══════════════════════════════════
+   NET KÂR HESABI — Page-Specific Styles
+   ═══════════════════════════════════ */
+
+/* INPUT MODULE */
+.input-module{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;position:relative;overflow:hidden;box-shadow:var(--key-shadow)}
+.input-module::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--blue),var(--purple),transparent)}
+.im-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;flex-wrap:wrap}
+.im-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.im-badge{font-family:'Geist Mono',monospace;font-size:8px;background:var(--blue-dim);color:var(--blue);padding:3px 8px;border-radius:4px;letter-spacing:.5px}
+.input-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.input-group{display:flex;flex-direction:column;gap:5px}
+.input-group.wide{grid-column:span 2}
+.input-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.input-field{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'Inter',sans-serif;width:100%}
+.input-field::placeholder{color:var(--muted2)}
+.input-field:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
+.param-select{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:12px;color:var(--text);font-family:'Geist Mono',monospace;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;width:100%;transition:border-color .2s}
+.param-select:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
+.calc-btn{padding:12px 24px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-radius:12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Geist Mono',monospace;letter-spacing:.3px;border:none;display:flex;align-items:center;gap:8px;transition:all .2s;box-shadow:var(--button-shadow)}
+.calc-btn:hover{transform:translateY(-1px);box-shadow:var(--key-shadow-strong)}
+.reset-btn{padding:12px 18px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Geist Mono',monospace;transition:all .15s}
+.reset-btn:hover{color:var(--text);border-color:var(--border2)}
+.btn-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+/* RESULT GRID */
+.result-grid{display:grid;grid-template-columns:1fr 1fr 320px;gap:14px;margin-bottom:14px}
+
+/* BREAKDOWN */
+.breakdown-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--key-shadow);position:relative;overflow:hidden}
+.breakdown-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--blue),transparent)}
+.bc-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
+.bc-ht{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.bk-rows{display:flex;flex-direction:column;gap:1px;margin-bottom:14px}
+.bk-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:6px;font-size:12px}
+.bk-row:nth-child(even){background:color-mix(in srgb,var(--text) 3%,transparent)}
+.bk-label{color:var(--muted2);display:flex;align-items:center;gap:6px}
+.bk-icon{font-size:11px;width:16px}
+.bk-amount{font-family:'Geist Mono',monospace;font-weight:500}
+.bk-amount.pos{color:var(--green)}
+.bk-amount.neg{color:var(--orange)}
+.bk-amount.warn{color:var(--yellow)}
+.bk-divider{height:1px;background:var(--border2);margin:6px 0}
+
+/* NET RESULT */
+.net-result{padding:14px;border-radius:12px;display:flex;align-items:center;justify-content:space-between}
+.net-result.profit{background:var(--green-dim);border:1px solid var(--focus-green-border)}
+.net-result.thin{background:var(--yellow-dim);border:1px solid color-mix(in srgb,var(--yellow) 18%,transparent)}
+.net-result.loss{background:color-mix(in srgb,var(--red) 6%,transparent);border:1px solid color-mix(in srgb,var(--red) 18%,transparent)}
+.nr-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.nr-amount{font-family:'Poppins',sans-serif;font-size:28px;font-weight:800;letter-spacing:-1px}
+.nr-amount.g{color:var(--green)}.nr-amount.y{color:var(--yellow)}.nr-amount.r{color:var(--red)}
+.nr-margin{text-align:right}
+.nr-pct{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;letter-spacing:-1px}
+.nr-pct.g{color:var(--green)}.nr-pct.y{color:var(--yellow)}.nr-pct.r{color:var(--red)}
+
+/* SCENARIOS */
+.sc-rows{display:flex;flex-direction:column;gap:10px;margin-top:14px}
+.sc-row{padding:12px 14px;background:var(--surface2);border-radius:12px;border:1px solid var(--border);transition:border-color .2s}
+.sc-row:hover{border-color:var(--border2)}
+.sc-row.highlight{border-color:var(--focus-green-border);background:var(--green-dim)}
+.sc-row-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:8px}
+.sc-name{font-size:12px;font-weight:600}
+.sc-price{font-family:'Geist Mono',monospace;font-size:11px;color:var(--muted2)}
+.sc-bar-wrap{height:5px;background:color-mix(in srgb,var(--text) 6%,transparent);border-radius:3px;overflow:hidden;margin-bottom:5px}
+.sc-bar{height:100%;border-radius:3px}
+.sc-bar.high{background:var(--green)}.sc-bar.mid{background:var(--yellow)}.sc-bar.low{background:var(--orange)}
+.sc-row-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sc-net{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700}
+.sc-net.g{color:var(--green)}.sc-net.y{color:var(--yellow)}.sc-net.o{color:var(--orange)}
+.sc-pct{font-size:10px;font-family:'Geist Mono',monospace}
+.sc-pct.g{color:var(--green)}.sc-pct.y{color:var(--yellow)}.sc-pct.o{color:var(--orange)}
+.sc-decision{font-size:9px;font-family:'Geist Mono',monospace;padding:2px 7px;border-radius:999px;font-weight:700}
+.sd-buy{background:var(--green-dim);color:var(--green)}.sd-wait{background:var(--yellow-dim);color:var(--yellow)}.sd-skip{background:var(--orange-dim);color:var(--orange)}
+
+/* AI BRIEF */
+.ai-brief-col{display:flex;flex-direction:column;gap:12px}
+.ai-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--key-shadow)}
+.ai-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.ai-card-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.ai-live{display:flex;align-items:center;gap:5px;font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2)}
+.ai-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.4s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.score-big-row{display:flex;align-items:center;gap:12px;padding:12px;background:var(--green-dim);border:1px solid var(--focus-green-border);border-radius:14px;margin-bottom:12px}
+.score-big-num{font-family:'Poppins',sans-serif;font-size:42px;font-weight:800;line-height:1;color:var(--green);letter-spacing:-2px}
+.score-big-label{font-size:10px;color:var(--muted2);margin-bottom:3px}
+.score-big-decision{font-family:'Poppins',sans-serif;font-size:15px;font-weight:800;color:var(--green)}
+.brief-text{font-size:11.5px;color:var(--muted);line-height:1.75;padding:11px 12px;background:var(--surface2);border-radius:10px;border-left:2px solid var(--purple);margin-bottom:10px}
+.mini-metrics{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.mm{padding:9px 10px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)}
+.mm-l{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:3px}
+.mm-v{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700}
+.mm-v.g{color:var(--green)}.mm-v.o{color:var(--orange)}.mm-v.p{color:var(--purple)}.mm-v.y{color:var(--yellow)}.mm-v.b{color:var(--blue)}
+
+/* VOLUME CARD */
+.volume-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--key-shadow);margin-top:14px}
+.vol-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px;flex-wrap:wrap}
+.vol-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.vol-slider-wrap{margin-bottom:14px}
+.vol-slider-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.vol-slider-text{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted)}
+.vol-slider-value{font-family:'Geist Mono',monospace;font-size:12px;font-weight:700;color:var(--blue)}
+.vol-slider{width:100%;height:6px;border-radius:999px;appearance:none;-webkit-appearance:none;background:color-mix(in srgb,var(--text) 8%,transparent);outline:none;cursor:pointer}
+.vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));box-shadow:var(--button-shadow);cursor:pointer;border:2px solid var(--surface)}
+.vol-slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));box-shadow:var(--button-shadow);cursor:pointer;border:2px solid var(--surface)}
+.vol-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.vol-kpi{padding:14px;background:var(--surface2);border:1px solid var(--border);border-radius:14px;text-align:center}
+.vol-kpi-label{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.vol-kpi-value{font-family:'Poppins',sans-serif;font-size:20px;font-weight:800;letter-spacing:-.5px}
+.vol-kpi-sub{font-size:10px;color:var(--muted2);margin-top:4px}
+
+/* INFO NOTE */
+.info-note{padding:10px 12px;background:color-mix(in srgb,var(--yellow) 6%,transparent);border-radius:10px;border:1px solid color-mix(in srgb,var(--yellow) 14%,transparent);font-size:10.5px;color:var(--muted2);display:flex;align-items:center;gap:7px;margin-top:10px;line-height:1.6}
+.info-note strong{color:var(--yellow)}
+
+/* COMMISSION TABLE */
+.comm-detail{margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)}
+.comm-title{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.comm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.comm-item{font-size:10px}
+.comm-item-label{color:var(--muted2);margin-bottom:2px}
+.comm-item-value{font-weight:600;font-family:'Geist Mono',monospace}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade1{animation:fadeUp .35s ease both}
+.fade2{animation:fadeUp .35s ease .05s both}
+.fade3{animation:fadeUp .35s ease .1s both}
+.fade4{animation:fadeUp .35s ease .15s both}
+
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+@media (max-width:900px){
+  .topbar{gap:14px;align-items:flex-start;flex-wrap:wrap}
+  .topbar-left{width:100%}
+  .topbar-right{width:100%;justify-content:space-between;flex-wrap:wrap}
+  .stat-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .input-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:700px){
+  .page-title{font-size:17px;line-height:1.2}
+  .stat-strip{grid-template-columns:1fr}
+  .input-grid{grid-template-columns:1fr}
+  .input-group.wide{grid-column:auto}
+  .result-grid{grid-template-columns:1fr}
+  .ai-brief-col{grid-column:auto;display:flex;grid-template-columns:none}
+  .vol-grid{grid-template-columns:1fr}
+  .comm-grid{grid-template-columns:1fr 1fr}
+  .btn-row{width:100%}
+  .calc-btn,.reset-btn{flex:1;justify-content:center}
+}
+@media (max-width:480px){
+  .nr-amount{font-size:24px}
+  .score-big-num{font-size:36px}
+}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<aside class="sidebar">
+  <div class="logo">
+    <a class="logo-link" href="./dropscout.html">
+      <div class="logo-icon">🎯</div>
+      <div class="logo-text">Drop<span>Scout</span></div>
+    </a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Keşif</div>
+    <a class="nav-item" href="./trend-radar.html"><span class="nav-icon">📡</span>Trend Radar</a>
+    <a class="nav-item" href="./gap-radar.html"><span class="nav-icon">🌍</span>Gap Radar <span class="nav-badge nb-purple">YENİ</span></a>
+    <a class="nav-item" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi <span class="nav-badge nb-blue">YENİ</span></a>
+    <a class="nav-item" href="./rakip-analizi.html"><span class="nav-icon">🔬</span>Rakip Analizi</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Araçlar</div>
+    <a class="nav-item active" href="./net-kar.html"><span class="nav-icon">💰</span>Net Kâr Hesabı</a>
+    <a class="nav-item" href="./takip-listem.html"><span class="nav-icon">⭐</span>Takip Listem</a>
+    <a class="nav-item" href="./yasal-kontrol.html"><span class="nav-icon">⚖️</span>Yasal Kontrol</a>
+    <a class="nav-item" href="./tedarikci-bul.html"><span class="nav-icon">🔗</span>Tedarikçi Bul</a>
+    <a class="nav-item" href="./raporlar.html"><span class="nav-icon">📊</span>Raporlar</a>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Platform</div>
+    <a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a>
+    <a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a>
+    <a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a>
+    <a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="theme-toggle-wrap">
+      <div class="theme-toggle-head">
+        <div class="theme-toggle-copy">
+          <div class="theme-toggle-label">Tema</div>
+          <div class="theme-toggle-sub">LIGHT / DARK MODE</div>
+          <div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div>
+        </div>
+        <label class="theme-switch" aria-label="Tema değiştir">
+          <input type="checkbox" id="themeToggle">
+          <span class="theme-slider">
+            <span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span>
+            <span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span>
+            <span class="theme-thumb" aria-hidden="true">
+              <span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span>
+            </span>
+          </span>
+        </label>
+      </div>
+    </div>
+    <div class="plan-card">
+      <div class="plan-tier">Pro Plan</div>
+      <div class="plan-name">Net Kâr Motoru Aktif ✓</div>
+      <div class="plan-meta"><span>₺499/ay · Sınırsız hesaplama</span><div class="upgrade-btn">Yönet</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar fade1">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
+      <div>
+        <div class="page-title">💰 Net Kâr Hesabı</div>
+        <div class="page-meta">// GERÇEK NET KÂR MOTORU · KOMİSYON + KARGO + VERGİ DAHİL · CANLI HESAPLAMA</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" onclick="resetForm()">↻ Sıfırla</button>
+      <button class="icon-btn">📥 PDF İndir</button>
+    </div>
+  </div>
+
+  <!-- KPI STRIP -->
+  <div class="stat-strip fade2" id="kpiStrip">
+    <div class="stat-box b">
+      <div class="sb-label">Satış Fiyatı</div>
+      <div class="sb-value b" id="kpiSale">₺620</div>
+      <div class="sb-sub">KDV dahil</div>
+    </div>
+    <div class="stat-box o">
+      <div class="sb-label">Toplam Kesinti</div>
+      <div class="sb-value o" id="kpiDeductions">₺466</div>
+      <div class="sb-sub">Komisyon+kargo+vergi+maliyet</div>
+    </div>
+    <div class="stat-box g">
+      <div class="sb-label">Net Kâr / Adet</div>
+      <div class="sb-value g" id="kpiNet">₺154</div>
+      <div class="sb-sub">Tüm kesintiler sonrası</div>
+    </div>
+    <div class="stat-box y">
+      <div class="sb-label">Net Marj</div>
+      <div class="sb-value y" id="kpiMargin">%24,8</div>
+      <div class="sb-sub">Gerçek kârlılık oranı</div>
+    </div>
+    <div class="stat-box p">
+      <div class="sb-label">AI Skoru</div>
+      <div class="sb-value p" id="kpiScore">88</div>
+      <div class="sb-sub">Satılabilirlik endeksi</div>
+    </div>
+  </div>
+
+  <!-- INPUT MODULE -->
+  <div class="input-module fade3">
+    <div class="im-header">
+      <div class="im-title">📊 Maliyet Parametreleri <div class="im-badge">CANLI HESAPLAMA</div></div>
+    </div>
+    <div class="input-grid">
+      <div class="input-group">
+        <div class="input-label">Satış Fiyatı (₺)</div>
+        <input class="input-field" id="inpSalePrice" type="number" value="620" min="0" step="1">
+      </div>
+      <div class="input-group">
+        <div class="input-label">Ürün Maliyeti (₺)</div>
+        <input class="input-field" id="inpCost" type="number" value="180" min="0" step="1">
+      </div>
+      <div class="input-group">
+        <div class="input-label">Platform</div>
+        <select class="param-select" id="inpPlatform">
+          <option value="trendyol" selected>Trendyol</option>
+          <option value="hepsiburada">Hepsiburada</option>
+          <option value="n11">N11</option>
+          <option value="amazon">Amazon TR</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Kategori</div>
+        <select class="param-select" id="inpCategory">
+          <option value="elektronik" selected>Elektronik</option>
+          <option value="moda">Moda & Giyim</option>
+          <option value="ev">Ev & Yaşam</option>
+          <option value="kozmetik">Kozmetik</option>
+          <option value="spor">Spor & Outdoor</option>
+          <option value="mutfak">Mutfak</option>
+          <option value="pet">Pet Ürünleri</option>
+          <option value="ofis">Ofis & Kırtasiye</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Şirket Türü</div>
+        <select class="param-select" id="inpCompany">
+          <option>Şahıs Şirketi</option>
+          <option>Ltd. Şti.</option>
+          <option>AŞ</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Ürün Desi</div>
+        <select class="param-select" id="inpDesi">
+          <option value="3" selected>1–3 desi (küçük)</option>
+          <option value="7">4–7 desi (orta)</option>
+          <option value="15">8–15 desi (büyük)</option>
+          <option value="25">15+ desi (ağır)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <div class="input-label">Paketleme Maliyeti (₺)</div>
+        <input class="input-field" id="inpPacking" type="number" value="9.10" min="0" step="0.1">
+      </div>
+      <div class="input-group">
+        <div class="input-label">Ek Maliyet (₺)</div>
+        <input class="input-field" id="inpExtra" type="number" value="0" min="0" step="1" placeholder="Reklam, depo vb.">
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="calc-btn" onclick="calculate()">⚡ Hesapla</button>
+      <button class="reset-btn" onclick="resetForm()">↻ Sıfırla</button>
+    </div>
+  </div>
+
+  <!-- RESULT AREA -->
+  <div class="result-grid fade4" id="resultArea">
+    <!-- BREAKDOWN -->
+    <div class="breakdown-card" id="breakdownCard">
+      <div class="bc-h">
+        <div class="bc-ht">💰 Net Kâr Dökümü</div>
+        <div class="ct-tag tag-blue">OTOMATİK HESAP</div>
+      </div>
+      <div class="bk-rows" id="breakdownRows">
+        <!-- JS ile doldurulacak -->
+      </div>
+      <div id="netResultBox"></div>
+      <div class="info-note" id="marginNote"></div>
+      <div class="comm-detail" id="commDetail"></div>
+    </div>
+
+    <!-- SCENARIOS -->
+    <div class="breakdown-card">
+      <div class="bc-h">
+        <div class="bc-ht">📊 Fiyat Senaryoları</div>
+        <div class="ct-tag tag-blue">AI ÖNERİLİ</div>
+      </div>
+      <div style="font-size:11px;color:var(--muted2);margin-bottom:4px">Farklı satış fiyatlarında net kâr projeksiyonu:</div>
+      <div class="sc-rows" id="scenarioRows"></div>
+    </div>
+
+    <!-- AI BRIEF -->
+    <div class="ai-brief-col">
+      <div class="ai-card">
+        <div class="ai-card-head">
+          <div class="ai-card-title">AI Karar Brief'i</div>
+          <div class="ai-live"><div class="ai-dot"></div>CANLI</div>
+        </div>
+        <div id="aiScoreRow"></div>
+        <div class="brief-text" id="aiBrief"></div>
+        <div class="mini-metrics" id="aiMetrics"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VOLUME SIMULATION -->
+  <div class="volume-card fade4" id="volumeCard">
+    <div class="vol-header">
+      <div class="vol-title">📈 Hacim Projeksiyonu</div>
+      <div class="ct-tag tag-green">AYLIK TAHMİN</div>
+    </div>
+    <div class="vol-slider-wrap">
+      <div class="vol-slider-label">
+        <span class="vol-slider-text">Aylık tahmini satış adedi</span>
+        <span class="vol-slider-value" id="volSliderVal">50 adet</span>
+      </div>
+      <input type="range" class="vol-slider" id="volSlider" min="5" max="500" value="50" step="5">
+    </div>
+    <div class="vol-grid" id="volGrid"></div>
+  </div>
+
+</main>
+
+<script>
+/* ── Platform Komisyon Tablosu ── */
+const PLATFORMS = {
+  trendyol:    { name:'Trendyol',     commission:{ elektronik:12, moda:15, ev:10, kozmetik:14, spor:11, mutfak:10, pet:9, ofis:10 }},
+  hepsiburada: { name:'Hepsiburada',  commission:{ elektronik:11, moda:13, ev:9,  kozmetik:12, spor:10, mutfak:9,  pet:8, ofis:9  }},
+  n11:         { name:'N11',           commission:{ elektronik:10, moda:12, ev:8,  kozmetik:11, spor:9,  mutfak:8,  pet:7, ofis:8  }},
+  amazon:      { name:'Amazon TR',     commission:{ elektronik:12, moda:14, ev:10, kozmetik:13, spor:11, mutfak:10, pet:9, ofis:10 }}
+};
+
+const KDV_RATES = { elektronik:20, moda:10, ev:20, kozmetik:20, spor:20, mutfak:20, pet:20, ofis:20 };
+const CARGO = { 3:95, 7:125, 15:165, 25:210 };
+
+/* ── Hesaplama Motoru ── */
+function getInputs(){
+  return {
+    salePrice: parseFloat(document.getElementById('inpSalePrice').value) || 0,
+    cost:      parseFloat(document.getElementById('inpCost').value) || 0,
+    platform:  document.getElementById('inpPlatform').value,
+    category:  document.getElementById('inpCategory').value,
+    desi:      parseInt(document.getElementById('inpDesi').value),
+    packing:   parseFloat(document.getElementById('inpPacking').value) || 0,
+    extra:     parseFloat(document.getElementById('inpExtra').value) || 0
+  };
+}
+
+function computeProfit(salePrice, cost, platform, category, desi, packing, extra){
+  const kdvRate = KDV_RATES[category] || 20;
+  const commRate = PLATFORMS[platform]?.commission[category] || 12;
+  const cargo = CARGO[desi] || 95;
+
+  const kdvAmount = salePrice - (salePrice / (1 + kdvRate/100));
+  const saleExVat = salePrice - kdvAmount;
+  const commAmount = salePrice * (commRate / 100);
+  const commVat = commAmount * 0.20;
+  const stopaj = saleExVat * 0.01;
+  const totalDeductions = kdvAmount + commAmount + commVat + cargo + stopaj + cost + packing + extra;
+  const netProfit = salePrice - totalDeductions;
+  const netMargin = salePrice > 0 ? (netProfit / salePrice) * 100 : 0;
+  const grossMargin = salePrice > 0 ? ((salePrice - cost) / salePrice) * 100 : 0;
+
+  let aiScore = 50;
+  if(netMargin >= 25) aiScore = 90;
+  else if(netMargin >= 20) aiScore = 82;
+  else if(netMargin >= 15) aiScore = 72;
+  else if(netMargin >= 10) aiScore = 58;
+  else if(netMargin >= 5) aiScore = 42;
+  else aiScore = 28;
+
+  return { salePrice, cost, kdvRate, kdvAmount, saleExVat, commRate, commAmount, commVat, cargo, stopaj, packing, extra, totalDeductions, netProfit, netMargin, grossMargin, aiScore, platformName: PLATFORMS[platform]?.name || platform, category };
+}
+
+function fmt(n){ return n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtI(n){ return Math.round(n).toLocaleString('tr-TR'); }
+
+/* ── Render ── */
+function calculate(){
+  const inp = getInputs();
+  const r = computeProfit(inp.salePrice, inp.cost, inp.platform, inp.category, inp.desi, inp.packing, inp.extra);
+
+  // KPI Strip
+  document.getElementById('kpiSale').textContent = '₺' + fmtI(r.salePrice);
+  document.getElementById('kpiDeductions').textContent = '₺' + fmtI(r.totalDeductions);
+  document.getElementById('kpiNet').textContent = (r.netProfit >= 0 ? '₺' : '-₺') + fmtI(Math.abs(r.netProfit));
+  document.getElementById('kpiMargin').textContent = '%' + r.netMargin.toFixed(1).replace('.',',');
+  document.getElementById('kpiScore').textContent = r.aiScore;
+
+  // Breakdown
+  document.getElementById('breakdownRows').innerHTML = `
+    <div class="bk-row"><div class="bk-label"><span class="bk-icon">💵</span>Satış Fiyatı (KDV dahil)</div><div class="bk-amount pos">+₺${fmt(r.salePrice)}</div></div>
+    <div class="bk-row"><div class="bk-label"><span class="bk-icon">🧾</span>KDV (%${r.kdvRate})</div><div class="bk-amount neg">−₺${fmt(r.kdvAmount)}</div></div>
+    <div class="bk-row"><div class="bk-label" style="padding-left:8px;font-size:11px;color:var(--muted)">= KDV hariç satış</div><div class="bk-amount" style="color:var(--muted2)">₺${fmt(r.saleExVat)}</div></div>
+    <div class="bk-divider"></div>
+    <div class="bk-row"><div class="bk-label"><span class="bk-icon">🏪</span>Platform Komisyonu (%${r.commRate})</div><div class="bk-amount neg">−₺${fmt(r.commAmount)}</div></div>
+    <div class="bk-row"><div class="bk-label"><span class="bk-icon">🧾</span>Komisyon KDV'si (%20)</div><div class="bk-amount neg">−₺${fmt(r.commVat)}</div></div>
+    <div class="bk-row"><div class="bk-label"><span class="bk-icon">📦</span>Kargo (${inp.desi} desi)</div><div class="bk-amount neg">−₺${fmt(r.cargo)}</div></div>
+    <div class="bk-row"><div class="bk-label"><span class="bk-icon">📋</span>Stopaj Vergisi (%1)</div><div class="bk-amount warn">−₺${fmt(r.stopaj)}</div></div>
+    <div class="bk-row"><div class="bk-label"><span class="bk-icon">🛒</span>Ürün Maliyeti</div><div class="bk-amount neg">−₺${fmt(r.cost)}</div></div>
+    <div class="bk-row"><div class="bk-label"><span class="bk-icon">📦</span>Paketleme & Etiket</div><div class="bk-amount neg">−₺${fmt(r.packing)}</div></div>
+    ${r.extra > 0 ? `<div class="bk-row"><div class="bk-label"><span class="bk-icon">📣</span>Ek Maliyet</div><div class="bk-amount neg">−₺${fmt(r.extra)}</div></div>` : ''}
+    <div class="bk-divider"></div>
+  `;
+
+  const status = r.netMargin >= 20 ? 'profit' : r.netMargin >= 10 ? 'thin' : 'loss';
+  const amtColor = r.netMargin >= 20 ? 'g' : r.netMargin >= 10 ? 'y' : 'r';
+  document.getElementById('netResultBox').innerHTML = `
+    <div class="net-result ${status}">
+      <div><div class="nr-label">GERÇEK NET KÂR / ADET</div><div class="nr-amount ${amtColor}">${r.netProfit >= 0 ? '' : '−'}₺${fmtI(Math.abs(r.netProfit))}</div></div>
+      <div class="nr-margin"><div class="nr-label">NET MARJ</div><div class="nr-pct ${amtColor}">%${r.netMargin.toFixed(1).replace('.',',')}</div></div>
+    </div>
+  `;
+
+  document.getElementById('marginNote').innerHTML = `<span>💡</span><span>Brüt marj <strong>%${r.grossMargin.toFixed(0)}</strong> görünürdü — gerçek net marj <strong style="color:var(--green)">%${r.netMargin.toFixed(1).replace('.',',')}</strong>. Fark: komisyon + kargo + vergi.</span>`;
+
+  document.getElementById('commDetail').innerHTML = `
+    <div class="comm-title">KOMİSYON DETAYI</div>
+    <div class="comm-grid">
+      <div class="comm-item"><div class="comm-item-label">Platform</div><div class="comm-item-value" style="color:var(--orange)">${r.platformName}</div></div>
+      <div class="comm-item"><div class="comm-item-label">Kategori</div><div class="comm-item-value">${inp.category.charAt(0).toUpperCase()+inp.category.slice(1)}</div></div>
+      <div class="comm-item"><div class="comm-item-label">Komisyon</div><div class="comm-item-value" style="color:var(--yellow)">%${r.commRate}</div></div>
+      <div class="comm-item"><div class="comm-item-label">KDV Oranı</div><div class="comm-item-value">%${r.kdvRate}</div></div>
+      <div class="comm-item"><div class="comm-item-label">Stopaj</div><div class="comm-item-value" style="color:var(--yellow)">%1</div></div>
+      <div class="comm-item"><div class="comm-item-label">Kargo</div><div class="comm-item-value">₺${r.cargo}</div></div>
+    </div>
+  `;
+
+  // Scenarios
+  const scenarios = [
+    { name:'Agresif Fiyat', mult:0.88 },
+    { name:'Optimal Fiyat', mult:1.0 },
+    { name:'Premium Fiyat', mult:1.2 },
+  ];
+  document.getElementById('scenarioRows').innerHTML = scenarios.map(s => {
+    const sp = Math.round(r.salePrice * s.mult);
+    const sr = computeProfit(sp, r.cost, inp.platform, inp.category, inp.desi, r.packing, r.extra);
+    const barColor = sr.netMargin >= 20 ? 'high' : sr.netMargin >= 12 ? 'mid' : 'low';
+    const netColor = sr.netMargin >= 20 ? 'g' : sr.netMargin >= 12 ? 'y' : 'o';
+    const decClass = sr.netMargin >= 20 ? 'sd-buy' : sr.netMargin >= 12 ? 'sd-wait' : 'sd-skip';
+    const decText = sr.netMargin >= 20 ? '✓ ÖNERİLEN' : sr.netMargin >= 12 ? '⏳ DÖNÜŞÜM TEST ET' : '⏳ RİSKLİ';
+    const isOpt = s.mult === 1.0;
+    return `<div class="sc-row${isOpt ? ' highlight' : ''}">
+      <div class="sc-row-top">
+        <div class="sc-name"${isOpt ? ' style="color:var(--green)"' : ''}>${isOpt ? '⭐ ' : ''}${s.name}</div>
+        <div class="sc-price">₺${fmtI(sp)} satış · ₺${fmtI(r.cost)} maliyet</div>
+      </div>
+      <div class="sc-bar-wrap"><div class="sc-bar ${barColor}" style="width:${Math.min(sr.netMargin * 2.5, 100)}%"></div></div>
+      <div class="sc-row-bottom">
+        <div><div class="sc-net ${netColor}">₺${fmtI(sr.netProfit)}</div><div class="sc-pct ${netColor}">net marj %${sr.netMargin.toFixed(1).replace('.',',')}</div></div>
+        <div class="sc-decision ${decClass}">${decText}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Volume
+  const vol50 = computeProfit(r.salePrice, r.cost, inp.platform, inp.category, inp.desi, r.packing, r.extra);
+  document.getElementById('scenarioRows').innerHTML += `
+    <div class="sc-row">
+      <div class="sc-row-top"><div class="sc-name">Yüksek Hacim</div><div class="sc-price">₺${fmtI(Math.round(r.salePrice * 0.95))} · 50 adet/ay tahmin</div></div>
+      <div class="sc-bar-wrap"><div class="sc-bar high" style="width:55%"></div></div>
+      <div class="sc-row-bottom">
+        <div><div class="sc-net g">₺${fmtI(vol50.netProfit * 50)}/ay</div><div class="sc-pct g">aylık net kâr</div></div>
+        <div class="sc-decision sd-buy">✓ HEDEF</div>
+      </div>
+    </div>`;
+
+  // AI Brief
+  const decisionText = r.aiScore >= 80 ? '✓ SAT — Kârlı' : r.aiScore >= 60 ? '⏳ İZLE — Orta Risk' : '⛔ ATLA — Düşük Marj';
+  const decisionColor = r.aiScore >= 80 ? 'var(--green)' : r.aiScore >= 60 ? 'var(--yellow)' : 'var(--red)';
+  const bgClass = r.aiScore >= 80 ? 'green-dim' : r.aiScore >= 60 ? 'yellow-dim' : '';
+  const borderVar = r.aiScore >= 80 ? 'var(--focus-green-border)' : r.aiScore >= 60 ? 'color-mix(in srgb,var(--yellow) 18%,transparent)' : 'color-mix(in srgb,var(--red) 18%,transparent)';
+
+  document.getElementById('aiScoreRow').innerHTML = `
+    <div class="score-big-row" style="background:var(--${r.aiScore >= 80 ? 'green' : r.aiScore >= 60 ? 'yellow' : 'red'}-dim);border-color:${borderVar}">
+      <div class="score-big-num" style="color:${decisionColor}">${r.aiScore}</div>
+      <div><div class="score-big-label">AI Güven Skoru</div><div class="score-big-decision" style="color:${decisionColor}">${decisionText}</div></div>
+    </div>`;
+
+  document.getElementById('aiBrief').innerHTML = `Net marj <strong style="color:var(--green)">%${r.netMargin.toFixed(1).replace('.',',')}</strong> — tüm kesintiler düşüldükten sonra adet başı <strong style="color:var(--green)">₺${fmtI(r.netProfit)} kâr</strong>. ${r.platformName} · ${inp.category} kategorisi · %${r.commRate} komisyon.`;
+
+  document.getElementById('aiMetrics').innerHTML = `
+    <div class="mm"><div class="mm-l">Net Kâr/Adet</div><div class="mm-v ${amtColor}">₺${fmtI(r.netProfit)}</div></div>
+    <div class="mm"><div class="mm-l">Net Marj</div><div class="mm-v ${amtColor}">%${r.netMargin.toFixed(1).replace('.',',')}</div></div>
+    <div class="mm"><div class="mm-l">Komisyon</div><div class="mm-v y">%${r.commRate}</div></div>
+    <div class="mm"><div class="mm-l">Kargo</div><div class="mm-v o">₺${r.cargo}</div></div>
+  `;
+
+  updateVolume();
+}
+
+function updateVolume(){
+  const inp = getInputs();
+  const r = computeProfit(inp.salePrice, inp.cost, inp.platform, inp.category, inp.desi, inp.packing, inp.extra);
+  const vol = parseInt(document.getElementById('volSlider').value);
+  document.getElementById('volSliderVal').textContent = vol + ' adet';
+
+  const monthlyNet = r.netProfit * vol;
+  const monthlyRevenue = r.salePrice * vol;
+  const yearlyNet = monthlyNet * 12;
+
+  const netColor = r.netProfit >= 0 ? 'color:var(--green)' : 'color:var(--red)';
+  document.getElementById('volGrid').innerHTML = `
+    <div class="vol-kpi"><div class="vol-kpi-label">Aylık Net Kâr</div><div class="vol-kpi-value" style="${netColor}">${monthlyNet >= 0 ? '' : '−'}₺${fmtI(Math.abs(monthlyNet))}</div><div class="vol-kpi-sub">${vol} adet × ₺${fmtI(r.netProfit)}</div></div>
+    <div class="vol-kpi"><div class="vol-kpi-label">Aylık Ciro</div><div class="vol-kpi-value" style="color:var(--blue)">₺${fmtI(monthlyRevenue)}</div><div class="vol-kpi-sub">${vol} adet × ₺${fmtI(r.salePrice)}</div></div>
+    <div class="vol-kpi"><div class="vol-kpi-label">Yıllık Net Kâr</div><div class="vol-kpi-value" style="color:var(--purple)">${yearlyNet >= 0 ? '' : '−'}₺${fmtI(Math.abs(yearlyNet))}</div><div class="vol-kpi-sub">12 ay projeksiyon</div></div>
+  `;
+}
+
+function resetForm(){
+  document.getElementById('inpSalePrice').value = 620;
+  document.getElementById('inpCost').value = 180;
+  document.getElementById('inpPlatform').value = 'trendyol';
+  document.getElementById('inpCategory').value = 'elektronik';
+  document.getElementById('inpDesi').value = '3';
+  document.getElementById('inpPacking').value = 9.10;
+  document.getElementById('inpExtra').value = 0;
+  document.getElementById('volSlider').value = 50;
+  calculate();
+}
+
+// Live calculation on input change
+document.querySelectorAll('.input-field, .param-select').forEach(el => {
+  el.addEventListener('input', calculate);
+  el.addEventListener('change', calculate);
+});
+document.getElementById('volSlider').addEventListener('input', updateVolume);
+
+// Initial calculation
+calculate();
+
+</script>
+</body>
+</html>

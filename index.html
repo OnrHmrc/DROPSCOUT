@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropScout TR — AI Destekli Ürün Keşif Platformu</title>
+<meta name="description" content="Türkiye pazarında trend olan ürünleri keşfet, net kârını hesapla, rakiplerini analiz et. AI destekli dropshipping karar destek platformu.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<style>
+/* ═══════════════════════════════════
+   VARIABLES
+   ═══════════════════════════════════ */
+:root{
+  --bg:#f4f6f9;--surface:#ffffff;--surface2:#f8fafc;--surface3:#e2e8f0;
+  --border:rgba(15,23,42,0.08);--border2:rgba(15,23,42,0.12);
+  --green:#059669;--green-dim:rgba(5,150,105,0.12);
+  --orange:#ea580c;--orange-dim:rgba(234,88,12,0.12);
+  --purple:#6366f1;--purple-dim:rgba(99,102,241,0.12);
+  --yellow:#d97706;--yellow-dim:rgba(217,119,6,0.12);
+  --blue:#2563eb;--blue-dim:rgba(37,99,235,0.12);
+  --red:#ef4444;--red-dim:rgba(239,68,68,0.10);
+  --text:#1e293b;--muted:#64748b;--muted2:#94a3b8;
+  --key-shadow:0 8px 24px -14px rgba(15,23,42,0.14),0 2px 6px rgba(15,23,42,0.04);
+  --key-shadow-strong:0 16px 36px -18px rgba(15,23,42,0.18),0 4px 12px rgba(15,23,42,0.06);
+  --soft-shadow:0 12px 30px -18px rgba(15,23,42,0.12);
+  --glass-box:rgba(255,255,255,0.62);
+  --focus-blue-border:rgba(37,99,235,0.35);
+  --body-glow:rgba(99,102,241,0.06);
+  --panel-highlight:rgba(255,255,255,0.75);
+}
+[data-theme="dark"]{
+  --bg:#030307;--surface:#0b0b14;--surface2:#10111e;--surface3:#16182a;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.12);
+  --green:#08f7d0;--green-dim:rgba(8,247,208,0.10);
+  --orange:#ff8f4a;--orange-dim:rgba(255,143,74,0.12);
+  --purple:#8e68ff;--purple-dim:rgba(142,104,255,0.12);
+  --yellow:#fdbb2d;--yellow-dim:rgba(253,187,45,0.12);
+  --blue:#5b8cff;--blue-dim:rgba(91,140,255,0.12);
+  --red:#ff5c6b;--red-dim:rgba(255,92,107,0.10);
+  --text:#e0e0ea;--muted:#7e8299;--muted2:#9ca3b8;
+  --key-shadow:0 10px 28px -16px rgba(0,0,0,0.5),0 2px 10px rgba(0,0,0,0.22);
+  --key-shadow-strong:0 18px 42px -20px rgba(0,0,0,0.56),0 4px 14px rgba(0,0,0,0.28);
+  --soft-shadow:0 14px 34px -24px rgba(0,0,0,0.55);
+  --glass-box:rgba(255,255,255,0.06);
+  --focus-blue-border:rgba(91,140,255,0.35);
+  --body-glow:rgba(142,104,255,0.12);
+  --panel-highlight:rgba(255,255,255,0.05);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden}
+html{background:var(--bg);scroll-behavior:smooth}
+
+/* ═══════════════════════════════════
+   ANIMATIONS
+   ═══════════════════════════════════ */
+@keyframes fadeUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes chartDraw{from{stroke-dashoffset:300}to{stroke-dashoffset:0}}
+@keyframes barRise{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes fillBar{from{width:0}to{width:var(--fill)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes radarSweep{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes statusPop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes countPulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes dotPulse{0%,100%{r:3}50%{r:5}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+.reveal{opacity:0;transform:translateY(30px);transition:opacity .7s ease,transform .7s ease}
+.reveal.revealed{opacity:1;transform:translateY(0)}
+.reveal-d1{transition-delay:.1s}.reveal-d2{transition-delay:.2s}.reveal-d3{transition-delay:.3s}
+.reveal-d4{transition-delay:.4s}.reveal-d5{transition-delay:.5s}
+
+/* ═══════════════════════════════════
+   NAV
+   ═══════════════════════════════════ */
+.lp-nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;background:color-mix(in srgb,var(--bg) 80%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.lp-nav::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--purple),var(--blue),var(--green),transparent);opacity:.4}
+.lp-nav-logo{display:flex;align-items:center;gap:10px;font-family:'Poppins',sans-serif;font-size:17px;font-weight:800;letter-spacing:-.3px;text-decoration:none;color:var(--text)}
+.lp-nav-logo span{color:var(--orange)}
+.lp-nav-logo em{font-style:normal;font-size:19px}
+.lp-nav-center{display:flex;gap:20px}
+.lp-nav-center a{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);text-decoration:none;letter-spacing:.5px;transition:color .15s}
+.lp-nav-center a:hover{color:var(--text)}
+.lp-nav-right{display:flex;align-items:center;gap:10px}
+.lp-btn{padding:9px 20px;border-radius:10px;font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.3px;cursor:pointer;border:none;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.lp-btn.ghost{background:transparent;border:1px solid var(--border2);color:var(--text)}
+.lp-btn.ghost:hover{border-color:var(--focus-blue-border);background:var(--surface)}
+.lp-btn.primary{background:linear-gradient(135deg,var(--orange),#ff8a00);color:#fff;box-shadow:0 2px 12px rgba(255,106,0,0.3)}
+.lp-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,106,0,0.4)}
+.theme-btn{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:14px;transition:all .15s;line-height:1}
+.theme-btn:hover{transform:scale(1.05);border-color:var(--focus-blue-border)}
+
+/* ═══════════════════════════════════
+   HERO
+   ═══════════════════════════════════ */
+.lp-hero{max-width:1100px;margin:0 auto;padding:120px 24px 60px;display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;position:relative}
+.lp-hero::before{content:'';position:absolute;top:0;right:-100px;width:500px;height:500px;background:radial-gradient(circle,var(--body-glow),transparent 60%);pointer-events:none;z-index:-1}
+.lp-hero::after{content:'';position:absolute;top:120px;left:-150px;width:400px;height:400px;background:radial-gradient(circle,rgba(5,150,105,0.06),transparent 60%);pointer-events:none;z-index:-1}
+.hero-text{z-index:1}
+.lp-badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border-radius:999px;background:var(--green-dim);border:1px solid rgba(5,150,105,0.16);font-family:'Geist Mono',monospace;font-size:10px;font-weight:700;color:var(--green);letter-spacing:.5px;margin-bottom:20px}
+.lp-badge .badge-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 1.4s ease-in-out infinite}
+.lp-hero h1{font-family:'Poppins',sans-serif;font-size:clamp(30px,4.5vw,48px);font-weight:800;letter-spacing:-1px;line-height:1.12;margin-bottom:16px}
+.lp-hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--orange),#ff8a00,var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.lp-hero p{font-size:clamp(13px,1.8vw,16px);color:var(--muted);line-height:1.7;margin-bottom:28px;max-width:480px}
+.hero-ctas{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:28px}
+.hero-ctas .lp-btn{padding:13px 28px;font-size:12px}
+.hero-trust{display:flex;gap:20px;flex-wrap:wrap}
+.hero-trust span{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:.3px;display:flex;align-items:center;gap:5px}
+.hero-trust span::before{content:'✓';color:var(--green);font-weight:700}
+
+/* Hero Dashboard Mockup */
+.hero-mockup{animation:float 4s ease-in-out infinite;z-index:1}
+.mockup-frame{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--key-shadow-strong);position:relative;overflow:hidden}
+.mockup-frame::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),var(--blue),var(--purple))}
+.mockup-topbar{display:flex;align-items:center;gap:8px;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.mockup-dot{width:7px;height:7px;border-radius:50%}
+.mockup-dot.r{background:#ef4444}.mockup-dot.y{background:#eab308}.mockup-dot.g{background:#22c55e}
+.mockup-title{font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;margin-left:8px;color:var(--text)}
+.mockup-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.mock-stat{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px;position:relative;overflow:hidden}
+.mock-stat::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px}
+.mock-stat:nth-child(1)::before{background:linear-gradient(90deg,var(--green),transparent)}
+.mock-stat:nth-child(2)::before{background:linear-gradient(90deg,var(--blue),transparent)}
+.mock-stat:nth-child(3)::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.mock-stat-label{font-family:'Geist Mono',monospace;font-size:7px;color:var(--muted2);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.mock-stat-val{font-family:'Poppins',sans-serif;font-size:16px;font-weight:800;letter-spacing:-1px}
+.mock-stat:nth-child(1) .mock-stat-val{color:var(--green)}
+.mock-stat:nth-child(2) .mock-stat-val{color:var(--blue)}
+.mock-stat:nth-child(3) .mock-stat-val{color:var(--purple)}
+.mock-stat-sub{font-family:'Geist Mono',monospace;font-size:7px;color:var(--muted);margin-top:2px}
+.mockup-chart{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;height:120px;display:flex;align-items:flex-end;gap:6px}
+.mock-bar{flex:1;border-radius:3px 3px 0 0;transform-origin:bottom;animation:barRise 1.2s ease forwards}
+.mock-bar:nth-child(1){height:45%;background:var(--green-dim);border:1px solid rgba(5,150,105,0.2);animation-delay:.1s}
+.mock-bar:nth-child(2){height:68%;background:var(--blue-dim);border:1px solid rgba(37,99,235,0.2);animation-delay:.2s}
+.mock-bar:nth-child(3){height:52%;background:var(--purple-dim);border:1px solid rgba(99,102,241,0.2);animation-delay:.3s}
+.mock-bar:nth-child(4){height:85%;background:var(--green-dim);border:1px solid rgba(5,150,105,0.2);animation-delay:.4s}
+.mock-bar:nth-child(5){height:40%;background:var(--orange-dim);border:1px solid rgba(234,88,12,0.2);animation-delay:.5s}
+.mock-bar:nth-child(6){height:72%;background:var(--blue-dim);border:1px solid rgba(37,99,235,0.2);animation-delay:.6s}
+.mock-bar:nth-child(7){height:90%;background:var(--green-dim);border:1px solid rgba(5,150,105,0.2);animation-delay:.7s}
+.mock-bar:nth-child(8){height:58%;background:var(--purple-dim);border:1px solid rgba(99,102,241,0.2);animation-delay:.8s}
+
+/* ═══════════════════════════════════
+   TRUST BAR
+   ═══════════════════════════════════ */
+.trust-bar{max-width:1100px;margin:0 auto;padding:0 24px 60px;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.trust-item{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:12px;padding:16px 14px;text-align:center;position:relative;overflow:hidden;box-shadow:var(--key-shadow);transition:all .2s}
+.trust-item:hover{transform:translateY(-2px);box-shadow:var(--key-shadow-strong)}
+.trust-item::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px}
+.trust-item:nth-child(1)::before{background:linear-gradient(90deg,var(--green),transparent)}
+.trust-item:nth-child(2)::before{background:linear-gradient(90deg,var(--blue),transparent)}
+.trust-item:nth-child(3)::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.trust-item:nth-child(4)::before{background:linear-gradient(90deg,var(--orange),transparent)}
+.trust-num{font-family:'Poppins',sans-serif;font-size:26px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:4px}
+.trust-item:nth-child(1) .trust-num{color:var(--green)}
+.trust-item:nth-child(2) .trust-num{color:var(--blue)}
+.trust-item:nth-child(3) .trust-num{color:var(--purple)}
+.trust-item:nth-child(4) .trust-num{color:var(--orange)}
+.trust-label{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+
+/* ═══════════════════════════════════
+   SECTION SHARED
+   ═══════════════════════════════════ */
+.lp-section{max-width:1100px;margin:0 auto;padding:70px 24px}
+.lp-section-tag{font-family:'Geist Mono',monospace;font-size:9px;color:var(--green);letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px}
+.lp-section-tag::before,.lp-section-tag::after{content:'';width:20px;height:1px;background:var(--green)}
+.lp-section-title{font-family:'Poppins',sans-serif;font-size:clamp(22px,3.5vw,34px);font-weight:800;text-align:center;letter-spacing:-.5px;margin-bottom:12px}
+.lp-section-title em{font-style:normal;color:var(--green)}
+.lp-section-desc{font-size:14px;color:var(--muted);text-align:center;max-width:560px;margin:0 auto 48px;line-height:1.7}
+
+/* ═══════════════════════════════════
+   FEATURE SECTIONS (each tool)
+   ═══════════════════════════════════ */
+.feat-section{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;padding:48px 0;border-bottom:1px solid var(--border)}
+.feat-section:last-child{border-bottom:none}
+.feat-section.reverse .feat-visual{order:2}
+.feat-section.reverse .feat-content{order:1}
+
+.feat-content{}
+.feat-label{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px}
+.feat-label.c-green{color:var(--green);background:var(--green-dim)}
+.feat-label.c-purple{color:var(--purple);background:var(--purple-dim)}
+.feat-label.c-blue{color:var(--blue);background:var(--blue-dim)}
+.feat-label.c-orange{color:var(--orange);background:var(--orange-dim)}
+.feat-label.c-yellow{color:var(--yellow);background:var(--yellow-dim)}
+.feat-label.c-red{color:var(--red);background:var(--red-dim)}
+.feat-h{font-family:'Poppins',sans-serif;font-size:clamp(20px,3vw,28px);font-weight:800;letter-spacing:-.5px;margin-bottom:12px;line-height:1.2}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:18px;max-width:420px}
+.feat-bullets{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
+.feat-bullet{font-size:12px;color:var(--muted2);display:flex;align-items:center;gap:8px}
+.feat-bullet::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.feat-section.c-green .feat-bullet::before{background:var(--green)}
+.feat-section.c-purple .feat-bullet::before{background:var(--purple)}
+.feat-section.c-blue .feat-bullet::before{background:var(--blue)}
+.feat-section.c-orange .feat-bullet::before{background:var(--orange)}
+.feat-section.c-yellow .feat-bullet::before{background:var(--yellow)}
+.feat-section.c-red .feat-bullet::before{background:var(--red)}
+
+/* Feature Visual Cards */
+.feat-visual{}
+.feat-card{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;box-shadow:var(--key-shadow);transition:all .3s}
+.feat-card:hover{box-shadow:var(--key-shadow-strong);transform:translateY(-2px)}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.feat-card.bc-green::before{background:linear-gradient(90deg,var(--green),transparent)}
+.feat-card.bc-purple::before{background:linear-gradient(90deg,var(--purple),transparent)}
+.feat-card.bc-blue::before{background:linear-gradient(90deg,var(--blue),transparent)}
+.feat-card.bc-orange::before{background:linear-gradient(90deg,var(--orange),transparent)}
+.feat-card.bc-yellow::before{background:linear-gradient(90deg,var(--yellow),transparent)}
+.feat-card.bc-red::before{background:linear-gradient(90deg,var(--red),transparent)}
+
+/* — Trend Radar Visual — */
+.trend-chart{width:100%;height:160px;display:flex;align-items:flex-end;gap:4px;padding:0 4px}
+.trend-chart svg{width:100%;height:100%}
+.trend-line{fill:none;stroke:var(--green);stroke-width:2;stroke-dasharray:300;stroke-dashoffset:300;animation:chartDraw 2s ease forwards}
+.trend-area{fill:var(--green-dim);opacity:.5}
+.trend-dot{fill:var(--green)}
+.trend-dot.animated{animation:dotPulse 2s ease-in-out infinite}
+.trend-bar-group{display:flex;align-items:flex-end;gap:5px;margin-top:12px;height:60px}
+.t-bar{width:100%;border-radius:3px 3px 0 0;transform-origin:bottom;transform:scaleY(0);animation:barRise 1s ease forwards}
+
+/* — Gap Radar Visual — */
+.gap-visual-inner{display:flex;flex-direction:column;gap:12px}
+.gap-radar-circle{width:120px;height:120px;border-radius:50%;border:2px solid var(--border);margin:0 auto 12px;position:relative;display:flex;align-items:center;justify-content:center}
+.gap-radar-circle::after{content:'';position:absolute;width:50%;height:2px;background:linear-gradient(90deg,transparent,var(--purple));transform-origin:left center;animation:radarSweep 3s linear infinite}
+.gap-radar-center{width:8px;height:8px;border-radius:50%;background:var(--purple);animation:pulse 1.4s ease-in-out infinite}
+.gap-ring{position:absolute;border:1px solid var(--border);border-radius:50%}
+.gap-ring.r1{width:40px;height:40px}.gap-ring.r2{width:80px;height:80px}
+.gap-compare{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gap-col{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px}
+.gap-col-title{font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.gap-bar-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.gap-bar-label{font-size:9px;color:var(--muted2);width:52px;flex-shrink:0;font-family:'Geist Mono',monospace}
+.gap-bar-track{flex:1;height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.gap-bar-fill{height:100%;border-radius:3px;animation:fillBar 1.5s ease forwards;width:0}
+.gap-bar-fill.purple{background:var(--purple);--fill:var(--w)}
+.gap-bar-fill.green{background:var(--green);--fill:var(--w)}
+
+/* — Link Analiz Visual — */
+.link-visual-inner{}
+.link-input-mock{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.link-input-mock .link-icon{color:var(--blue);font-size:14px}
+.link-input-mock .link-url{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.link-cursor{width:1px;height:14px;background:var(--blue);animation:blink 1s infinite}
+.link-arrow{text-align:center;color:var(--muted2);font-size:16px;margin:8px 0;animation:pulse 1.5s ease-in-out infinite}
+.link-breakdown{display:flex;flex-direction:column;gap:6px}
+.link-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:11px;opacity:0;animation:fadeUp .5s ease forwards}
+.link-row:nth-child(1){animation-delay:.3s}.link-row:nth-child(2){animation-delay:.5s}
+.link-row:nth-child(3){animation-delay:.7s}.link-row:nth-child(4){animation-delay:.9s}
+.link-row:nth-child(5){animation-delay:1.1s}
+.link-row-label{color:var(--muted);font-family:'Geist Mono',monospace;font-size:10px}
+.link-row-val{font-weight:700;font-family:'Geist Mono',monospace;font-size:11px}
+.link-row.net{background:var(--green-dim);border-color:rgba(5,150,105,0.16)}
+.link-row.net .link-row-val{color:var(--green);font-size:14px;font-weight:800}
+
+/* — Rakip Analizi Visual — */
+.rakip-table{width:100%}
+.rakip-row{display:grid;grid-template-columns:1fr 60px 50px 80px;gap:8px;align-items:center;padding:10px 12px;border-radius:8px;margin-bottom:6px;opacity:0;animation:slideInRight .6s ease forwards}
+.rakip-row:nth-child(1){animation-delay:.2s}.rakip-row:nth-child(2){animation-delay:.4s}
+.rakip-row:nth-child(3){animation-delay:.6s}.rakip-row:nth-child(4){animation-delay:.8s}
+.rakip-row.header{opacity:1;animation:none;font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;background:none}
+.rakip-row:not(.header){background:var(--surface2);border:1px solid var(--border)}
+.rakip-name{font-size:11px;font-weight:600}
+.rakip-price{font-family:'Geist Mono',monospace;font-size:11px;font-weight:700}
+.rakip-rating{font-size:10px;color:var(--yellow)}
+.rakip-score-bar{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.rakip-score-fill{height:100%;border-radius:3px;animation:fillBar 1.2s ease forwards;width:0}
+.rakip-row.winner{border-color:rgba(5,150,105,0.2);background:linear-gradient(90deg,var(--green-dim),var(--surface2))}
+.rakip-row.winner .rakip-name{color:var(--green)}
+
+/* — Yasal Kontrol Visual — */
+.yasal-list{display:flex;flex-direction:column;gap:8px}
+.yasal-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;font-size:11px;opacity:0;animation:fadeUp .5s ease forwards}
+.yasal-item:nth-child(1){animation-delay:.2s}.yasal-item:nth-child(2){animation-delay:.5s}
+.yasal-item:nth-child(3){animation-delay:.8s}.yasal-item:nth-child(4){animation-delay:1.1s}
+.yasal-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;animation:statusPop .4s ease forwards;transform:scale(0)}
+.yasal-item:nth-child(1) .yasal-icon{animation-delay:.5s}
+.yasal-item:nth-child(2) .yasal-icon{animation-delay:.8s}
+.yasal-item:nth-child(3) .yasal-icon{animation-delay:1.1s}
+.yasal-item:nth-child(4) .yasal-icon{animation-delay:1.4s}
+.yasal-icon.ok{background:var(--green-dim);color:var(--green)}
+.yasal-icon.warn{background:var(--yellow-dim);color:var(--yellow)}
+.yasal-icon.no{background:var(--red-dim);color:var(--red)}
+.yasal-text{flex:1;color:var(--muted2)}
+.yasal-status-badge{margin-top:12px;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:999px;background:var(--green-dim);border:1px solid rgba(5,150,105,0.16);font-family:'Geist Mono',monospace;font-size:10px;font-weight:700;color:var(--green);opacity:0;animation:fadeUp .5s ease 1.6s forwards}
+
+/* — Tedarikci Bul Visual — */
+.supplier-stack{display:flex;flex-direction:column;gap:8px}
+.supplier-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;opacity:0;animation:slideInRight .6s ease forwards;transition:all .2s}
+.supplier-card:hover{border-color:var(--focus-blue-border);transform:translateX(4px)}
+.supplier-card:nth-child(1){animation-delay:.2s}.supplier-card:nth-child(2){animation-delay:.5s}.supplier-card:nth-child(3){animation-delay:.8s}
+.supplier-avatar{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.supplier-info{flex:1}
+.supplier-name{font-size:12px;font-weight:700;margin-bottom:2px}
+.supplier-meta{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted)}
+.supplier-stars{color:var(--yellow);font-size:10px}
+.supplier-price{font-family:'Geist Mono',monospace;font-size:12px;font-weight:700;color:var(--green)}
+
+/* ═══════════════════════════════════
+   PLATFORMS
+   ═══════════════════════════════════ */
+.platform-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.platform-card{background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:14px;padding:20px 16px;text-align:center;box-shadow:var(--key-shadow);transition:all .2s;position:relative;overflow:hidden}
+.platform-card:hover{transform:translateY(-2px);box-shadow:var(--key-shadow-strong)}
+.platform-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.platform-card:nth-child(1)::before{background:linear-gradient(90deg,#f27a1a,transparent)}
+.platform-card:nth-child(2)::before{background:linear-gradient(90deg,#ff6000,transparent)}
+.platform-card:nth-child(3)::before{background:linear-gradient(90deg,#ff9900,transparent)}
+.platform-card:nth-child(4)::before{background:linear-gradient(90deg,#7849c4,transparent)}
+.platform-logo{width:40px;height:40px;border-radius:10px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:var(--surface2);border:1px solid var(--border)}
+.platform-logo img{width:28px;height:28px;border-radius:4px}
+.platform-name{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;margin-bottom:4px}
+.platform-desc{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.3px;line-height:1.5}
+
+/* ═══════════════════════════════════
+   PRICING
+   ═══════════════════════════════════ */
+.price-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;max-width:700px;margin:0 auto}
+.price-card{background:linear-gradient(180deg,var(--surface),var(--surface2));border:2px solid var(--border);border-radius:18px;padding:32px 26px;position:relative;overflow:hidden;transition:all .25s;box-shadow:var(--key-shadow)}
+.price-card:hover{transform:translateY(-3px);box-shadow:var(--key-shadow-strong)}
+.price-card.pop{border-color:rgba(99,102,241,0.3)}
+.price-card.pop::after{content:'';position:absolute;inset:0;background:radial-gradient(circle at top right,var(--purple-dim),transparent 60%);pointer-events:none}
+.pop-badge{position:absolute;top:14px;right:14px;background:var(--purple);color:#fff;font-family:'Geist Mono',monospace;font-size:7px;font-weight:700;letter-spacing:1px;padding:4px 10px;border-radius:999px;animation:pulse 2s ease-in-out infinite;z-index:1}
+.price-tier{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.price-amount{font-family:'Poppins',sans-serif;font-size:38px;font-weight:800;letter-spacing:-1.5px;line-height:1}
+.price-amount span{font-size:14px;font-weight:500;color:var(--muted2)}
+.price-period{font-size:10px;color:var(--muted);margin-bottom:18px;font-family:'Geist Mono',monospace}
+.price-list{display:flex;flex-direction:column;gap:8px;margin-bottom:22px;position:relative;z-index:1}
+.pl{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:8px}
+.pl::before{content:'✓';color:var(--green);font-weight:700;font-size:10px}
+.pl.off::before{content:'✗';color:var(--muted)}
+.pl.off{color:var(--muted)}
+.price-trial{text-align:center;font-family:'Geist Mono',monospace;font-size:9px;color:var(--green);margin-top:12px;letter-spacing:.3px}
+
+/* FAQ */
+.faq-wrap{max-width:700px;margin:48px auto 0}
+.faq-title{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;text-align:center;margin-bottom:20px}
+.faq-item{border:1px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;background:var(--surface)}
+.faq-item summary{padding:14px 18px;font-size:12px;font-weight:600;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;transition:background .15s}
+.faq-item summary:hover{background:var(--surface2)}
+.faq-item summary::after{content:'+';font-family:'Geist Mono',monospace;font-size:16px;color:var(--muted);transition:transform .2s}
+.faq-item[open] summary::after{content:'-';transform:rotate(180deg)}
+.faq-answer{padding:0 18px 14px;font-size:12px;color:var(--muted);line-height:1.7}
+
+/* ═══════════════════════════════════
+   FINAL CTA
+   ═══════════════════════════════════ */
+.lp-cta{text-align:center;padding:80px 24px 60px;position:relative}
+.lp-cta::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at center,var(--body-glow),transparent 50%);pointer-events:none}
+.lp-cta h2{font-family:'Poppins',sans-serif;font-size:clamp(24px,3.5vw,36px);font-weight:800;letter-spacing:-.5px;margin-bottom:14px;position:relative}
+.lp-cta h2 em{font-style:normal;background:linear-gradient(135deg,var(--orange),var(--purple),var(--blue),var(--orange));background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientShift 4s ease infinite}
+.lp-cta p{font-size:14px;color:var(--muted);margin-bottom:28px;position:relative}
+.cta-badges{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-top:24px;position:relative}
+.cta-badge{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);display:flex;align-items:center;gap:5px}
+.cta-badge::before{content:'🛡️';font-size:12px}
+
+/* ═══════════════════════════════════
+   FOOTER
+   ═══════════════════════════════════ */
+.lp-footer{border-top:1px solid var(--border);padding:32px 24px 20px}
+.footer-inner{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px}
+.footer-brand{font-family:'Poppins',sans-serif;font-size:15px;font-weight:800;margin-bottom:8px}
+.footer-brand span{color:var(--orange)}
+.footer-about{font-size:11px;color:var(--muted);line-height:1.6}
+.footer-col-title{font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.footer-col a{display:block;font-size:11px;color:var(--muted2);text-decoration:none;margin-bottom:6px;transition:color .15s}
+.footer-col a:hover{color:var(--text)}
+.footer-bottom{max-width:1100px;margin:16px auto 0;padding-top:16px;border-top:1px solid var(--border);text-align:center;font-size:10px;color:var(--muted2)}
+
+/* ═══════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════ */
+@media(max-width:900px){
+  .lp-hero{grid-template-columns:1fr;padding-top:100px;gap:32px;text-align:center}
+  .lp-hero p{margin:0 auto 28px}
+  .hero-ctas{justify-content:center}
+  .hero-trust{justify-content:center}
+  .hero-mockup{max-width:420px;margin:0 auto}
+  .trust-bar{grid-template-columns:repeat(2,1fr)}
+  .feat-section{grid-template-columns:1fr;gap:24px}
+  .feat-section.reverse .feat-visual{order:0}
+  .feat-section.reverse .feat-content{order:0}
+  .feat-content{text-align:center}
+  .feat-desc{margin:0 auto 18px}
+  .platform-grid{grid-template-columns:repeat(2,1fr)}
+  .lp-nav-center{display:none}
+  .footer-inner{grid-template-columns:1fr 1fr}
+}
+@media(max-width:680px){
+  .trust-bar{grid-template-columns:1fr 1fr}
+  .price-grid{grid-template-columns:1fr}
+  .platform-grid{grid-template-columns:1fr 1fr}
+  .lp-nav-logo{font-size:14px}
+  .lp-btn.ghost.hide-mobile{display:none}
+  .footer-inner{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav class="lp-nav">
+  <a class="lp-nav-logo" href="#">
+    <em>🎯</em> Drop<span>Scout</span> TR
+  </a>
+  <div class="lp-nav-center">
+    <a href="#features">MODÜLLER</a>
+    <a href="#platforms">PLATFORMLAR</a>
+    <a href="#pricing">FİYATLAR</a>
+  </div>
+  <div class="lp-nav-right">
+    <button class="theme-btn" id="themeBtn" aria-label="Tema değiştir">☀️</button>
+    <a class="lp-btn ghost hide-mobile" href="./login.html">Giriş Yap</a>
+    <a class="lp-btn primary" href="./login.html?tab=register">Ücretsiz Dene</a>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="lp-hero">
+  <div class="hero-text">
+    <div class="lp-badge"><span class="badge-dot"></span> AI DESTEKLİ ÜRÜN KEŞFİ</div>
+    <h1>Türkiye pazarında<br><em>doğru ürünü</em> bul,<br>gerçek kârını gör.</h1>
+    <p>4 pazaryerinde trend ürünleri keşfet, pazar boşluklarını yakala, komisyon + KDV + kargo dahil net kârını saniyeler içinde hesapla. AI destekli karar motoru ile doğru ürüne odaklan.</p>
+    <div class="hero-ctas">
+      <a class="lp-btn primary" href="./login.html?tab=register">Ücretsiz Hesap Oluştur →</a>
+      <a class="lp-btn ghost" href="./login.html">Giriş Yap</a>
+    </div>
+    <div class="hero-trust">
+      <span>14 gün ücretsiz deneme</span>
+      <span>Kredi kartı gerekmez</span>
+      <span>Anında kurulum</span>
+    </div>
+  </div>
+
+  <div class="hero-mockup">
+    <div class="mockup-frame">
+      <div class="mockup-topbar">
+        <div class="mockup-dot r"></div>
+        <div class="mockup-dot y"></div>
+        <div class="mockup-dot g"></div>
+        <div class="mockup-title">🎯 DropScout Dashboard</div>
+      </div>
+      <div class="mockup-stats">
+        <div class="mock-stat">
+          <div class="mock-stat-label">Drop Score</div>
+          <div class="mock-stat-val">87</div>
+          <div class="mock-stat-sub">▲ +12 bu hafta</div>
+        </div>
+        <div class="mock-stat">
+          <div class="mock-stat-label">Trend Ürün</div>
+          <div class="mock-stat-val">248</div>
+          <div class="mock-stat-sub">4 platformda</div>
+        </div>
+        <div class="mock-stat">
+          <div class="mock-stat-label">Net Kâr</div>
+          <div class="mock-stat-val">₺142</div>
+          <div class="mock-stat-sub">ort. ürün başı</div>
+        </div>
+      </div>
+      <div class="mockup-chart">
+        <div class="mock-bar"></div>
+        <div class="mock-bar"></div>
+        <div class="mock-bar"></div>
+        <div class="mock-bar"></div>
+        <div class="mock-bar"></div>
+        <div class="mock-bar"></div>
+        <div class="mock-bar"></div>
+        <div class="mock-bar"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ TRUST BAR ═══ -->
+<div class="trust-bar">
+  <div class="trust-item reveal">
+    <div class="trust-num">1.200+</div>
+    <div class="trust-label">Aktif Kullanıcı</div>
+  </div>
+  <div class="trust-item reveal reveal-d1">
+    <div class="trust-num">50.000+</div>
+    <div class="trust-label">Ürün Analizi</div>
+  </div>
+  <div class="trust-item reveal reveal-d2">
+    <div class="trust-num">4</div>
+    <div class="trust-label">Platform Entegrasyonu</div>
+  </div>
+  <div class="trust-item reveal reveal-d3">
+    <div class="trust-num">%94</div>
+    <div class="trust-label">Doğru Tahmin Oranı</div>
+  </div>
+</div>
+
+<!-- ═══ FEATURES ═══ -->
+<section class="lp-section" id="features">
+  <div class="lp-section-tag">Modüller</div>
+  <div class="lp-section-title">Altı güçlü modül,<br><em>tek panel.</em></div>
+  <div class="lp-section-desc">Her modül farklı bir karar sürecini otomatikleştirir. Ürün bulma, analiz etme ve satışa karar verme sürecini dakikalar içinde tamamla.</div>
+
+  <!-- 1. Trend Radar -->
+  <div class="feat-section c-green reveal">
+    <div class="feat-content">
+      <div class="feat-label c-green">📡 TREND RADAR</div>
+      <div class="feat-h">Yükselen ürünleri<br>ilk sen keşfet.</div>
+      <div class="feat-desc">Tüm pazaryerlerinde son 7–30 günde hız kazanan ürünleri tespit et. Arama hacmi artışı, stok azalması ve fiyat baskısını tek ekranda gör. AI skorlama ile gerçek potansiyeli ölç.</div>
+      <div class="feat-bullets">
+        <div class="feat-bullet">7/30 günlük trend takibi ve arama hacmi analizi</div>
+        <div class="feat-bullet">Stok seviyesi değişim takibi ve fiyat baskısı uyarıları</div>
+        <div class="feat-bullet">AI destekli DropScore ile ürün potansiyeli puanlama</div>
+        <div class="feat-bullet">Kategori bazlı filtreleme ve sıralama</div>
+      </div>
+      <a class="lp-btn primary" href="./login.html?tab=register">Trend Radar'ı Dene →</a>
+    </div>
+    <div class="feat-visual">
+      <div class="feat-card bc-green">
+        <div style="font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:10px">TREND ANALİZİ · SON 7 GÜN</div>
+        <svg viewBox="0 0 300 120" style="width:100%;height:auto">
+          <defs>
+            <linearGradient id="tg" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" style="stop-color:var(--green);stop-opacity:0.3"/>
+              <stop offset="100%" style="stop-color:var(--green);stop-opacity:0"/>
+            </linearGradient>
+          </defs>
+          <path class="trend-area" d="M0,100 L30,85 60,88 90,70 120,65 150,55 180,40 210,38 240,20 270,15 300,8 300,120 0,120Z" fill="url(#tg)"/>
+          <path class="trend-line" d="M0,100 L30,85 60,88 90,70 120,65 150,55 180,40 210,38 240,20 270,15 300,8"/>
+          <circle class="trend-dot animated" cx="150" cy="55" r="3"/>
+          <circle class="trend-dot animated" cx="240" cy="20" r="3" style="animation-delay:.5s"/>
+          <circle class="trend-dot animated" cx="300" cy="8" r="3" style="animation-delay:1s"/>
+        </svg>
+        <div class="trend-bar-group" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;height:50px;align-items:flex-end">
+          <div class="t-bar" style="height:35%;background:var(--green-dim);animation-delay:.1s"></div>
+          <div class="t-bar" style="height:50%;background:var(--green-dim);animation-delay:.2s"></div>
+          <div class="t-bar" style="height:42%;background:var(--green-dim);animation-delay:.3s"></div>
+          <div class="t-bar" style="height:65%;background:var(--green-dim);animation-delay:.4s"></div>
+          <div class="t-bar" style="height:58%;background:var(--green);opacity:.3;animation-delay:.5s"></div>
+          <div class="t-bar" style="height:80%;background:var(--green);opacity:.4;animation-delay:.6s"></div>
+          <div class="t-bar" style="height:95%;background:var(--green);opacity:.5;animation-delay:.7s;border-radius:3px 3px 0 0"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Gap Radar -->
+  <div class="feat-section c-purple reverse reveal">
+    <div class="feat-content">
+      <div class="feat-label c-purple">🌍 GAP RADAR</div>
+      <div class="feat-h">Global trendler,<br>yerel fırsatlar.</div>
+      <div class="feat-desc">Global pazarda (Amazon US, AliExpress, Temu) trend olan ama henüz Türkiye'de satılmayan ürünleri keşfet. Fırsat penceresini ilk sen yakala. Cross-border analiz ile rekabetsiz pazara gir.</div>
+      <div class="feat-bullets">
+        <div class="feat-bullet">Amazon US, AliExpress, Temu trend verisi karşılaştırması</div>
+        <div class="feat-bullet">Türkiye pazarı doygunluk analizi</div>
+        <div class="feat-bullet">İlk giriş avantajı fırsat puanlaması</div>
+        <div class="feat-bullet">Kategori bazlı boşluk haritası</div>
+      </div>
+      <a class="lp-btn primary" href="./login.html?tab=register" style="background:linear-gradient(135deg,var(--purple),#7c3aed)">Gap Radar'ı Dene →</a>
+    </div>
+    <div class="feat-visual">
+      <div class="feat-card bc-purple">
+        <div style="font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:10px">CROSS-BORDER ANALİZ</div>
+        <div class="gap-visual-inner">
+          <div class="gap-radar-circle">
+            <div class="gap-ring r1"></div>
+            <div class="gap-ring r2"></div>
+            <div class="gap-radar-center"></div>
+          </div>
+          <div class="gap-compare">
+            <div class="gap-col">
+              <div class="gap-col-title">🌐 Global</div>
+              <div class="gap-bar-row"><span class="gap-bar-label">Elektronik</span><div class="gap-bar-track"><div class="gap-bar-fill purple" style="--w:85%"></div></div></div>
+              <div class="gap-bar-row"><span class="gap-bar-label">Mutfak</span><div class="gap-bar-track"><div class="gap-bar-fill purple" style="--w:72%"></div></div></div>
+              <div class="gap-bar-row"><span class="gap-bar-label">Spor</span><div class="gap-bar-track"><div class="gap-bar-fill purple" style="--w:68%"></div></div></div>
+            </div>
+            <div class="gap-col">
+              <div class="gap-col-title">🇹🇷 Türkiye</div>
+              <div class="gap-bar-row"><span class="gap-bar-label">Elektronik</span><div class="gap-bar-track"><div class="gap-bar-fill green" style="--w:40%"></div></div></div>
+              <div class="gap-bar-row"><span class="gap-bar-label">Mutfak</span><div class="gap-bar-track"><div class="gap-bar-fill green" style="--w:25%"></div></div></div>
+              <div class="gap-bar-row"><span class="gap-bar-label">Spor</span><div class="gap-bar-track"><div class="gap-bar-fill green" style="--w:18%"></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Link Analiz -->
+  <div class="feat-section c-blue reveal">
+    <div class="feat-content">
+      <div class="feat-label c-blue">🔗 LİNK ANALİZ</div>
+      <div class="feat-h">Link yapıştır,<br>net kârını gör.</div>
+      <div class="feat-desc">Herhangi bir ürün linkini yapıştır — platform komisyonu, KDV, kargo ücreti ve stopaj vergisi otomatik hesaplanır. Gerçek net kârını saniyeler içinde öğren. Hangi ürünü satacağına veriye dayalı karar ver.</div>
+      <div class="feat-bullets">
+        <div class="feat-bullet">Trendyol, Hepsiburada, Amazon TR, N11 desteği</div>
+        <div class="feat-bullet">Otomatik komisyon + KDV + kargo hesaplama</div>
+        <div class="feat-bullet">Stopaj vergisi ve ek masraf dahil net kâr</div>
+        <div class="feat-bullet">Maliyet kırılımı ile şeffaf analiz</div>
+      </div>
+      <a class="lp-btn primary" href="./login.html?tab=register" style="background:linear-gradient(135deg,var(--blue),#1d4ed8)">Link Analiz'i Dene →</a>
+    </div>
+    <div class="feat-visual">
+      <div class="feat-card bc-blue">
+        <div style="font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:10px">NET KÂR HESAPLAMA</div>
+        <div class="link-visual-inner">
+          <div class="link-input-mock">
+            <span class="link-icon">🔗</span>
+            <span class="link-url">trendyol.com/p/bluetooth-kulaklik-xyz</span>
+            <span class="link-cursor"></span>
+          </div>
+          <div class="link-arrow">↓</div>
+          <div class="link-breakdown">
+            <div class="link-row"><span class="link-row-label">Satış Fiyatı</span><span class="link-row-val">₺599</span></div>
+            <div class="link-row"><span class="link-row-label">Komisyon (%12)</span><span class="link-row-val" style="color:var(--red)">-₺71,88</span></div>
+            <div class="link-row"><span class="link-row-label">Kargo</span><span class="link-row-val" style="color:var(--orange)">-₺34,99</span></div>
+            <div class="link-row"><span class="link-row-label">KDV + Stopaj</span><span class="link-row-val" style="color:var(--yellow)">-₺107,82</span></div>
+            <div class="link-row net"><span class="link-row-label">Net Kâr</span><span class="link-row-val">₺142,31</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Rakip Analizi -->
+  <div class="feat-section c-orange reverse reveal">
+    <div class="feat-content">
+      <div class="feat-label c-orange">🔬 RAKİP ANALİZİ</div>
+      <div class="feat-h">Rakiplerini tanı,<br>avantajını ölç.</div>
+      <div class="feat-desc">Aynı ürünü satan rakiplerin fiyat, stok, puan ve yorum verilerini karşılaştır. Kimin ne kadar sattığını, fiyat stratejisini ve müşteri memnuniyetini tek ekranda gör. Rekabet avantajını ölç.</div>
+      <div class="feat-bullets">
+        <div class="feat-bullet">Fiyat, stok, puan ve yorum karşılaştırması</div>
+        <div class="feat-bullet">Satıcı performans skoru analizi</div>
+        <div class="feat-bullet">Fiyat değişim takibi ve uyarılar</div>
+        <div class="feat-bullet">Optimal fiyat önerisi</div>
+      </div>
+      <a class="lp-btn primary" href="./login.html?tab=register" style="background:linear-gradient(135deg,var(--orange),#c2410c)">Rakip Analizi'ni Dene →</a>
+    </div>
+    <div class="feat-visual">
+      <div class="feat-card bc-orange">
+        <div style="font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:10px">RAKİP KARŞILAŞTIRMA</div>
+        <div class="rakip-table">
+          <div class="rakip-row header">
+            <span>Satıcı</span><span>Fiyat</span><span>Puan</span><span>Skor</span>
+          </div>
+          <div class="rakip-row winner">
+            <span class="rakip-name">📦 Sen (DropScout)</span>
+            <span class="rakip-price" style="color:var(--green)">₺529</span>
+            <span class="rakip-rating">★★★★★</span>
+            <div class="rakip-score-bar"><div class="rakip-score-fill" style="--fill:92%;background:var(--green)"></div></div>
+          </div>
+          <div class="rakip-row">
+            <span class="rakip-name">TechStore TR</span>
+            <span class="rakip-price">₺579</span>
+            <span class="rakip-rating">★★★★☆</span>
+            <div class="rakip-score-bar"><div class="rakip-score-fill" style="--fill:68%;background:var(--orange)"></div></div>
+          </div>
+          <div class="rakip-row">
+            <span class="rakip-name">MegaShop</span>
+            <span class="rakip-price">₺549</span>
+            <span class="rakip-rating">★★★☆☆</span>
+            <div class="rakip-score-bar"><div class="rakip-score-fill" style="--fill:55%;background:var(--yellow)"></div></div>
+          </div>
+          <div class="rakip-row">
+            <span class="rakip-name">DigiMarket</span>
+            <span class="rakip-price">₺599</span>
+            <span class="rakip-rating">★★★★☆</span>
+            <div class="rakip-score-bar"><div class="rakip-score-fill" style="--fill:42%;background:var(--red)"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Yasal Kontrol -->
+  <div class="feat-section c-yellow reveal">
+    <div class="feat-content">
+      <div class="feat-label c-yellow">⚖️ YASAL KONTROL</div>
+      <div class="feat-h">Satışa başlamadan<br>yasal durumu kontrol et.</div>
+      <div class="feat-desc">Satmak istediğin ürünün yasal durumunu kontrol et. Belge gereksinimleri, yasaklı ürün listeleri ve mevzuat uyarılarını tek tıkla öğren. Ceza riskini ortadan kaldır.</div>
+      <div class="feat-bullets">
+        <div class="feat-bullet">TSE, CE, ÜTS belge gereksinimi kontrolü</div>
+        <div class="feat-bullet">Yasaklı ve kısıtlı ürün veritabanı</div>
+        <div class="feat-bullet">Gümrük mevzuatı ve ithalat uyarıları</div>
+        <div class="feat-bullet">Platform özel kurallar ve gereksinimler</div>
+      </div>
+      <a class="lp-btn primary" href="./login.html?tab=register" style="background:linear-gradient(135deg,var(--yellow),#b45309)">Yasal Kontrol'ü Dene →</a>
+    </div>
+    <div class="feat-visual">
+      <div class="feat-card bc-yellow">
+        <div style="font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:10px">YASAL DURUM KONTROLÜ</div>
+        <div class="yasal-list">
+          <div class="yasal-item"><span class="yasal-icon ok">✓</span><span class="yasal-text">TSE belgesi gerekli — Mevcut</span></div>
+          <div class="yasal-item"><span class="yasal-icon ok">✓</span><span class="yasal-text">CE sertifikası — Mevcut</span></div>
+          <div class="yasal-item"><span class="yasal-icon warn">!</span><span class="yasal-text">Gümrük beyanı — Kontrol edilmeli</span></div>
+          <div class="yasal-item"><span class="yasal-icon ok">✓</span><span class="yasal-text">Yasaklı ürün listesi — Temiz</span></div>
+        </div>
+        <div class="yasal-status-badge">✓ SATIŞ İÇİN UYGUN</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Tedarikçi Bul -->
+  <div class="feat-section c-red reverse reveal">
+    <div class="feat-content">
+      <div class="feat-label c-red">🏭 TEDARİKÇİ BUL</div>
+      <div class="feat-h">Güvenilir tedarikçiyi<br>hızla bul.</div>
+      <div class="feat-desc">Yerli ve uluslararası tedarikçileri bul, fiyat karşılaştırması yap. Tedarik zincirini keşfet, en uygun fiyatlı ve güvenilir kaynağı seç. Doğrudan iletişim kur.</div>
+      <div class="feat-bullets">
+        <div class="feat-bullet">Yerli ve uluslararası tedarikçi veritabanı</div>
+        <div class="feat-bullet">Fiyat karşılaştırma ve minimum sipariş bilgisi</div>
+        <div class="feat-bullet">Tedarikçi güvenilirlik puanlaması</div>
+        <div class="feat-bullet">Doğrudan iletişim ve teklif alma</div>
+      </div>
+      <a class="lp-btn primary" href="./login.html?tab=register" style="background:linear-gradient(135deg,var(--red),#dc2626)">Tedarikçi Bul'u Dene →</a>
+    </div>
+    <div class="feat-visual">
+      <div class="feat-card bc-red">
+        <div style="font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;margin-bottom:10px">TEDARİKÇİ SONUÇLARI</div>
+        <div class="supplier-stack">
+          <div class="supplier-card">
+            <div class="supplier-avatar" style="background:var(--green-dim)">🏭</div>
+            <div class="supplier-info">
+              <div class="supplier-name">TechParts Elektronik</div>
+              <div class="supplier-meta">İstanbul · Min. 50 adet</div>
+            </div>
+            <div><div class="supplier-stars">★★★★★</div><div class="supplier-price">₺180</div></div>
+          </div>
+          <div class="supplier-card">
+            <div class="supplier-avatar" style="background:var(--blue-dim)">📦</div>
+            <div class="supplier-info">
+              <div class="supplier-name">Shenzhen Direct</div>
+              <div class="supplier-meta">Çin · Min. 100 adet</div>
+            </div>
+            <div><div class="supplier-stars">★★★★☆</div><div class="supplier-price">₺95</div></div>
+          </div>
+          <div class="supplier-card">
+            <div class="supplier-avatar" style="background:var(--purple-dim)">🌐</div>
+            <div class="supplier-info">
+              <div class="supplier-name">EuroSupply GmbH</div>
+              <div class="supplier-meta">Almanya · Min. 25 adet</div>
+            </div>
+            <div><div class="supplier-stars">★★★★★</div><div class="supplier-price">₺210</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PLATFORMS ═══ -->
+<section class="lp-section" id="platforms">
+  <div class="lp-section-tag">Platformlar</div>
+  <div class="lp-section-title">4 pazaryerini<br><em>tek panelden yönet.</em></div>
+  <div class="lp-section-desc">Mağazanı API ile bağla. Komisyon oranları, KDV verileri ve kategori bilgileri otomatik çekilsin. Her platform için özel analiz.</div>
+
+  <div class="platform-grid">
+    <div class="platform-card reveal">
+      <div class="platform-logo"><img src="https://www.google.com/s2/favicons?domain=trendyol.com&sz=64" alt="Trendyol"></div>
+      <div class="platform-name">Trendyol</div>
+      <div class="platform-desc">Komisyon oranları, kategori verileri ve satıcı API entegrasyonu</div>
+    </div>
+    <div class="platform-card reveal reveal-d1">
+      <div class="platform-logo"><img src="https://www.google.com/s2/favicons?domain=hepsiburada.com&sz=64" alt="Hepsiburada"></div>
+      <div class="platform-name">Hepsiburada</div>
+      <div class="platform-desc">Merchant API bağlantısı ve kategori bazlı komisyon takibi</div>
+    </div>
+    <div class="platform-card reveal reveal-d2">
+      <div class="platform-logo"><img src="https://www.google.com/s2/favicons?domain=amazon.com.tr&sz=64" alt="Amazon TR"></div>
+      <div class="platform-name">Amazon TR</div>
+      <div class="platform-desc">SP-API entegrasyonu ve referral fee otomatik hesaplama</div>
+    </div>
+    <div class="platform-card reveal reveal-d3">
+      <div class="platform-logo"><img src="https://www.google.com/s2/favicons?domain=n11.com&sz=64" alt="N11"></div>
+      <div class="platform-name">N11</div>
+      <div class="platform-desc">Mağaza API bağlantısı ve komisyon oranı veritabanı</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section class="lp-section">
+  <div class="lp-section-tag">Nasıl Çalışır</div>
+  <div class="lp-section-title">3 adımda<br><em>satışa başla.</em></div>
+  <div class="lp-section-desc">Karmaşık analizleri AI'a bırak, sen doğru kararlara odaklan.</div>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+    <div class="reveal" style="background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:16px;padding:28px 22px;text-align:center;box-shadow:var(--key-shadow);transition:all .2s;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--blue),transparent)"></div>
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--blue-dim);color:var(--blue);display:flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;margin:0 auto 14px">1</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px">Platformunu Bağla</div>
+      <div style="font-size:11px;color:var(--muted2);line-height:1.6">Trendyol, Hepsiburada, Amazon TR veya N11 mağazanı API ile bağla. Komisyon ve KDV verileri otomatik çekilsin.</div>
+    </div>
+    <div class="reveal reveal-d1" style="background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:16px;padding:28px 22px;text-align:center;box-shadow:var(--key-shadow);transition:all .2s;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),transparent)"></div>
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--green-dim);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;margin:0 auto 14px">2</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px">Ürün Keşfet</div>
+      <div style="font-size:11px;color:var(--muted2);line-height:1.6">Trend Radar ile yükselen ürünleri bul, Gap Radar ile global fırsatları yakala. AI skor ile değerlendir.</div>
+    </div>
+    <div class="reveal reveal-d2" style="background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--border);border-radius:16px;padding:28px 22px;text-align:center;box-shadow:var(--key-shadow);transition:all .2s;position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),transparent)"></div>
+      <div style="width:40px;height:40px;border-radius:50%;background:var(--purple-dim);color:var(--purple);display:flex;align-items:center;justify-content:center;font-family:'Geist Mono',monospace;font-size:14px;font-weight:700;margin:0 auto 14px">3</div>
+      <div style="font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px">Net Kârını Hesapla</div>
+      <div style="font-size:11px;color:var(--muted2);line-height:1.6">Ürün linkini yapıştır, komisyon + kargo + KDV + stopaj dahil gerçek net kârını saniyeler içinde gör.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRICING ═══ -->
+<section class="lp-section" id="pricing">
+  <div class="lp-section-tag">Fiyatlandırma</div>
+  <div class="lp-section-title">İşine uygun<br><em>planı seç.</em></div>
+  <div class="lp-section-desc">14 gün ücretsiz dene. Kredi kartı gerekmez. İstediğinde iptal et.</div>
+
+  <div class="price-grid">
+    <div class="price-card reveal">
+      <div class="price-tier">Starter</div>
+      <div class="price-amount">₺299<span>/ay</span></div>
+      <div class="price-period">≈ günlük ₺10 · KDV dahil</div>
+      <div class="price-list">
+        <div class="pl">Link Analiz (50/ay)</div>
+        <div class="pl">Trend Radar erişimi</div>
+        <div class="pl">1 platform entegrasyonu</div>
+        <div class="pl">Temel rakip analizi</div>
+        <div class="pl">Yasal kontrol (10/ay)</div>
+        <div class="pl">E-posta desteği</div>
+        <div class="pl off">Gap Radar</div>
+        <div class="pl off">AI DropScore</div>
+        <div class="pl off">Tedarikçi veritabanı</div>
+      </div>
+      <a class="lp-btn ghost" href="./login.html?tab=register" style="width:100%;justify-content:center">Starter ile Başla →</a>
+      <div class="price-trial">14 gün ücretsiz deneme</div>
+    </div>
+    <div class="price-card pop reveal reveal-d1">
+      <div class="pop-badge">EN POPÜLER</div>
+      <div class="price-tier">Pro</div>
+      <div class="price-amount">₺499<span>/ay</span></div>
+      <div class="price-period">≈ günlük ₺17 · KDV dahil</div>
+      <div class="price-list">
+        <div class="pl">Link Analiz (Sınırsız)</div>
+        <div class="pl">Trend Radar (gelişmiş)</div>
+        <div class="pl">Tüm platformlar (4)</div>
+        <div class="pl">Gelişmiş rakip analizi</div>
+        <div class="pl">Yasal kontrol (sınırsız)</div>
+        <div class="pl">Gap Radar erişimi</div>
+        <div class="pl">AI DropScore</div>
+        <div class="pl">Tedarikçi veritabanı</div>
+        <div class="pl">Öncelikli destek</div>
+      </div>
+      <a class="lp-btn primary" href="./login.html?tab=register" style="width:100%;justify-content:center">Pro ile Başla →</a>
+      <div class="price-trial">14 gün ücretsiz deneme</div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="faq-wrap reveal">
+    <div class="faq-title">Sıkça Sorulan Sorular</div>
+    <details class="faq-item">
+      <summary>Ücretsiz deneme nasıl çalışır?</summary>
+      <div class="faq-answer">Kayıt olduktan sonra 14 gün boyunca seçtiğiniz planın tüm özelliklerini ücretsiz kullanabilirsiniz. Deneme süresinde kredi kartı bilgisi istenmez. Süre sonunda otomatik ücretlendirme yapılmaz — planınızı aktif etmek için ödeme bilgilerinizi girmeniz gerekir.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Planımı istediğim zaman değiştirebilir miyim?</summary>
+      <div class="faq-answer">Evet, Starter'dan Pro'ya istediğiniz zaman yükseltme yapabilirsiniz. Fark orantılı olarak hesaplanır. Pro'dan Starter'a geçiş ise mevcut dönem sonunda uygulanır.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Hangi platformlar destekleniyor?</summary>
+      <div class="faq-answer">Şu anda Trendyol, Hepsiburada, Amazon TR ve N11 desteklenmektedir. Her platform için API entegrasyonu, komisyon oranları ve kategori verileri mevcuttur. Yeni platformlar sürekli eklenmektedir.</div>
+    </details>
+    <details class="faq-item">
+      <summary>Verilerim güvende mi?</summary>
+      <div class="faq-answer">Tüm verileriniz Firebase altyapısı üzerinde şifrelenmiş olarak saklanır. API anahtarlarınız güvenli bir şekilde işlenir ve üçüncü taraflarla paylaşılmaz. KVKK uyumlu veri işleme politikamız mevcuttur.</div>
+    </details>
+  </div>
+</section>
+
+<!-- ═══ FINAL CTA ═══ -->
+<section class="lp-cta reveal">
+  <h2>Ürün keşfini <em>AI ile hızlandır.</em></h2>
+  <p>Doğru ürünü bul, rakiplerinden öne geç, net kârını hesapla. Hepsi tek platformda.</p>
+  <a class="lp-btn primary" href="./login.html?tab=register" style="padding:14px 34px;font-size:13px">Ücretsiz Hesap Oluştur →</a>
+  <div class="cta-badges">
+    <span class="cta-badge">14 gün ücretsiz deneme</span>
+    <span class="cta-badge">Kredi kartı gerekmez</span>
+    <span class="cta-badge">İstediğin zaman iptal et</span>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="lp-footer">
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">🎯 Drop<span>Scout</span> TR</div>
+      <div class="footer-about">AI destekli ürün keşif ve karar destek platformu. Türkiye pazaryerlerinde doğru ürünü bul, gerçek kârını hesapla.</div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Modüller</div>
+      <a href="./login.html?tab=register">Trend Radar</a>
+      <a href="./login.html?tab=register">Gap Radar</a>
+      <a href="./login.html?tab=register">Link Analiz</a>
+      <a href="./login.html?tab=register">Rakip Analizi</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Araçlar</div>
+      <a href="./login.html?tab=register">Yasal Kontrol</a>
+      <a href="./login.html?tab=register">Tedarikçi Bul</a>
+      <a href="./login.html?tab=register">Net Kâr Hesabı</a>
+      <a href="./login.html?tab=register">Raporlar</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Hesap</div>
+      <a href="./login.html">Giriş Yap</a>
+      <a href="./login.html?tab=register">Kayıt Ol</a>
+      <a href="#pricing">Fiyatlandırma</a>
+    </div>
+  </div>
+  <div class="footer-bottom">DropScout TR — AI Destekli Ürün Keşif Platformu © 2026</div>
+</footer>
+
+<script type="module">
+import { redirectIfAuthenticated } from '/src/js/auth.js';
+
+// Giris yapmis kullaniciyi dashboard'a yonlendir
+redirectIfAuthenticated();
+
+// Tema toggle
+const themeBtn = document.getElementById('themeBtn');
+function updateIcon() {
+  themeBtn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '🌙' : '☀️';
+}
+updateIcon();
+themeBtn.addEventListener('click', () => {
+  const root = document.documentElement;
+  const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  root.setAttribute('data-theme', next);
+  localStorage.setItem('dropscout-theme-preference', next);
+  updateIcon();
+});
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('revealed');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

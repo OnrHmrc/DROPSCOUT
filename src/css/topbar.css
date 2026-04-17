@@ -1,0 +1,95 @@
+/* ══════════════════════════════════════
+   DropScout TR — Topbar & Main Layout
+   ══════════════════════════════════════ */
+
+.main {
+  margin-left:224px;
+  padding:24px 28px;
+  min-height:100vh;
+  position:relative;
+  z-index:1;
+}
+
+/* Topbar */
+.topbar {
+  display:flex; align-items:center;
+  justify-content:space-between;
+  margin-bottom:22px; gap:14px; flex-wrap:wrap;
+}
+.topbar-left {
+  display:flex; align-items:flex-start; gap:12px;
+}
+.page-title {
+  font-family:'Poppins', sans-serif;
+  font-size:19px; font-weight:700;
+  letter-spacing:-0.3px; margin-bottom:2px;
+}
+.page-meta {
+  font-family:'Geist Mono', monospace;
+  font-size:9px; color:var(--muted);
+  letter-spacing:.5px; line-height:1.7;
+}
+.page-description {
+  font-size:12px; color:var(--muted);
+  line-height:1.7; margin-top:8px; max-width:780px;
+}
+.topbar-right {
+  display:flex; align-items:center; gap:9px;
+}
+.top-actions {
+  display:flex; align-items:center; gap:9px;
+  flex-wrap:wrap; justify-content:flex-end;
+}
+
+/* Platform pills */
+.platform-pills {
+  display:flex;
+  background:var(--surface);
+  border:1px solid var(--border); border-radius:12px;
+  overflow:hidden; box-shadow:var(--key-shadow);
+}
+.pp {
+  padding:6px 12px; font-size:10px;
+  font-family:'Geist Mono', monospace;
+  color:var(--muted2); cursor:pointer; transition:all .15s;
+}
+.pp.active { background:var(--blue); color:#fff; font-weight:700; }
+.pp:hover:not(.active) { background:var(--surface2); color:var(--text); }
+
+/* Icon button */
+.icon-btn {
+  padding:7px 12px;
+  background:var(--surface);
+  border:1px solid var(--border); border-radius:12px;
+  font-size:10px; font-family:'Geist Mono', monospace;
+  color:var(--muted); cursor:pointer;
+  transition:all .15s; box-shadow:var(--key-shadow);
+}
+.icon-btn:hover {
+  border-color:var(--focus-blue-border);
+  color:var(--blue); background:var(--blue-dim);
+}
+.icon-btn.primary {
+  background:linear-gradient(135deg, var(--blue), var(--purple));
+  color:#fff; border-color:transparent;
+  box-shadow:var(--button-shadow);
+}
+.icon-btn.primary:hover { opacity:.9; }
+
+/* Generic btn */
+.btn {
+  padding:7px 12px;
+  background:var(--surface);
+  border:1px solid var(--border); border-radius:12px;
+  font-size:10px; font-family:'Geist Mono', monospace;
+  color:var(--muted); cursor:pointer;
+  transition:all .15s; box-shadow:var(--key-shadow);
+}
+.btn:hover {
+  border-color:rgba(37,99,235,0.16);
+  color:var(--blue); background:var(--blue-dim);
+}
+.btn.primary {
+  background:var(--blue); color:#fff;
+  border-color:transparent; box-shadow:var(--button-shadow);
+}

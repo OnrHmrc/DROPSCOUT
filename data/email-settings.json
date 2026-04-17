@@ -1,0 +1,7 @@
+﻿{
+  "frequency": "daily",
+  "trendThreshold": 15,
+  "scoreDelta": 10,
+  "complianceAlerts": true,
+  "enabled": true
+}

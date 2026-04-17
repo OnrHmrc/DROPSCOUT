@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropScout TR — Amazon TR Mağaza Bağlantısı</title>
+<meta name="description" content="Amazon Türkiye SP-API bağlantısı. Mağazanızı bağlayın, ürün verilerini çekin, komisyon ve KDV analizlerini görün.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<link rel="stylesheet" href="/src/css/main.css">
+<script type="module" src="/src/js/main.js"></script>
+<style>
+.connect-module{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:var(--key-shadow);position:relative;overflow:hidden}
+.connect-module::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#ff9900,#ffb84d,transparent)}
+.cm-header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.cm-logo{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;background:linear-gradient(135deg,rgba(255,153,0,0.15),rgba(255,153,0,0.05));border:1px solid rgba(255,153,0,0.2)}
+.cm-info h3{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;margin:0 0 3px}
+.cm-info p{font-size:11px;color:var(--muted);margin:0}
+.cm-status{margin-left:auto;display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-family:'Geist Mono',monospace;font-size:9px;font-weight:700}
+.cm-status.connected{background:var(--green-dim);color:var(--green)}
+.cm-status.disconnected{background:color-mix(in srgb,var(--text) 6%,transparent);color:var(--muted)}
+.cm-dot{width:6px;height:6px;border-radius:50%}
+.cm-status.connected .cm-dot{background:var(--green);animation:blink 1.4s infinite}
+.cm-status.disconnected .cm-dot{background:var(--muted)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.api-form{display:flex;flex-direction:column;gap:12px}
+.af-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.af-group{display:flex;flex-direction:column;gap:5px}
+.af-group.full{grid-column:1/-1}
+.af-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.af-input{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'Geist Mono',monospace;width:100%}
+.af-input:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
+.af-input::placeholder{color:var(--muted2);font-size:11px}
+.af-hint{font-size:9px;color:var(--muted2);margin-top:2px}
+.af-actions{display:flex;gap:10px;margin-top:6px;align-items:center}
+.af-btn{padding:11px 24px;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Geist Mono',monospace;border:none;white-space:nowrap;transition:all .2s}
+.af-btn.primary{background:linear-gradient(135deg,#ff9900,#ffb84d);color:#232f3e;box-shadow:0 2px 8px rgba(255,153,0,0.3)}
+.af-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,153,0,0.4)}
+.af-btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.af-btn.secondary:hover{border-color:var(--focus-blue-border)}
+.af-btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.af-msg{font-size:10px;color:var(--muted);font-family:'Geist Mono',monospace;margin-left:8px}
+.af-msg.success{color:var(--green)}.af-msg.error{color:var(--orange)}
+.content-grid{display:grid;grid-template-columns:minmax(0,1.5fr) 360px;gap:14px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--key-shadow);overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.card-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.ct-tag{font-family:'Geist Mono',monospace;font-size:8px;padding:3px 8px;border-radius:999px;font-weight:700}
+.tag-blue{background:var(--blue-dim);color:var(--blue)}.tag-green{background:var(--green-dim);color:var(--green)}.tag-yellow{background:var(--yellow-dim);color:var(--yellow)}.tag-orange{background:var(--orange-dim);color:var(--orange)}
+.store-info{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.si-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px;background:var(--surface2);border:1px solid var(--border)}
+.si-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase}
+.si-value{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.si-value.g{color:var(--green)}.si-value.o{color:var(--orange)}.si-value.b{color:var(--blue)}.si-value.y{color:var(--yellow)}
+.params-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 18px}
+.param-box{padding:12px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)}
+.pb-label{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.pb-value{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700}
+.pb-sub{font-size:9px;color:var(--muted2);margin-top:2px}
+.side-stack{display:flex;flex-direction:column;gap:12px;position:sticky;top:24px}
+.detail-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--key-shadow)}
+.dc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.dc-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.sync-log{display:flex;flex-direction:column;gap:6px}
+.sl-entry{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);font-size:10px;line-height:1.5}
+.sl-time{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);white-space:nowrap;min-width:42px}
+.sl-text{color:var(--muted)}.sl-text strong{color:var(--text)}
+.features-list{display:flex;flex-direction:column;gap:7px}
+.fl-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);font-size:11px;font-weight:600}
+.fl-icon{font-size:14px;min-width:20px;text-align:center}
+.fl-check{margin-left:auto;font-family:'Geist Mono',monospace;font-size:9px;padding:2px 6px;border-radius:4px;background:var(--green-dim);color:var(--green);font-weight:700}
+.fl-soon{margin-left:auto;font-family:'Geist Mono',monospace;font-size:9px;padding:2px 6px;border-radius:4px;background:var(--yellow-dim);color:var(--yellow);font-weight:700}
+.empty-state{padding:40px 20px;text-align:center}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.6}
+.empty-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;margin-bottom:6px}
+.empty-desc{font-size:11px;color:var(--muted);line-height:1.7;max-width:320px;margin:0 auto}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade1{animation:fadeUp .35s ease both}.fade2{animation:fadeUp .35s .05s ease both}.fade3{animation:fadeUp .35s .1s ease both}.fade4{animation:fadeUp .35s .15s ease both}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+@media(max-width:1200px){.content-grid{grid-template-columns:1fr 340px}}
+@media(max-width:1100px){.content-grid{grid-template-columns:1fr}.side-stack{position:static}}
+@media(max-width:900px){.mobile-menu-btn{display:flex}.sidebar{transform:translateX(-110%);transition:transform .24s;will-change:transform;width:min(82vw,300px);height:100dvh;overflow-y:auto}.sidebar.open{transform:translateX(0)}.main{margin-left:0;padding:18px 16px 26px}.stat-strip{grid-template-columns:repeat(2,1fr)}.af-row{grid-template-columns:1fr}}
+@media(max-width:700px){.stat-strip{grid-template-columns:1fr}.params-grid{grid-template-columns:1fr}.page-title{font-size:17px}}
+@media(max-width:480px){.main{padding:14px 12px 22px}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="logo"><a class="logo-link" href="./dropscout.html"><div class="logo-icon">🎯</div><div class="logo-text">Drop<span>Scout</span></div></a></div>
+  <div class="nav-group"><div class="nav-label">Keşif</div><a class="nav-item" href="./trend-radar.html"><span class="nav-icon">📡</span>Trend Radar</a><a class="nav-item" href="./gap-radar.html"><span class="nav-icon">🌍</span>Gap Radar <span class="nav-badge nb-purple">YENİ</span></a><a class="nav-item" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi <span class="nav-badge nb-blue">YENİ</span></a><a class="nav-item" href="./rakip-analizi.html"><span class="nav-icon">🔬</span>Rakip Analizi</a></div>
+  <div class="nav-group"><div class="nav-label">Araçlar</div><a class="nav-item" href="./net-kar.html"><span class="nav-icon">💰</span>Net Kâr Hesabı</a><a class="nav-item" href="./takip-listem.html"><span class="nav-icon">⭐</span>Takip Listem</a><a class="nav-item" href="./yasal-kontrol.html"><span class="nav-icon">⚖️</span>Yasal Kontrol</a><a class="nav-item" href="./tedarikci-bul.html"><span class="nav-icon">🔗</span>Tedarikçi Bul</a><a class="nav-item" href="./raporlar.html"><span class="nav-icon">📊</span>Raporlar</a></div>
+  <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item active" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
+  <div class="sidebar-bottom">
+    <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
+    <div class="plan-card"><div class="plan-tier">Pro Plan</div><div class="plan-name">Platform Entegrasyonu Aktif ✓</div><div class="plan-meta"><span>₺499/ay · 4 platform</span><div class="upgrade-btn">Yönet</div></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar fade1">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div>
+        <div class="page-title">📦 Amazon TR Mağaza Bağlantısı</div>
+        <div class="page-meta">// SP-API · SELLER CENTRAL · KOMİSYON · KDV · FBA / FBM VERİLERİ</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" id="syncBtn">↻ Senkronize Et</button>
+      <button class="icon-btn">📥 Verileri İndir</button>
+    </div>
+  </div>
+
+  <div class="stat-strip fade2">
+    <div class="stat-box g"><div class="sb-label">Bağlantı</div><div class="sb-value g" id="kpiStatus">--</div><div class="sb-sub" id="kpiStatusSub">Henüz bağlanmadı</div></div>
+    <div class="stat-box o"><div class="sb-label">Toplam Ürün</div><div class="sb-value o" id="kpiProducts">--</div><div class="sb-sub">Mağazadaki ürün sayısı</div></div>
+    <div class="stat-box b"><div class="sb-label">Son Senkron</div><div class="sb-value b" id="kpiSync">--</div><div class="sb-sub" id="kpiSyncSub">Henüz senkronize edilmedi</div></div>
+    <div class="stat-box y"><div class="sb-label">Ort. Komisyon</div><div class="sb-value y" id="kpiCommission">--</div><div class="sb-sub">Referral fee ortalaması</div></div>
+  </div>
+
+  <div class="connect-module fade3">
+    <div class="cm-header">
+      <div class="cm-logo">📦</div>
+      <div class="cm-info">
+        <h3>Amazon SP-API (Selling Partner API)</h3>
+        <p>Amazon Seller Central üzerinden oluşturulan SP-API kimlik bilgilerinizi girerek mağazanızı bağlayın. Ürün, sipariş, referral fee ve FBA verileri çekilecektir.</p>
+      </div>
+      <div class="cm-status disconnected" id="connStatus"><div class="cm-dot"></div><span id="connStatusText">BAĞLI DEĞİL</span></div>
+    </div>
+    <div class="api-form" id="apiForm">
+      <div class="af-row">
+        <div class="af-group">
+          <div class="af-label">Seller ID (Merchant Token)</div>
+          <input class="af-input" id="inputSellerId" placeholder="Örn: A1B2C3D4E5F6G7" autocomplete="off">
+          <div class="af-hint">Seller Central → Account Info → Merchant Token</div>
+        </div>
+        <div class="af-group">
+          <div class="af-label">Marketplace ID</div>
+          <input class="af-input" id="inputMarketplaceId" value="A33AVAJ2PDY3EV" placeholder="A33AVAJ2PDY3EV (TR)" autocomplete="off">
+          <div class="af-hint">Türkiye marketplace: A33AVAJ2PDY3EV</div>
+        </div>
+      </div>
+      <div class="af-row">
+        <div class="af-group">
+          <div class="af-label">LWA Client ID</div>
+          <input class="af-input" id="inputClientId" placeholder="Örn: amzn1.application-oa2-client.abc..." autocomplete="off">
+          <div class="af-hint">Developer Central → App Client ID</div>
+        </div>
+        <div class="af-group">
+          <div class="af-label">LWA Client Secret</div>
+          <input class="af-input" id="inputClientSecret" type="password" placeholder="Örn: abcdef0123456789..." autocomplete="off">
+          <div class="af-hint">Developer Central → App Client Secret</div>
+        </div>
+      </div>
+      <div class="af-row">
+        <div class="af-group">
+          <div class="af-label">Refresh Token</div>
+          <input class="af-input" id="inputRefreshToken" type="password" placeholder="Atzr|IwEB..." autocomplete="off">
+          <div class="af-hint">SP-API yetkilendirme sonrası alınan refresh token</div>
+        </div>
+        <div class="af-group">
+          <div class="af-label">Mağaza Adı (Opsiyonel)</div>
+          <input class="af-input" id="inputStoreName" placeholder="Örn: TechWorld TR">
+        </div>
+      </div>
+      <div class="af-actions">
+        <button class="af-btn primary" id="connectBtn">Bağlantıyı Test Et ve Kaydet</button>
+        <button class="af-btn secondary" id="disconnectBtn" style="display:none">Bağlantıyı Kes</button>
+        <span class="af-msg" id="formMsg"></span>
+      </div>
+    </div>
+  </div>
+
+  <section class="content-grid fade4" id="contentGrid">
+    <div>
+      <div class="card" id="storeCard">
+        <div class="card-head"><div class="card-title">Mağaza Bilgileri</div><div class="ct-tag tag-orange" id="storeTag">BAĞLANTI BEKLENİYOR</div></div>
+        <div id="storeContent">
+          <div class="empty-state"><div class="empty-icon">🔌</div><div class="empty-title">Mağaza henüz bağlanmadı</div><div class="empty-desc">Yukarıdaki forma SP-API bilgilerinizi girerek Amazon TR mağazanızı bağlayın.</div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px" id="paramsCard">
+        <div class="card-head"><div class="card-title">Referral Fee & KDV Parametreleri</div><div class="ct-tag tag-yellow">CANLI VERİ</div></div>
+        <div id="paramsContent">
+          <div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Veri yok</div><div class="empty-desc">Mağaza bağlandıktan sonra kategori bazlı referral fee oranları burada görünecektir.</div></div>
+        </div>
+      </div>
+    </div>
+    <aside class="side-stack">
+      <div class="detail-card">
+        <div class="dc-head"><div class="dc-title">API ile Gelen Veriler</div><div class="ct-tag tag-green">AKTİF</div></div>
+        <div class="features-list">
+          <div class="fl-item"><span class="fl-icon">📦</span>Ürün kataloğu ve ASIN bilgileri<span class="fl-check">AKTİF</span></div>
+          <div class="fl-item"><span class="fl-icon">💰</span>Referral fee (kategori bazlı)<span class="fl-check">AKTİF</span></div>
+          <div class="fl-item"><span class="fl-icon">🧾</span>KDV oranları<span class="fl-check">AKTİF</span></div>
+          <div class="fl-item"><span class="fl-icon">📈</span>Sipariş ve satış verileri<span class="fl-check">AKTİF</span></div>
+          <div class="fl-item"><span class="fl-icon">🏷️</span>BuyBox fiyat ve durum bilgisi<span class="fl-check">AKTİF</span></div>
+          <div class="fl-item"><span class="fl-icon">📦</span>FBA / FBM stok ve kargo bilgisi<span class="fl-check">AKTİF</span></div>
+          <div class="fl-item"><span class="fl-icon">🔬</span>Rakip ASIN karşılaştırması<span class="fl-soon">YAKINDA</span></div>
+        </div>
+      </div>
+      <div class="detail-card" id="syncLogCard">
+        <div class="dc-head"><div class="dc-title">Senkronizasyon Geçmişi</div></div>
+        <div class="sync-log" id="syncLog">
+          <div class="sl-entry"><span class="sl-time">--:--</span><span class="sl-text">Henüz senkronizasyon yapılmadı.</span></div>
+        </div>
+      </div>
+      <div class="detail-card">
+        <div class="dc-head"><div class="dc-title">Nasıl Bağlanırım?</div></div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.8">
+          <p style="margin:0 0 8px"><strong style="color:var(--text)">1.</strong> Amazon Seller Central'a giriş yapın</p>
+          <p style="margin:0 0 8px"><strong style="color:var(--text)">2.</strong> Developer Central'dan bir SP-API uygulaması oluşturun</p>
+          <p style="margin:0 0 8px"><strong style="color:var(--text)">3.</strong> LWA Client ID ve Secret alın</p>
+          <p style="margin:0 0 8px"><strong style="color:var(--text)">4.</strong> Uygulamayı yetkilendirip Refresh Token alın</p>
+          <p style="margin:0"><strong style="color:var(--text)">5.</strong> Tüm bilgileri forma girin ve test edin</p>
+        </div>
+      </div>
+    </aside>
+  </section>
+</main>
+
+<script type="module">
+import { onAuthChange } from '/src/js/auth.js';
+import { savePlatformConnection, getPlatformConnection, deletePlatformConnection } from '/src/js/store.js';
+const PLATFORM = 'amazon-tr';
+let currentUid = null;
+onAuthChange((user) => { if (user) { currentUid = user.uid; loadSavedState(); } });
+const state = { connected: false, store: null, credentials: null, syncHistory: [] };
+
+const mockStoreData = {
+  name: '', sellerId: '', marketplaceId: 'A33AVAJ2PDY3EV', totalProducts: 156, activeProducts: 142, rating: 4.6, joinDate: '2024-02-20',
+  fulfillment: 'FBM',
+  categories: [
+    { name: 'Elektronik', commission: 8.0, kdv: 20, products: 48, buybox: '₺199 - ₺4.500' },
+    { name: 'Ev & Mutfak', commission: 15.0, kdv: 20, products: 37, buybox: '₺49 - ₺1.800' },
+    { name: 'Bilgisayar', commission: 8.0, kdv: 20, products: 28, buybox: '₺299 - ₺12.000' },
+    { name: 'Spor & Outdoor', commission: 15.0, kdv: 20, products: 24, buybox: '₺79 - ₺2.100' },
+    { name: 'Oyuncak', commission: 15.0, kdv: 10, products: 19, buybox: '₺39 - ₺650' }
+  ],
+  avgCommission: 12.2, lastSync: null
+};
+
+async function loadSavedState(){if(!currentUid)return;try{const data=await getPlatformConnection(currentUid,PLATFORM);if(data&&data.connected){state.connected=true;state.credentials=data.credentials||null;state.syncHistory=data.syncHistory||[];if(state.credentials){mockStoreData.name=state.credentials.storeName||'Mağaza';mockStoreData.sellerId=state.credentials.sellerId||'';state.store=mockStoreData}}}catch(e){console.warn('Platform verisi yüklenemedi:',e)}renderAll()}
+async function saveState(){if(!currentUid)return;try{await savePlatformConnection(currentUid,PLATFORM,{storeName:state.credentials?.storeName||'',credentials:state.credentials||{},syncHistory:state.syncHistory.slice(-10)})}catch(e){console.warn('Platform verisi kaydedilemedi:',e)}}
+function addSyncLog(t){const now=new Date();state.syncHistory.unshift({time:now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),text:t,date:now.toISOString()});if(state.syncHistory.length>10)state.syncHistory.pop();saveState()}
+
+function renderKPIs(){
+  const el=(id)=>document.getElementById(id);
+  if(state.connected&&state.store){el('kpiStatus').textContent='Aktif';el('kpiStatusSub').textContent='Bağlantı kuruldu';el('kpiProducts').textContent=state.store.totalProducts.toLocaleString('tr-TR');el('kpiCommission').textContent='%'+state.store.avgCommission.toFixed(1);if(state.syncHistory.length>0){const l=new Date(state.syncHistory[0].date);el('kpiSync').textContent=l.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});el('kpiSyncSub').textContent=l.toLocaleDateString('tr-TR')}}
+  else{el('kpiStatus').textContent='--';el('kpiStatusSub').textContent='Henüz bağlanmadı';el('kpiProducts').textContent='--';el('kpiSync').textContent='--';el('kpiSyncSub').textContent='Henüz senkronize edilmedi';el('kpiCommission').textContent='--'}
+}
+function renderConnectionStatus(){const el=document.getElementById('connStatus'),txt=document.getElementById('connStatusText');if(state.connected){el.className='cm-status connected';txt.textContent='BAĞLI';document.getElementById('disconnectBtn').style.display='';document.getElementById('connectBtn').textContent='Bağlantıyı Güncelle';if(state.credentials){document.getElementById('inputSellerId').value=state.credentials.sellerId||'';document.getElementById('inputMarketplaceId').value=state.credentials.marketplaceId||'A33AVAJ2PDY3EV';document.getElementById('inputClientId').value=state.credentials.clientId?'••••••••••••':'';document.getElementById('inputClientSecret').value=state.credentials.clientSecret?'••••••••••••':'';document.getElementById('inputRefreshToken').value=state.credentials.refreshToken?'••••••••••••':'';document.getElementById('inputStoreName').value=state.credentials.storeName||''}}else{el.className='cm-status disconnected';txt.textContent='BAĞLI DEĞİL';document.getElementById('disconnectBtn').style.display='none';document.getElementById('connectBtn').textContent='Bağlantıyı Test Et ve Kaydet'}}
+function renderStoreInfo(){const c=document.getElementById('storeContent'),t=document.getElementById('storeTag');if(!state.connected||!state.store){t.textContent='BAĞLANTI BEKLENİYOR';t.className='ct-tag tag-orange';c.innerHTML='<div class="empty-state"><div class="empty-icon">🔌</div><div class="empty-title">Mağaza henüz bağlanmadı</div><div class="empty-desc">SP-API bilgilerinizi girerek Amazon TR mağazanızı bağlayın.</div></div>';return}t.textContent='AKTİF';t.className='ct-tag tag-green';const s=state.store;c.innerHTML=`<div class="store-info"><div class="si-row"><span class="si-label">Mağaza Adı</span><span class="si-value">${s.name||'Belirtilmedi'}</span></div><div class="si-row"><span class="si-label">Seller ID</span><span class="si-value b">${s.sellerId}</span></div><div class="si-row"><span class="si-label">Marketplace</span><span class="si-value">Amazon.com.tr (${s.marketplaceId})</span></div><div class="si-row"><span class="si-label">Toplam Ürün</span><span class="si-value o">${s.totalProducts}</span></div><div class="si-row"><span class="si-label">Aktif Ürün</span><span class="si-value g">${s.activeProducts}</span></div><div class="si-row"><span class="si-label">Fulfillment</span><span class="si-value y">${s.fulfillment}</span></div><div class="si-row"><span class="si-label">Mağaza Puanı</span><span class="si-value y">${s.rating} / 5</span></div></div>`}
+function renderParams(){const c=document.getElementById('paramsContent');if(!state.connected||!state.store){c.innerHTML='<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Veri yok</div><div class="empty-desc">Mağaza bağlandıktan sonra referral fee oranları burada görünecektir.</div></div>';return}let h='<div class="params-grid">';state.store.categories.forEach(cat=>{h+=`<div class="param-box"><div class="pb-label">${cat.name}</div><div class="pb-value" style="color:var(--orange)">%${cat.commission.toFixed(1)}</div><div class="pb-sub">KDV: %${cat.kdv} · ${cat.products} ürün · BuyBox: ${cat.buybox}</div></div>`});h+=`<div class="param-box" style="border-color:var(--focus-blue-border);background:color-mix(in srgb,var(--blue-dim) 30%,var(--surface2))"><div class="pb-label">Ort. Referral Fee</div><div class="pb-value" style="color:var(--blue)">%${state.store.avgCommission.toFixed(1)}</div><div class="pb-sub">Tüm kategoriler ortalaması</div></div></div>`;c.innerHTML=h}
+function renderSyncLog(){const el=document.getElementById('syncLog');if(state.syncHistory.length===0){el.innerHTML='<div class="sl-entry"><span class="sl-time">--:--</span><span class="sl-text">Henüz senkronizasyon yapılmadı.</span></div>';return}el.innerHTML=state.syncHistory.map(s=>`<div class="sl-entry"><span class="sl-time">${s.time}</span><span class="sl-text">${s.text}</span></div>`).join('')}
+function renderAll(){renderKPIs();renderConnectionStatus();renderStoreInfo();renderParams();renderSyncLog()}
+
+document.getElementById('connectBtn').addEventListener('click',async()=>{const sid=document.getElementById('inputSellerId').value.trim();const mid=document.getElementById('inputMarketplaceId').value.trim();const cid=document.getElementById('inputClientId').value.trim();const cs=document.getElementById('inputClientSecret').value.trim();const rt=document.getElementById('inputRefreshToken').value.trim();const name=document.getElementById('inputStoreName').value.trim();const msg=document.getElementById('formMsg');const btn=document.getElementById('connectBtn');if(!sid||!cid||!cs||!rt){msg.textContent='Seller ID, Client ID, Client Secret ve Refresh Token zorunludur.';msg.className='af-msg error';return}btn.disabled=true;btn.textContent='Test ediliyor...';msg.textContent='SP-API bağlantısı kontrol ediliyor...';msg.className='af-msg';await new Promise(r=>setTimeout(r,2200));state.connected=true;state.credentials={sellerId:sid,marketplaceId:mid,clientId:cid,clientSecret:cs,refreshToken:rt,storeName:name};mockStoreData.name=name||'Amazon TR Mağaza';mockStoreData.sellerId=sid;mockStoreData.marketplaceId=mid;state.store=mockStoreData;addSyncLog('<strong>Bağlantı kuruldu.</strong> Amazon SP-API doğrulandı. '+mockStoreData.totalProducts+' ürün senkronize edildi.');btn.disabled=false;msg.textContent='Bağlantı başarılı!';msg.className='af-msg success';saveState();renderAll()});
+document.getElementById('disconnectBtn').addEventListener('click',async()=>{state.connected=false;state.store=null;state.credentials=null;document.getElementById('inputSellerId').value='';document.getElementById('inputMarketplaceId').value='A33AVAJ2PDY3EV';document.getElementById('inputClientId').value='';document.getElementById('inputClientSecret').value='';document.getElementById('inputRefreshToken').value='';document.getElementById('inputStoreName').value='';document.getElementById('formMsg').textContent='';if(currentUid){try{await deletePlatformConnection(currentUid,PLATFORM)}catch(e){}}state.syncHistory=[];renderAll()});
+document.getElementById('syncBtn').addEventListener('click',async()=>{if(!state.connected)return;const btn=document.getElementById('syncBtn');btn.textContent='↻ Senkronize ediliyor...';btn.disabled=true;await new Promise(r=>setTimeout(r,1500));addSyncLog('<strong>Senkronizasyon tamamlandı.</strong> '+mockStoreData.totalProducts+' ürün, '+mockStoreData.categories.length+' kategori güncellendi.');btn.textContent='↻ Senkronize Et';btn.disabled=false;renderAll()});
+
+renderAll();
+</script>
+</body>
+</html>

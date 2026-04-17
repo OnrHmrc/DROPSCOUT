@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropScout TR — Trendyol Mağaza Bağlantısı</title>
+<meta name="description" content="Trendyol satıcı paneli API bağlantısı. Mağazanızı bağlayın, ürün verilerini çekin, komisyon ve KDV analizlerini görün.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<link rel="stylesheet" href="/src/css/main.css">
+<script type="module" src="/src/js/main.js"></script>
+<style>
+/* ═══════════════════════════════════
+   PLATFORM STORE CONNECTION PAGE
+   ═══════════════════════════════════ */
+
+/* CONNECTION MODULE */
+.connect-module{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:18px;box-shadow:var(--key-shadow);position:relative;overflow:hidden}
+.connect-module::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#ff6a00,#f27a1a,transparent)}
+.cm-header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.cm-logo{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;background:linear-gradient(135deg,rgba(242,122,26,0.15),rgba(242,122,26,0.05));border:1px solid rgba(242,122,26,0.2)}
+.cm-info h3{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;margin:0 0 3px}
+.cm-info p{font-size:11px;color:var(--muted);margin:0}
+.cm-status{margin-left:auto;display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-family:'Geist Mono',monospace;font-size:9px;font-weight:700}
+.cm-status.connected{background:var(--green-dim);color:var(--green)}
+.cm-status.disconnected{background:color-mix(in srgb,var(--text) 6%,transparent);color:var(--muted)}
+.cm-status.error{background:var(--orange-dim);color:var(--orange)}
+.cm-dot{width:6px;height:6px;border-radius:50%}
+.cm-status.connected .cm-dot{background:var(--green);animation:blink 1.4s infinite}
+.cm-status.disconnected .cm-dot{background:var(--muted)}
+.cm-status.error .cm-dot{background:var(--orange)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* API FORM */
+.api-form{display:flex;flex-direction:column;gap:12px}
+.af-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.af-group{display:flex;flex-direction:column;gap:5px}
+.af-group.full{grid-column:1/-1}
+.af-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.af-input{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'Geist Mono',monospace;width:100%}
+.af-input:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
+.af-input::placeholder{color:var(--muted2);font-size:11px}
+.af-hint{font-size:9px;color:var(--muted2);margin-top:2px}
+.af-actions{display:flex;gap:10px;margin-top:6px;align-items:center}
+.af-btn{padding:11px 24px;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Geist Mono',monospace;border:none;white-space:nowrap;transition:all .2s}
+.af-btn.primary{background:linear-gradient(135deg,#f27a1a,#ff6a00);color:#fff;box-shadow:0 2px 8px rgba(242,122,26,0.3)}
+.af-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(242,122,26,0.4)}
+.af-btn.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.af-btn.secondary:hover{border-color:var(--focus-blue-border)}
+.af-btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.af-msg{font-size:10px;color:var(--muted);font-family:'Geist Mono',monospace;margin-left:8px}
+.af-msg.success{color:var(--green)}
+.af-msg.error{color:var(--orange)}
+
+/* CONTENT GRID */
+.content-grid{display:grid;grid-template-columns:minmax(0,1.5fr) 360px;gap:14px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--key-shadow);overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.card-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.ct-tag{font-family:'Geist Mono',monospace;font-size:8px;padding:3px 8px;border-radius:999px;font-weight:700}
+.tag-blue{background:var(--blue-dim);color:var(--blue)}.tag-green{background:var(--green-dim);color:var(--green)}.tag-yellow{background:var(--yellow-dim);color:var(--yellow)}.tag-orange{background:var(--orange-dim);color:var(--orange)}.tag-purple{background:var(--purple-dim);color:var(--purple)}
+
+/* STORE INFO */
+.store-info{padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.si-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px;background:var(--surface2);border:1px solid var(--border)}
+.si-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase}
+.si-value{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.si-value.g{color:var(--green)}.si-value.o{color:var(--orange)}.si-value.b{color:var(--blue)}.si-value.y{color:var(--yellow)}
+
+/* PARAMS GRID */
+.params-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:16px 18px}
+.param-box{padding:12px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)}
+.pb-label{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.pb-value{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700}
+.pb-sub{font-size:9px;color:var(--muted2);margin-top:2px}
+
+/* SIDE PANEL */
+.side-stack{display:flex;flex-direction:column;gap:12px;position:sticky;top:24px}
+.detail-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--key-shadow)}
+.dc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.dc-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+
+/* SYNC LOG */
+.sync-log{display:flex;flex-direction:column;gap:6px}
+.sl-entry{display:flex;align-items:flex-start;gap:8px;padding:8px 10px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);font-size:10px;line-height:1.5}
+.sl-time{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);white-space:nowrap;min-width:42px}
+.sl-text{color:var(--muted)}
+.sl-text strong{color:var(--text)}
+
+/* FEATURES LIST */
+.features-list{display:flex;flex-direction:column;gap:7px}
+.fl-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);font-size:11px;font-weight:600}
+.fl-icon{font-size:14px;min-width:20px;text-align:center}
+.fl-check{margin-left:auto;font-family:'Geist Mono',monospace;font-size:9px;padding:2px 6px;border-radius:4px;background:var(--green-dim);color:var(--green);font-weight:700}
+.fl-soon{margin-left:auto;font-family:'Geist Mono',monospace;font-size:9px;padding:2px 6px;border-radius:4px;background:var(--yellow-dim);color:var(--yellow);font-weight:700}
+
+/* EMPTY STATE */
+.empty-state{padding:40px 20px;text-align:center}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.6}
+.empty-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;margin-bottom:6px}
+.empty-desc{font-size:11px;color:var(--muted);line-height:1.7;max-width:320px;margin:0 auto}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade1{animation:fadeUp .35s ease both}.fade2{animation:fadeUp .35s .05s ease both}.fade3{animation:fadeUp .35s .1s ease both}.fade4{animation:fadeUp .35s .15s ease both}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+@media(max-width:1200px){.content-grid{grid-template-columns:1fr 340px}}
+@media(max-width:1100px){.content-grid{grid-template-columns:1fr}.side-stack{position:static}}
+@media(max-width:900px){.mobile-menu-btn{display:flex}.sidebar{transform:translateX(-110%);transition:transform .24s;will-change:transform;width:min(82vw,300px);height:100dvh;overflow-y:auto}.sidebar.open{transform:translateX(0)}.main{margin-left:0;padding:18px 16px 26px}.stat-strip{grid-template-columns:repeat(2,1fr)}.af-row{grid-template-columns:1fr}}
+@media(max-width:700px){.stat-strip{grid-template-columns:1fr}.params-grid{grid-template-columns:1fr}.page-title{font-size:17px}}
+@media(max-width:480px){.main{padding:14px 12px 22px}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="logo"><a class="logo-link" href="./dropscout.html"><div class="logo-icon">🎯</div><div class="logo-text">Drop<span>Scout</span></div></a></div>
+  <div class="nav-group"><div class="nav-label">Keşif</div><a class="nav-item" href="./trend-radar.html"><span class="nav-icon">📡</span>Trend Radar</a><a class="nav-item" href="./gap-radar.html"><span class="nav-icon">🌍</span>Gap Radar <span class="nav-badge nb-purple">YENİ</span></a><a class="nav-item" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi <span class="nav-badge nb-blue">YENİ</span></a><a class="nav-item" href="./rakip-analizi.html"><span class="nav-icon">🔬</span>Rakip Analizi</a></div>
+  <div class="nav-group"><div class="nav-label">Araçlar</div><a class="nav-item" href="./net-kar.html"><span class="nav-icon">💰</span>Net Kâr Hesabı</a><a class="nav-item" href="./takip-listem.html"><span class="nav-icon">⭐</span>Takip Listem</a><a class="nav-item" href="./yasal-kontrol.html"><span class="nav-icon">⚖️</span>Yasal Kontrol</a><a class="nav-item" href="./tedarikci-bul.html"><span class="nav-icon">🔗</span>Tedarikçi Bul</a><a class="nav-item" href="./raporlar.html"><span class="nav-icon">📊</span>Raporlar</a></div>
+  <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item active" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
+  <div class="sidebar-bottom">
+    <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
+    <div class="plan-card"><div class="plan-tier">Pro Plan</div><div class="plan-name">Platform Entegrasyonu Aktif ✓</div><div class="plan-meta"><span>₺499/ay · 4 platform</span><div class="upgrade-btn">Yönet</div></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar fade1">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div>
+        <div class="page-title">🛍️ Trendyol Mağaza Bağlantısı</div>
+        <div class="page-meta">// API KEY · MAĞAZA VERİLERİ · KOMİSYON · KDV · ÜRÜN SENKRONİZASYONU</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" id="syncBtn">↻ Senkronize Et</button>
+      <button class="icon-btn">📥 Verileri İndir</button>
+    </div>
+  </div>
+
+  <div class="stat-strip fade2">
+    <div class="stat-box g"><div class="sb-label">Bağlantı</div><div class="sb-value g" id="kpiStatus">--</div><div class="sb-sub" id="kpiStatusSub">Henüz bağlanmadı</div></div>
+    <div class="stat-box o"><div class="sb-label">Toplam Ürün</div><div class="sb-value o" id="kpiProducts">--</div><div class="sb-sub">Mağazadaki ürün sayısı</div></div>
+    <div class="stat-box b"><div class="sb-label">Son Senkron</div><div class="sb-value b" id="kpiSync">--</div><div class="sb-sub" id="kpiSyncSub">Henüz senkronize edilmedi</div></div>
+    <div class="stat-box y"><div class="sb-label">Ort. Komisyon</div><div class="sb-value y" id="kpiCommission">--</div><div class="sb-sub">Kategori ortalaması</div></div>
+  </div>
+
+  <!-- API KEY CONNECTION -->
+  <div class="connect-module fade3">
+    <div class="cm-header">
+      <div class="cm-logo">🛍️</div>
+      <div class="cm-info">
+        <h3>Trendyol Satıcı Paneli API</h3>
+        <p>Trendyol Partner API anahtarınızı girerek mağazanızı bağlayın. Ürün, sipariş ve komisyon verileri otomatik çekilecektir.</p>
+      </div>
+      <div class="cm-status disconnected" id="connStatus"><div class="cm-dot"></div><span id="connStatusText">BAĞLI DEĞİL</span></div>
+    </div>
+    <div class="api-form" id="apiForm">
+      <div class="af-row">
+        <div class="af-group">
+          <div class="af-label">Satıcı ID (Supplier ID)</div>
+          <input class="af-input" id="inputSupplierId" placeholder="Örn: 123456" autocomplete="off">
+          <div class="af-hint">Trendyol Satıcı Paneli → Entegrasyon Bilgileri → Satıcı ID</div>
+        </div>
+        <div class="af-group">
+          <div class="af-label">API Key</div>
+          <input class="af-input" id="inputApiKey" type="password" placeholder="Örn: aBcDeFgHiJkLmNoPqRsT" autocomplete="off">
+          <div class="af-hint">Entegrasyon Bilgileri sayfasından kopyalayın</div>
+        </div>
+      </div>
+      <div class="af-row">
+        <div class="af-group">
+          <div class="af-label">API Secret</div>
+          <input class="af-input" id="inputApiSecret" type="password" placeholder="Örn: uVwXyZ0123456789..." autocomplete="off">
+          <div class="af-hint">API Key ile birlikte oluşturulan secret anahtarı</div>
+        </div>
+        <div class="af-group">
+          <div class="af-label">Mağaza Adı (Opsiyonel)</div>
+          <input class="af-input" id="inputStoreName" placeholder="Örn: TechStore TR">
+        </div>
+      </div>
+      <div class="af-actions">
+        <button class="af-btn primary" id="connectBtn">Bağlantıyı Test Et ve Kaydet</button>
+        <button class="af-btn secondary" id="disconnectBtn" style="display:none">Bağlantıyı Kes</button>
+        <span class="af-msg" id="formMsg"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <section class="content-grid fade4" id="contentGrid">
+    <div>
+      <!-- STORE INFO -->
+      <div class="card" id="storeCard">
+        <div class="card-head">
+          <div class="card-title">Mağaza Bilgileri</div>
+          <div class="ct-tag tag-orange" id="storeTag">BAĞLANTI BEKLENİYOR</div>
+        </div>
+        <div id="storeContent">
+          <div class="empty-state">
+            <div class="empty-icon">🔌</div>
+            <div class="empty-title">Mağaza henüz bağlanmadı</div>
+            <div class="empty-desc">Yukarıdaki forma API bilgilerinizi girerek Trendyol mağazanızı bağlayın. Bağlantı kurulduktan sonra mağaza verileri burada görünecektir.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMMISSION & KDV -->
+      <div class="card" style="margin-top:14px" id="paramsCard">
+        <div class="card-head">
+          <div class="card-title">Komisyon & KDV Parametreleri</div>
+          <div class="ct-tag tag-yellow">CANLI VERİ</div>
+        </div>
+        <div id="paramsContent">
+          <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <div class="empty-title">Veri yok</div>
+            <div class="empty-desc">Mağaza bağlandıktan sonra kategori bazlı komisyon oranları ve KDV bilgileri burada listelenecektir.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDE PANEL -->
+    <aside class="side-stack">
+      <div class="detail-card">
+        <div class="dc-head"><div class="dc-title">API ile Gelen Veriler</div><div class="ct-tag tag-green">AKTİF</div></div>
+        <div class="features-list">
+          <div class="fl-item"><span class="fl-icon">📦</span>Ürün listesi ve stok bilgileri<span class="fl-check">AKTİF</span></div>
+          <div class="fl-item"><span class="fl-icon">💰</span>Komisyon oranları (kategori bazlı)<span class="fl-check">AKTİF</span></div>
+          <div class="fl-item"><span class="fl-icon">🧾</span>KDV oranları<span class="fl-check">AKTİF</span></div>
+          <div class="fl-item"><span class="fl-icon">📈</span>Satış ve sipariş verileri<span class="fl-check">AKTİF</span></div>
+          <div class="fl-item"><span class="fl-icon">🏷️</span>BuyBox fiyat bilgileri<span class="fl-check">AKTİF</span></div>
+          <div class="fl-item"><span class="fl-icon">🔬</span>Rakip fiyat karşılaştırması<span class="fl-soon">YAKINDA</span></div>
+          <div class="fl-item"><span class="fl-icon">📊</span>Performans metrikleri<span class="fl-soon">YAKINDA</span></div>
+        </div>
+      </div>
+
+      <div class="detail-card" id="syncLogCard">
+        <div class="dc-head"><div class="dc-title">Senkronizasyon Geçmişi</div></div>
+        <div class="sync-log" id="syncLog">
+          <div class="sl-entry"><span class="sl-time">--:--</span><span class="sl-text">Henüz senkronizasyon yapılmadı. Mağazayı bağlayarak başlayın.</span></div>
+        </div>
+      </div>
+
+      <div class="detail-card">
+        <div class="dc-head"><div class="dc-title">Nasıl Bağlanırım?</div></div>
+        <div style="font-size:11px;color:var(--muted);line-height:1.8">
+          <p style="margin:0 0 8px"><strong style="color:var(--text)">1.</strong> Trendyol Satıcı Paneli'ne giriş yapın</p>
+          <p style="margin:0 0 8px"><strong style="color:var(--text)">2.</strong> Entegrasyon Bilgileri sayfasına gidin</p>
+          <p style="margin:0 0 8px"><strong style="color:var(--text)">3.</strong> API Key ve Secret oluşturun</p>
+          <p style="margin:0 0 8px"><strong style="color:var(--text)">4.</strong> Supplier ID, API Key ve Secret değerlerini buraya yapıştırın</p>
+          <p style="margin:0"><strong style="color:var(--text)">5.</strong> "Bağlantıyı Test Et" butonuna tıklayın</p>
+        </div>
+      </div>
+    </aside>
+  </section>
+</main>
+
+<script type="module">
+import { onAuthChange } from '/src/js/auth.js';
+import { savePlatformConnection, getPlatformConnection, deletePlatformConnection, addSyncEntry } from '/src/js/store.js';
+
+const PLATFORM = 'trendyol';
+let currentUid = null;
+
+// Kullanici UID'sini al
+onAuthChange((user) => { if (user) { currentUid = user.uid; loadSavedState(); } });
+
+const state = {
+  connected: false,
+  store: null,
+  credentials: null,
+  syncHistory: []
+};
+
+// Mock store data (API bağlantısı simülasyonu)
+const mockStoreData = {
+  name: '',
+  supplierId: '',
+  totalProducts: 347,
+  activeProducts: 312,
+  rating: 9.4,
+  joinDate: '2023-06-14',
+  categories: [
+    { name: 'Elektronik', commission: 12.0, kdv: 20, products: 89, buybox: '₺149 - ₺2.490' },
+    { name: 'Ev & Yaşam', commission: 15.5, kdv: 20, products: 124, buybox: '₺29 - ₺899' },
+    { name: 'Kozmetik', commission: 18.0, kdv: 20, products: 67, buybox: '₺19 - ₺349' },
+    { name: 'Giyim', commission: 22.0, kdv: 10, products: 45, buybox: '₺49 - ₺599' },
+    { name: 'Spor & Outdoor', commission: 14.0, kdv: 20, products: 22, buybox: '₺59 - ₺1.290' }
+  ],
+  avgCommission: 16.3,
+  lastSync: null
+};
+
+async function loadSavedState() {
+  if (!currentUid) return;
+  try {
+    const data = await getPlatformConnection(currentUid, PLATFORM);
+    if (data && data.connected) {
+      state.connected = true;
+      state.credentials = data.credentials || null;
+      state.syncHistory = data.syncHistory || [];
+      if (state.credentials) {
+        mockStoreData.name = state.credentials.storeName || 'Mağaza';
+        mockStoreData.supplierId = state.credentials.supplierId || '';
+        state.store = mockStoreData;
+      }
+    }
+  } catch(e) { console.warn('Platform verisi yüklenemedi:', e); }
+  renderAll();
+}
+
+async function saveState() {
+  if (!currentUid) return;
+  try {
+    await savePlatformConnection(currentUid, PLATFORM, {
+      storeName: state.credentials?.storeName || '',
+      credentials: state.credentials || {},
+      syncHistory: state.syncHistory.slice(-10)
+    });
+  } catch(e) { console.warn('Platform verisi kaydedilemedi:', e); }
+}
+
+function addSyncLog(text) {
+  const now = new Date();
+  const time = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+  state.syncHistory.unshift({ time, text, date: now.toISOString() });
+  if (state.syncHistory.length > 10) state.syncHistory.pop();
+  saveState();
+}
+
+function renderKPIs() {
+  const kpiStatus = document.getElementById('kpiStatus');
+  const kpiStatusSub = document.getElementById('kpiStatusSub');
+  const kpiProducts = document.getElementById('kpiProducts');
+  const kpiSync = document.getElementById('kpiSync');
+  const kpiSyncSub = document.getElementById('kpiSyncSub');
+  const kpiCommission = document.getElementById('kpiCommission');
+
+  if (state.connected && state.store) {
+    kpiStatus.textContent = 'Aktif';
+    kpiStatusSub.textContent = 'Bağlantı kuruldu';
+    kpiProducts.textContent = state.store.totalProducts.toLocaleString('tr-TR');
+    kpiCommission.textContent = '%' + state.store.avgCommission.toFixed(1);
+    if (state.syncHistory.length > 0) {
+      const last = new Date(state.syncHistory[0].date);
+      kpiSync.textContent = last.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' });
+      kpiSyncSub.textContent = last.toLocaleDateString('tr-TR');
+    }
+  } else {
+    kpiStatus.textContent = '--';
+    kpiStatusSub.textContent = 'Henüz bağlanmadı';
+    kpiProducts.textContent = '--';
+    kpiSync.textContent = '--';
+    kpiSyncSub.textContent = 'Henüz senkronize edilmedi';
+    kpiCommission.textContent = '--';
+  }
+}
+
+function renderConnectionStatus() {
+  const el = document.getElementById('connStatus');
+  const text = document.getElementById('connStatusText');
+  if (state.connected) {
+    el.className = 'cm-status connected';
+    text.textContent = 'BAĞLI';
+    document.getElementById('disconnectBtn').style.display = '';
+    document.getElementById('connectBtn').textContent = 'Bağlantıyı Güncelle';
+    if (state.credentials) {
+      document.getElementById('inputSupplierId').value = state.credentials.supplierId || '';
+      document.getElementById('inputApiKey').value = state.credentials.apiKey ? '••••••••••••' : '';
+      document.getElementById('inputApiSecret').value = state.credentials.apiSecret ? '••••••••••••' : '';
+      document.getElementById('inputStoreName').value = state.credentials.storeName || '';
+    }
+  } else {
+    el.className = 'cm-status disconnected';
+    text.textContent = 'BAĞLI DEĞİL';
+    document.getElementById('disconnectBtn').style.display = 'none';
+    document.getElementById('connectBtn').textContent = 'Bağlantıyı Test Et ve Kaydet';
+  }
+}
+
+function renderStoreInfo() {
+  const content = document.getElementById('storeContent');
+  const tag = document.getElementById('storeTag');
+
+  if (!state.connected || !state.store) {
+    tag.textContent = 'BAĞLANTI BEKLENİYOR';
+    tag.className = 'ct-tag tag-orange';
+    content.innerHTML = '<div class="empty-state"><div class="empty-icon">🔌</div><div class="empty-title">Mağaza henüz bağlanmadı</div><div class="empty-desc">Yukarıdaki forma API bilgilerinizi girerek Trendyol mağazanızı bağlayın.</div></div>';
+    return;
+  }
+
+  tag.textContent = 'AKTİF';
+  tag.className = 'ct-tag tag-green';
+  const s = state.store;
+  content.innerHTML = `
+    <div class="store-info">
+      <div class="si-row"><span class="si-label">Mağaza Adı</span><span class="si-value">${s.name || 'Belirtilmedi'}</span></div>
+      <div class="si-row"><span class="si-label">Supplier ID</span><span class="si-value b">${s.supplierId}</span></div>
+      <div class="si-row"><span class="si-label">Toplam Ürün</span><span class="si-value o">${s.totalProducts}</span></div>
+      <div class="si-row"><span class="si-label">Aktif Ürün</span><span class="si-value g">${s.activeProducts}</span></div>
+      <div class="si-row"><span class="si-label">Mağaza Puanı</span><span class="si-value y">${s.rating} / 10</span></div>
+      <div class="si-row"><span class="si-label">Kayıt Tarihi</span><span class="si-value">${new Date(s.joinDate).toLocaleDateString('tr-TR')}</span></div>
+    </div>`;
+}
+
+function renderParams() {
+  const content = document.getElementById('paramsContent');
+
+  if (!state.connected || !state.store) {
+    content.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Veri yok</div><div class="empty-desc">Mağaza bağlandıktan sonra komisyon oranları burada görünecektir.</div></div>';
+    return;
+  }
+
+  const cats = state.store.categories;
+  let html = '<div class="params-grid">';
+  cats.forEach(c => {
+    html += `
+      <div class="param-box">
+        <div class="pb-label">${c.name}</div>
+        <div class="pb-value" style="color:var(--orange)">%${c.commission.toFixed(1)}</div>
+        <div class="pb-sub">KDV: %${c.kdv} · ${c.products} ürün · BuyBox: ${c.buybox}</div>
+      </div>`;
+  });
+  html += `
+    <div class="param-box" style="border-color:var(--focus-blue-border);background:color-mix(in srgb,var(--blue-dim) 30%,var(--surface2))">
+      <div class="pb-label">Ortalama Komisyon</div>
+      <div class="pb-value" style="color:var(--blue)">%${state.store.avgCommission.toFixed(1)}</div>
+      <div class="pb-sub">Tüm kategoriler ortalaması</div>
+    </div>`;
+  html += '</div>';
+  content.innerHTML = html;
+}
+
+function renderSyncLog() {
+  const el = document.getElementById('syncLog');
+  if (state.syncHistory.length === 0) {
+    el.innerHTML = '<div class="sl-entry"><span class="sl-time">--:--</span><span class="sl-text">Henüz senkronizasyon yapılmadı.</span></div>';
+    return;
+  }
+  el.innerHTML = state.syncHistory.map(s =>
+    `<div class="sl-entry"><span class="sl-time">${s.time}</span><span class="sl-text">${s.text}</span></div>`
+  ).join('');
+}
+
+function renderAll() {
+  renderKPIs();
+  renderConnectionStatus();
+  renderStoreInfo();
+  renderParams();
+  renderSyncLog();
+}
+
+// Connect handler
+document.getElementById('connectBtn').addEventListener('click', async () => {
+  const supplierId = document.getElementById('inputSupplierId').value.trim();
+  const apiKey = document.getElementById('inputApiKey').value.trim();
+  const apiSecret = document.getElementById('inputApiSecret').value.trim();
+  const storeName = document.getElementById('inputStoreName').value.trim();
+  const msg = document.getElementById('formMsg');
+  const btn = document.getElementById('connectBtn');
+
+  if (!supplierId || !apiKey || !apiSecret) {
+    msg.textContent = 'Supplier ID, API Key ve API Secret zorunludur.';
+    msg.className = 'af-msg error';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Test ediliyor...';
+  msg.textContent = 'API bağlantısı kontrol ediliyor...';
+  msg.className = 'af-msg';
+
+  // Simulate API connection test
+  await new Promise(r => setTimeout(r, 1800));
+
+  state.connected = true;
+  state.credentials = { supplierId, apiKey, apiSecret, storeName };
+  mockStoreData.name = storeName || 'Trendyol Mağaza';
+  mockStoreData.supplierId = supplierId;
+  state.store = mockStoreData;
+
+  addSyncLog('<strong>Bağlantı kuruldu.</strong> Trendyol API doğrulandı. ' + mockStoreData.totalProducts + ' ürün senkronize edildi.');
+
+  btn.disabled = false;
+  msg.textContent = 'Bağlantı başarılı! Veriler senkronize edildi.';
+  msg.className = 'af-msg success';
+
+  saveState();
+  renderAll();
+});
+
+// Disconnect handler
+document.getElementById('disconnectBtn').addEventListener('click', async () => {
+  state.connected = false;
+  state.store = null;
+  state.credentials = null;
+
+  document.getElementById('inputSupplierId').value = '';
+  document.getElementById('inputApiKey').value = '';
+  document.getElementById('inputApiSecret').value = '';
+  document.getElementById('inputStoreName').value = '';
+  document.getElementById('formMsg').textContent = '';
+
+  if (currentUid) {
+    try { await deletePlatformConnection(currentUid, PLATFORM); } catch(e) {}
+  }
+  state.syncHistory = [];
+  renderAll();
+});
+
+// Sync handler
+document.getElementById('syncBtn').addEventListener('click', async () => {
+  if (!state.connected) return;
+  const btn = document.getElementById('syncBtn');
+  btn.textContent = '↻ Senkronize ediliyor...';
+  btn.disabled = true;
+  await new Promise(r => setTimeout(r, 1500));
+  addSyncLog('<strong>Senkronizasyon tamamlandı.</strong> ' + mockStoreData.totalProducts + ' ürün, ' + mockStoreData.categories.length + ' kategori güncellendi.');
+  btn.textContent = '↻ Senkronize Et';
+  btn.disabled = false;
+  renderAll();
+});
+
+// Init — renderAll cagrilir, veriler onAuthChange callback'inden yuklenir
+renderAll();
+</script>
+</body>
+</html>

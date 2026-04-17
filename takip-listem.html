@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropScout TR — Takip Listem</title>
+<meta name="description" content="İzlediğiniz ürünlerin AI skorlarını, fiyat değişimlerini ve rekabet durumlarını tek panelden takip edin.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  // Tema anında uygula (FOUC/flaş önleme)
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<link rel="stylesheet" href="/src/css/main.css">
+<script type="module" src="/src/js/main.js"></script>
+<style>
+/* Page-Specific Styles */
+
+/* FILTER PILLS */
+.filter-row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.fpill{padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s;box-shadow:var(--key-shadow);font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px}
+.fpill:hover{border-color:var(--focus-blue-border);color:var(--blue);background:var(--blue-dim)}
+.fpill.active{background:var(--blue-dim);border-color:var(--focus-blue-border);color:var(--blue)}
+.fpill-count{font-family:'Geist Mono',monospace;font-size:9px;padding:1px 6px;border-radius:999px;background:color-mix(in srgb,var(--text) 5%,transparent)}
+.fpill.active .fpill-count{background:color-mix(in srgb,var(--blue) 14%,transparent);color:var(--blue)}
+
+/* CONTENT GRID */
+.content-grid{display:grid;grid-template-columns:minmax(0,1.5fr) 360px;gap:14px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--key-shadow);overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.card-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.ct-tag{font-family:'Geist Mono',monospace;font-size:8px;padding:3px 8px;border-radius:999px;font-weight:700}
+.tag-blue{background:var(--blue-dim);color:var(--blue)}.tag-green{background:var(--green-dim);color:var(--green)}.tag-yellow{background:var(--yellow-dim);color:var(--yellow)}.tag-red{background:var(--red-dim);color:var(--red)}
+
+/* WATCHLIST ITEMS */
+.wl-list{display:flex;flex-direction:column;gap:10px;padding:16px 18px}
+.wl-card{padding:14px;border-radius:14px;border:1px solid var(--border);background:linear-gradient(180deg,var(--surface2),color-mix(in srgb,var(--surface2) 72%,var(--panel-highlight)));box-shadow:var(--soft-shadow);cursor:pointer;transition:all .18s}
+.wl-card:hover{transform:translateY(-1px);box-shadow:var(--key-shadow-strong);border-color:var(--focus-blue-border)}
+.wl-card.selected{border-color:var(--focus-blue-border);box-shadow:var(--key-shadow-strong)}
+.wl-top{display:grid;grid-template-columns:48px 1fr auto;gap:12px;align-items:center;margin-bottom:10px}
+.wl-ring{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;position:relative;background:conic-gradient(var(--green) calc(var(--score)*1%),color-mix(in srgb,var(--text) 8%,transparent) 0)}
+.wl-ring::after{content:'';position:absolute;inset:6px;background:var(--surface2);border-radius:50%}
+.wl-ring span{position:relative;z-index:1;font-family:'Poppins',sans-serif;font-size:12px;font-weight:800}
+.wl-info{min-width:0}
+.wl-name{font-size:13px;font-weight:700;letter-spacing:-.2px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wl-platform{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.wl-delta{text-align:right}
+.wl-delta-val{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700}
+.wl-delta-val.up{color:var(--green)}.wl-delta-val.down{color:var(--red)}.wl-delta-val.flat{color:var(--muted2)}
+.wl-delta-sub{font-size:9px;color:var(--muted2)}
+
+/* SPARKLINE */
+.wl-spark{height:28px;display:flex;align-items:end;gap:2px;margin-bottom:10px}
+.spark-bar{flex:1;border-radius:2px 2px 0 0;transition:height .3s;min-width:0}
+
+/* WATCHLIST METRICS */
+.wl-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:10px}
+.wlm{padding:7px 8px;background:var(--surface);border-radius:8px;border:1px solid var(--border)}
+.wlm-l{font-family:'Geist Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:2px}
+.wlm-v{font-family:'Poppins',sans-serif;font-size:11px;font-weight:700}
+.wlm-v.g{color:var(--green)}.wlm-v.o{color:var(--orange)}.wlm-v.y{color:var(--yellow)}.wlm-v.b{color:var(--blue)}.wlm-v.r{color:var(--red)}
+
+/* STATUS + ACTIONS */
+.wl-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.wl-status{font-family:'Geist Mono',monospace;font-size:9px;padding:4px 9px;border-radius:999px;font-weight:700}
+.ws-sat{background:var(--green-dim);color:var(--green)}.ws-watch{background:var(--yellow-dim);color:var(--yellow)}.ws-risk{background:var(--red-dim);color:var(--red)}
+.wl-actions{display:flex;gap:6px}
+.wla{padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-size:9px;font-weight:700;font-family:'Geist Mono',monospace;color:var(--muted);cursor:pointer;transition:all .15s}
+.wla:hover{border-color:var(--focus-blue-border);color:var(--blue);background:var(--blue-dim)}
+.wla.danger:hover{border-color:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red);background:var(--red-dim)}
+
+/* SIDE PANEL */
+.side-stack{display:flex;flex-direction:column;gap:12px;position:sticky;top:24px}
+.detail-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--key-shadow)}
+.dc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.dc-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.dc-live{display:flex;align-items:center;gap:5px;font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2)}
+.dc-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+.score-hero{display:flex;align-items:center;gap:12px;padding:12px;background:var(--green-dim);border:1px solid var(--focus-green-border);border-radius:14px;margin-bottom:12px}
+.score-hero-num{font-family:'Poppins',sans-serif;font-size:42px;font-weight:800;line-height:1;color:var(--green);letter-spacing:-2px}
+.score-hero-label{font-size:10px;color:var(--muted2);margin-bottom:2px}
+.score-hero-decision{font-family:'Poppins',sans-serif;font-size:14px;font-weight:800;color:var(--green)}
+
+.history-chart{margin-bottom:12px}
+.hc-title{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.hc-bars{display:flex;align-items:end;gap:4px;height:80px;padding:0 2px}
+.hc-bar{flex:1;border-radius:4px 4px 0 0;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;cursor:pointer;transition:all .15s}
+.hc-bar:hover{opacity:.8}
+.hc-bar-val{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted2);margin-bottom:3px}
+.hc-bar-fill{width:100%;border-radius:4px 4px 0 0}
+.hc-labels{display:flex;gap:4px;margin-top:4px}
+.hc-labels span{flex:1;text-align:center;font-family:'Geist Mono',monospace;font-size:7px;color:var(--muted2)}
+
+.alarm-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:12px}
+.alarm-title{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.alarm-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px;font-size:11px}
+.alarm-label{color:var(--muted)}
+.alarm-value{font-family:'Geist Mono',monospace;font-weight:700;font-size:10px}
+.alarm-value.on{color:var(--green)}.alarm-value.off{color:var(--muted2)}
+
+.brief-text{font-size:11.5px;color:var(--muted);line-height:1.75;padding:11px 12px;background:var(--surface2);border-radius:10px;border-left:2px solid var(--purple);margin-bottom:10px}
+.brief-text strong{color:var(--text)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade1{animation:fadeUp .35s ease both}.fade2{animation:fadeUp .35s .05s ease both}.fade3{animation:fadeUp .35s .1s ease both}.fade4{animation:fadeUp .35s .15s ease both}
+@keyframes panelFade{0%{opacity:.6;transform:translateY(3px)}100%{opacity:1;transform:translateY(0)}}.panel-flash{animation:panelFade .25s ease forwards}
+
+@media(max-width:1100px){.content-grid{grid-template-columns:1fr}.side-stack{position:static}}
+@media(max-width:900px){.mobile-menu-btn{display:flex}.sidebar{transform:translateX(-110%);transition:transform .24s;will-change:transform;width:min(82vw,300px);height:100dvh;overflow-y:auto}.sidebar.open{transform:translateX(0)}.main{margin-left:0;padding:18px 16px 26px}.stat-strip{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.stat-strip{grid-template-columns:1fr}.wl-metrics{grid-template-columns:1fr 1fr}.page-title{font-size:17px}}
+@media(max-width:480px){.main{padding:14px 12px 22px}.sb-value{font-size:20px}.score-hero-num{font-size:36px}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="logo"><a class="logo-link" href="./dropscout.html"><div class="logo-icon">🎯</div><div class="logo-text">Drop<span>Scout</span></div></a></div>
+  <div class="nav-group"><div class="nav-label">Keşif</div><a class="nav-item" href="./trend-radar.html"><span class="nav-icon">📡</span>Trend Radar</a><a class="nav-item" href="./gap-radar.html"><span class="nav-icon">🌍</span>Gap Radar <span class="nav-badge nb-purple">YENİ</span></a><a class="nav-item" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi <span class="nav-badge nb-blue">YENİ</span></a><a class="nav-item" href="./rakip-analizi.html"><span class="nav-icon">🔬</span>Rakip Analizi</a></div>
+  <div class="nav-group"><div class="nav-label">Araçlar</div><a class="nav-item" href="./net-kar.html"><span class="nav-icon">💰</span>Net Kâr Hesabı</a><a class="nav-item active" href="./takip-listem.html"><span class="nav-icon">⭐</span>Takip Listem</a><a class="nav-item" href="./yasal-kontrol.html"><span class="nav-icon">⚖️</span>Yasal Kontrol</a><a class="nav-item" href="./tedarikci-bul.html"><span class="nav-icon">🔗</span>Tedarikçi Bul</a><a class="nav-item" href="./raporlar.html"><span class="nav-icon">📊</span>Raporlar</a></div>
+  <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
+  <div class="sidebar-bottom">
+    <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
+    <div class="plan-card"><div class="plan-tier">Pro Plan</div><div class="plan-name">Takip Listem Aktif ✓</div><div class="plan-meta"><span>₺499/ay · 50 ürün limiti</span><div class="upgrade-btn">Yönet</div></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar fade1">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div><div class="page-title">⭐ Takip Listem</div><div class="page-meta">// İZLEDİĞİN ÜRÜNLERİN AI SKORU + FİYAT DEĞİŞİMİ + REKABET DURUMU</div></div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn">↻ Güncelle</button>
+      <button class="icon-btn primary">+ Yeni Ürün Ekle</button>
+    </div>
+  </div>
+
+  <div class="stat-strip fade2">
+    <div class="stat-box b"><div class="sb-label">Toplam İzlenen</div><div class="sb-value b" id="kpiTotal">6</div><div class="sb-sub">Aktif takip</div></div>
+    <div class="stat-box g"><div class="sb-label">Yükselen</div><div class="sb-value g" id="kpiUp">3</div><div class="sb-sub">Son 7 gün +skor</div></div>
+    <div class="stat-box o"><div class="sb-label">Düşen</div><div class="sb-value o" id="kpiDown">1</div><div class="sb-sub">Son 7 gün −skor</div></div>
+    <div class="stat-box y"><div class="sb-label">Uyarı Bekleyen</div><div class="sb-value y" id="kpiAlert">2</div><div class="sb-sub">Alarm eşiğinde</div></div>
+  </div>
+
+  <div class="filter-row fade3" id="filterRow"></div>
+
+  <section class="content-grid fade4">
+    <div>
+      <div class="card">
+        <div class="card-head"><div class="card-title">İzlenen Ürünler</div><div class="ct-tag tag-blue" id="listCount">6 ÜRÜN</div></div>
+        <div class="wl-list" id="wlList"></div>
+      </div>
+    </div>
+    <aside class="side-stack" id="sidePanel">
+      <div class="detail-card" id="scorePanel">
+        <div class="dc-head"><div class="dc-title">AI Skor Durumu</div><div class="dc-live"><div class="dc-dot"></div>CANLI</div></div>
+        <div id="scoreHero"></div>
+        <div class="brief-text" id="briefText"></div>
+      </div>
+      <div class="detail-card" id="historyPanel">
+        <div class="dc-head"><div class="dc-title">7 Günlük Skor Grafiği</div><div class="ct-tag tag-green">TREND</div></div>
+        <div class="history-chart" id="historyChart"></div>
+      </div>
+      <div class="detail-card" id="alarmPanel">
+        <div class="dc-head"><div class="dc-title">Alarm Ayarları</div><div class="ct-tag tag-yellow">BİLDİRİM</div></div>
+        <div id="alarmContent"></div>
+      </div>
+    </aside>
+  </section>
+</main>
+
+<script>
+const watchlist = [
+  { id:1, name:'Minimal Masaüstü Köpük Sabunluk', platform:'Trendyol', category:'Ev & Yaşam', score:91, delta:+4, margin:26.7, competitors:18, legal:'SERBEST', status:'sat', statusLabel:'SATILIR', history:[84,86,87,88,89,90,91], alarms:{priceDown:true,scoreAlert:true,newCompetitor:false}, brief:'Son 7 günde istikrarlı yükseliş. Rakip baskısı düşük, görsel kalite avantajı korunuyor. Giriş penceresi hâlâ açık.' },
+  { id:2, name:'Kablosuz Şarjlı Mini Blender', platform:'Hepsiburada', category:'Mutfak', score:86, delta:+2, margin:29.2, competitors:24, legal:'SERBEST', status:'sat', statusLabel:'SATILIR', history:[80,82,83,84,85,85,86], alarms:{priceDown:true,scoreAlert:false,newCompetitor:true}, brief:'Video içeriklerle güçlü dönüşüm potansiyeli. Rakip görselleri zayıf, öncü avantaj mevcut.' },
+  { id:3, name:'Katlanabilir Laptop Yükseltici Stand', platform:'Trendyol', category:'Ofis', score:85, delta:+3, margin:25.5, competitors:22, legal:'SERBEST', status:'sat', statusLabel:'SATILIR', history:[79,80,81,82,83,84,85], alarms:{priceDown:false,scoreAlert:true,newCompetitor:false}, brief:'Ev-ofis segmentinde kalıcı talep. Ergonomi teması güçlü ve sezon bağımsız satış yapılabilir.' },
+  { id:4, name:'Katlanır Dar Alan Temizlik Seti', platform:'Trendyol', category:'Pratik', score:78, delta:-2, margin:22.1, competitors:31, legal:'SERBEST', status:'watch', statusLabel:'İZLENMELİ', history:[82,81,80,79,79,78,78], alarms:{priceDown:true,scoreAlert:true,newCompetitor:true}, brief:'Rakip sayısı artıyor ve fiyat baskısı hissediliyor. Marj koruması için farklılaşma gerekli.' },
+  { id:5, name:'Araç İçi Manyetik Kablo Düzenleyici', platform:'Amazon TR', category:'Oto Aksesuar', score:69, delta:-5, margin:18.2, competitors:38, legal:'SERBEST', status:'risk', statusLabel:'RİSKLİ', history:[78,76,74,73,71,70,69], alarms:{priceDown:true,scoreAlert:true,newCompetitor:true}, brief:'Hızlı düşüş trendi! Rakip yoğunluğu kritik seviyeye ulaştı. Fiyat savaşı devam ederse çıkış değerlendirilmeli.' },
+  { id:6, name:'Vakumlu Buzdolabı Düzenleyici Set', platform:'Amazon TR', category:'Mutfak Düzeni', score:89, delta:+1, margin:24.9, competitors:15, legal:'SERBEST', status:'sat', statusLabel:'SATILIR', history:[86,87,87,88,88,89,89], alarms:{priceDown:false,scoreAlert:false,newCompetitor:true}, brief:'Düşük rekabet ve güçlü hikâye potansiyeli. Kullanım senaryosu görsellerle dönüşüm artırılabilir.' }
+];
+
+let selectedId = 1;
+let activeFilter = 'all';
+
+const filters = [
+  { key:'all', label:'Tümü' },
+  { key:'sat', label:'Satılır' },
+  { key:'watch', label:'İzlenmeli' },
+  { key:'risk', label:'Riskli' }
+];
+
+function getFiltered(){
+  if(activeFilter === 'all') return watchlist;
+  return watchlist.filter(w => w.status === activeFilter);
+}
+
+function renderFilterRow(){
+  document.getElementById('filterRow').innerHTML = filters.map(f => {
+    const count = f.key === 'all' ? watchlist.length : watchlist.filter(w => w.status === f.key).length;
+    return `<button class="fpill${f.key === activeFilter ? ' active' : ''}" onclick="setFilter('${f.key}')">${f.label} <span class="fpill-count">${count}</span></button>`;
+  }).join('');
+}
+
+function setFilter(f){ activeFilter = f; renderFilterRow(); renderList(); }
+
+function sparkColor(val, max){ const pct = val/max; return pct >= .85 ? 'var(--green)' : pct >= .7 ? 'var(--yellow)' : 'var(--orange)'; }
+
+function renderList(){
+  const list = getFiltered();
+  document.getElementById('listCount').textContent = list.length + ' ÜRÜN';
+  document.getElementById('wlList').innerHTML = list.map(w => {
+    const maxH = Math.max(...w.history);
+    const sparkBars = w.history.map(h => `<div class="spark-bar" style="height:${(h/maxH*100)}%;background:${sparkColor(h,100)}"></div>`).join('');
+    const deltaPrefix = w.delta > 0 ? '+' : '';
+    const deltaClass = w.delta > 0 ? 'up' : w.delta < 0 ? 'down' : 'flat';
+    const statusClass = w.status === 'sat' ? 'ws-sat' : w.status === 'watch' ? 'ws-watch' : 'ws-risk';
+    return `<div class="wl-card${w.id===selectedId?' selected':''}" onclick="selectItem(${w.id})">
+      <div class="wl-top">
+        <div class="wl-ring" style="--score:${w.score}"><span>${w.score}</span></div>
+        <div class="wl-info">
+          <div class="wl-name">${w.name}</div>
+          <div class="wl-platform">${w.platform} · ${w.category} · <span class="wl-status ${statusClass}">${w.statusLabel}</span></div>
+        </div>
+        <div class="wl-delta"><div class="wl-delta-val ${deltaClass}">${deltaPrefix}${w.delta}</div><div class="wl-delta-sub">7 gün</div></div>
+      </div>
+      <div class="wl-spark">${sparkBars}</div>
+      <div class="wl-metrics">
+        <div class="wlm"><div class="wlm-l">Net Marj</div><div class="wlm-v ${w.margin>=22?'g':w.margin>=15?'y':'o'}">%${w.margin}</div></div>
+        <div class="wlm"><div class="wlm-l">Rakip</div><div class="wlm-v ${w.competitors>=30?'r':w.competitors>=20?'y':'g'}">${w.competitors}</div></div>
+        <div class="wlm"><div class="wlm-l">Yasal</div><div class="wlm-v g">${w.legal}</div></div>
+        <div class="wlm"><div class="wlm-l">Trend</div><div class="wlm-v ${w.delta>0?'g':w.delta<0?'r':'y'}">${w.delta>0?'↑ Yükselen':w.delta<0?'↓ Düşen':'→ Sabit'}</div></div>
+      </div>
+      <div class="wl-foot">
+        <div class="wl-actions">
+          <button class="wla">📊 Analiz Et</button>
+          <button class="wla">🔔 Alarm</button>
+          <button class="wla danger">✕ Kaldır</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selectItem(id){
+  selectedId = id;
+  renderList();
+  renderDetail();
+}
+
+function renderDetail(){
+  const w = watchlist.find(x => x.id === selectedId);
+  if(!w) return;
+
+  const decColor = w.score >= 80 ? 'var(--green)' : w.score >= 65 ? 'var(--yellow)' : 'var(--red)';
+  const bgDim = w.score >= 80 ? 'green' : w.score >= 65 ? 'yellow' : 'red';
+  const borderVar = w.score >= 80 ? 'var(--focus-green-border)' : `color-mix(in srgb,var(--${bgDim}) 18%,transparent)`;
+  document.getElementById('scoreHero').innerHTML = `
+    <div class="score-hero" style="background:var(--${bgDim}-dim);border-color:${borderVar}">
+      <div class="score-hero-num" style="color:${decColor}">${w.score}</div>
+      <div><div class="score-hero-label">Güncel AI Skoru</div><div class="score-hero-decision" style="color:${decColor}">${w.statusLabel}</div></div>
+    </div>`;
+  document.getElementById('briefText').innerHTML = w.brief;
+
+  const maxH = 100;
+  const days = ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'];
+  document.getElementById('historyChart').innerHTML = `
+    <div class="hc-title">Son 7 Gün Performansı</div>
+    <div class="hc-bars">${w.history.map((h,i) => `<div class="hc-bar"><div class="hc-bar-val">${h}</div><div class="hc-bar-fill" style="height:${h/maxH*100}%;background:${h>=80?'var(--green)':h>=65?'var(--yellow)':'var(--orange)'}"></div></div>`).join('')}</div>
+    <div class="hc-labels">${days.map(d => `<span>${d}</span>`).join('')}</div>`;
+
+  document.getElementById('alarmContent').innerHTML = `
+    <div class="alarm-card">
+      <div class="alarm-title">Bildirim Tercihleri</div>
+      <div class="alarm-row"><div class="alarm-label">Fiyat düşünce bildir</div><div class="alarm-value ${w.alarms.priceDown?'on':'off'}">${w.alarms.priceDown?'✓ AÇIK':'✕ KAPALI'}</div></div>
+      <div class="alarm-row"><div class="alarm-label">Skor değişiminde uyar</div><div class="alarm-value ${w.alarms.scoreAlert?'on':'off'}">${w.alarms.scoreAlert?'✓ AÇIK':'✕ KAPALI'}</div></div>
+      <div class="alarm-row"><div class="alarm-label">Yeni rakip girişinde bildir</div><div class="alarm-value ${w.alarms.newCompetitor?'on':'off'}">${w.alarms.newCompetitor?'✓ AÇIK':'✕ KAPALI'}</div></div>
+    </div>`;
+
+  document.querySelectorAll('#scorePanel,#historyPanel,#alarmPanel').forEach(el => { el.classList.remove('panel-flash'); void el.offsetWidth; el.classList.add('panel-flash'); });
+}
+
+function updateKPIs(){
+  document.getElementById('kpiTotal').textContent = watchlist.length;
+  document.getElementById('kpiUp').textContent = watchlist.filter(w=>w.delta>0).length;
+  document.getElementById('kpiDown').textContent = watchlist.filter(w=>w.delta<0).length;
+  document.getElementById('kpiAlert').textContent = watchlist.filter(w=>w.status==='watch'||w.status==='risk').length;
+}
+
+renderFilterRow(); updateKPIs(); renderList(); renderDetail();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropScout TR — Profil Ayarları</title>
+<meta name="description" content="Hesap bilgilerinizi ve profil ayarlarınızı yönetin.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<link rel="stylesheet" href="/src/css/main.css">
+<script type="module" src="/src/js/main.js"></script>
+<style>
+/* PROFILE PAGE */
+.profile-grid{display:grid;grid-template-columns:1fr 340px;gap:14px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--key-shadow);overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);gap:10px}
+.card-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.ct-tag{font-family:'Geist Mono',monospace;font-size:8px;padding:3px 8px;border-radius:999px;font-weight:700}
+.tag-blue{background:var(--blue-dim);color:var(--blue)}
+.tag-green{background:var(--green-dim);color:var(--green)}
+.tag-purple{background:var(--purple-dim);color:var(--purple)}
+
+.card-body{padding:18px}
+
+.pf-group{margin-bottom:18px}
+.pf-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.pf-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'Inter',sans-serif}
+.pf-input:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
+.pf-input::placeholder{color:var(--muted2);font-size:12px}
+.pf-input:disabled{opacity:.6;cursor:not-allowed}
+
+.pf-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+.pf-btn{padding:11px 24px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Geist Mono',monospace;border:none;transition:all .2s;letter-spacing:.3px}
+.pf-btn.primary{background:linear-gradient(135deg,var(--orange),#ff8a00);color:#fff;box-shadow:0 2px 10px rgba(255,106,0,0.3)}
+.pf-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(255,106,0,0.4)}
+.pf-btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
+.pf-btn.ghost{background:transparent;border:1px solid var(--border2);color:var(--text)}
+.pf-btn.ghost:hover{border-color:var(--focus-blue-border)}
+
+.pf-msg{font-size:11px;padding:10px 14px;border-radius:10px;font-weight:600;margin-bottom:14px;display:none}
+.pf-msg.success{display:block;background:var(--green-dim);color:var(--green)}
+.pf-msg.error{display:block;background:var(--orange-dim);color:var(--orange)}
+
+/* PLAN INFO */
+.plan-info{padding:18px}
+.pi-current{display:flex;align-items:center;gap:12px;padding:16px;border-radius:12px;background:linear-gradient(135deg,var(--purple-dim),var(--blue-dim));border:1px solid rgba(99,102,241,0.16);margin-bottom:16px}
+.pi-icon{font-size:28px}
+.pi-name{font-size:15px;font-weight:700;margin-bottom:2px}
+.pi-price{font-size:11px;color:var(--muted);font-family:'Geist Mono',monospace}
+.pi-features{display:flex;flex-direction:column;gap:8px}
+.pi-feat{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:6px}
+.pi-feat::before{content:'✓';color:var(--green);font-weight:700;font-size:10px}
+
+/* ACCOUNT ACTIONS */
+.account-actions{padding:18px;display:flex;flex-direction:column;gap:10px}
+.aa-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text)}
+.aa-item:hover{border-color:var(--focus-blue-border);background:var(--surface)}
+.aa-item.danger{color:var(--red)}
+.aa-item.danger:hover{border-color:var(--red);background:rgba(239,68,68,0.06)}
+.aa-icon{font-size:16px;width:24px;text-align:center}
+
+/* AVATAR DISPLAY */
+.profile-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ff8a00);color:#fff;font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 4px 16px rgba(255,106,0,0.25)}
+
+@media(max-width:900px){
+  .profile-grid{grid-template-columns:1fr}
+  .mobile-menu-btn{display:flex}
+  .sidebar{transform:translateX(-110%);transition:transform .24s;will-change:transform;width:min(82vw,300px);height:100dvh;overflow-y:auto}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0;padding:18px 16px 26px}
+}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="logo"><a class="logo-link" href="./dropscout.html"><div class="logo-icon">🎯</div><div class="logo-text">Drop<span>Scout</span></div></a></div>
+  <div class="nav-group"><div class="nav-label">Keşif</div><a class="nav-item" href="./trend-radar.html"><span class="nav-icon">📡</span>Trend Radar</a><a class="nav-item" href="./gap-radar.html"><span class="nav-icon">🌍</span>Gap Radar <span class="nav-badge nb-purple">YENİ</span></a><a class="nav-item" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi <span class="nav-badge nb-blue">YENİ</span></a><a class="nav-item" href="./rakip-analizi.html"><span class="nav-icon">🔬</span>Rakip Analizi</a></div>
+  <div class="nav-group"><div class="nav-label">Araçlar</div><a class="nav-item" href="./net-kar.html"><span class="nav-icon">💰</span>Net Kâr Hesabı</a><a class="nav-item" href="./takip-listem.html"><span class="nav-icon">⭐</span>Takip Listem</a><a class="nav-item" href="./yasal-kontrol.html"><span class="nav-icon">⚖️</span>Yasal Kontrol</a><a class="nav-item" href="./tedarikci-bul.html"><span class="nav-icon">🔗</span>Tedarikçi Bul</a><a class="nav-item" href="./raporlar.html"><span class="nav-icon">📊</span>Raporlar</a></div>
+  <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
+  <div class="sidebar-bottom">
+    <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
+    <div class="plan-card"><div class="plan-tier">Pro Plan</div><div class="plan-name">Profil Ayarları</div><div class="plan-meta"><span>Hesap yönetimi</span><div class="upgrade-btn">Yönet</div></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar fade1">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div><div class="page-title">👤 Profil Ayarları</div><div class="page-meta">// HESAP BİLGİLERİ VE TERCİHLER</div></div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn" id="saveTopBtn">💾 Kaydet</button>
+    </div>
+  </div>
+
+  <div class="profile-grid">
+    <!-- LEFT: Profile Form -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Hesap Bilgileri</div>
+        <div class="ct-tag tag-blue">DÜZENLE</div>
+      </div>
+      <div class="card-body">
+        <div id="profileMsg" class="pf-msg"></div>
+
+        <div class="profile-avatar" id="profileAvatar">?</div>
+
+        <div class="pf-row">
+          <div class="pf-group">
+            <div class="pf-label">Ad Soyad</div>
+            <input class="pf-input" id="pfName" type="text" placeholder="Ad Soyad">
+          </div>
+          <div class="pf-group">
+            <div class="pf-label">E-posta Adresi</div>
+            <input class="pf-input" id="pfEmail" type="email" placeholder="ornek@firma.com" disabled>
+          </div>
+        </div>
+
+        <div class="pf-row">
+          <div class="pf-group">
+            <div class="pf-label">Telefon Numarası</div>
+            <input class="pf-input" id="pfPhone" type="tel" placeholder="05XX XXX XX XX">
+          </div>
+          <div class="pf-group">
+            <div class="pf-label">Mağaza Adı</div>
+            <input class="pf-input" id="pfStore" type="text" placeholder="örn. TechMart Mağazası">
+          </div>
+        </div>
+
+        <div class="pf-row">
+          <div class="pf-group">
+            <div class="pf-label">KDV Durumu</div>
+            <input class="pf-input" id="pfVat" type="text" placeholder="Tam mükellef / Basit usul" disabled>
+          </div>
+          <div class="pf-group">
+            <div class="pf-label">Kayıt Tarihi</div>
+            <input class="pf-input" id="pfCreated" type="text" disabled>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:8px">
+          <button class="pf-btn primary" id="saveBtn">Değişiklikleri Kaydet</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Plan + Actions -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <!-- Plan -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Plan Bilgisi</div>
+          <div class="ct-tag tag-purple" id="planTag">FREE</div>
+        </div>
+        <div class="plan-info">
+          <div class="pi-current">
+            <div class="pi-icon" id="planIcon">🎁</div>
+            <div>
+              <div class="pi-name" id="planName">Ücretsiz Plan</div>
+              <div class="pi-price" id="planPrice">₺0/ay</div>
+            </div>
+          </div>
+          <div class="pi-features" id="planFeatures">
+            <div class="pi-feat">Temel özellikler</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Actions -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Hesap İşlemleri</div>
+        </div>
+        <div class="account-actions">
+          <div class="aa-item" id="changePassBtn">
+            <span class="aa-icon">🔑</span> Şifre Değiştir
+          </div>
+          <div class="aa-item" id="logoutBtn">
+            <span class="aa-icon">🚪</span> Çıkış Yap
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script type="module">
+import { onAuthChange, logout, resetPassword } from '/src/js/auth.js';
+import { getUserProfile, updateUserProfile } from '/src/js/store.js';
+
+let currentUser = null;
+
+onAuthChange(async (user) => {
+  if (!user) return;
+  currentUser = user;
+
+  // Profil verilerini yukle
+  try {
+    const profile = await getUserProfile(user.uid);
+    if (profile) {
+      document.getElementById('pfName').value = profile.displayName || '';
+      document.getElementById('pfEmail').value = profile.email || user.email || '';
+      document.getElementById('pfPhone').value = profile.phone || '';
+      document.getElementById('pfStore').value = profile.storeName || '';
+      document.getElementById('pfVat').value = profile.vatStatus || 'Belirtilmedi';
+
+      if (profile.createdAt) {
+        const d = profile.createdAt.toDate ? profile.createdAt.toDate() : new Date(profile.createdAt);
+        document.getElementById('pfCreated').value = d.toLocaleDateString('tr-TR', { year:'numeric', month:'long', day:'numeric' });
+      }
+
+      // Plan
+      const plan = profile.plan || 'free';
+      const planTag = document.getElementById('planTag');
+      const planName = document.getElementById('planName');
+      const planPrice = document.getElementById('planPrice');
+      const planIcon = document.getElementById('planIcon');
+      const planFeatures = document.getElementById('planFeatures');
+
+      if (plan === 'pro') {
+        planTag.textContent = 'PRO';
+        planName.textContent = 'Pro Plan';
+        planPrice.textContent = '₺499/ay';
+        planIcon.textContent = '🚀';
+        planFeatures.innerHTML = `
+          <div class="pi-feat">Link Analiz (Sınırsız)</div>
+          <div class="pi-feat">Trend Radar</div>
+          <div class="pi-feat">Tüm Platformlar</div>
+          <div class="pi-feat">Gap Radar</div>
+          <div class="pi-feat">AI Skor</div>
+          <div class="pi-feat">Öncelikli destek</div>
+        `;
+      } else if (plan === 'starter') {
+        planTag.textContent = 'STARTER';
+        planName.textContent = 'Starter Plan';
+        planPrice.textContent = '₺299/ay';
+        planIcon.textContent = '⭐';
+        planFeatures.innerHTML = `
+          <div class="pi-feat">Link Analiz (50/ay)</div>
+          <div class="pi-feat">Trend Radar</div>
+          <div class="pi-feat">1 Platform</div>
+          <div class="pi-feat">E-posta desteği</div>
+        `;
+      }
+
+      // Avatar bas harfleri
+      const name = profile.displayName || user.email || '';
+      const parts = name.trim().split(/\s+/);
+      const initials = parts.length >= 2
+        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+        : name.substring(0, 2).toUpperCase();
+      document.getElementById('profileAvatar').textContent = initials;
+    }
+  } catch (e) {
+    console.warn('Profil yüklenemedi:', e);
+    document.getElementById('pfEmail').value = user.email || '';
+  }
+});
+
+// Kaydet
+async function saveProfile() {
+  if (!currentUser) return;
+  const btn = document.getElementById('saveBtn');
+  const msg = document.getElementById('profileMsg');
+  btn.disabled = true;
+  btn.textContent = 'Kaydediliyor...';
+
+  try {
+    await updateUserProfile(currentUser.uid, {
+      displayName: document.getElementById('pfName').value.trim(),
+      phone: document.getElementById('pfPhone').value.trim(),
+      storeName: document.getElementById('pfStore').value.trim()
+    });
+    msg.textContent = 'Profil bilgileri başarıyla güncellendi.';
+    msg.className = 'pf-msg success';
+  } catch (e) {
+    msg.textContent = 'Güncelleme başarısız: ' + (e.message || e);
+    msg.className = 'pf-msg error';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Değişiklikleri Kaydet';
+  setTimeout(() => { msg.className = 'pf-msg'; }, 4000);
+}
+
+document.getElementById('saveBtn').addEventListener('click', saveProfile);
+document.getElementById('saveTopBtn').addEventListener('click', saveProfile);
+
+// Sifre degistir
+document.getElementById('changePassBtn').addEventListener('click', async () => {
+  if (!currentUser || !currentUser.email) return;
+  try {
+    await resetPassword(currentUser.email);
+    const msg = document.getElementById('profileMsg');
+    msg.textContent = 'Şifre sıfırlama linki e-posta adresinize gönderildi.';
+    msg.className = 'pf-msg success';
+    setTimeout(() => { msg.className = 'pf-msg'; }, 4000);
+  } catch (e) {
+    alert('Hata: ' + e.message);
+  }
+});
+
+// Cikis yap
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await logout();
+  window.location.href = './login.html';
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropScout TR — Tedarikçi Bul</title>
+<meta name="description" content="AliExpress, CJ Dropshipping ve Alibaba tedarikçi eşleştirmesi yapın. Fiyat karşılaştırması, güvenilirlik skoru ve kargo bilgileri.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  // Tema anında uygula (FOUC/flaş önleme)
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<link rel="stylesheet" href="/src/css/main.css">
+<script type="module" src="/src/js/main.js"></script>
+<style>
+/* Page-Specific Styles */
+
+.search-module{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:18px;box-shadow:var(--key-shadow);position:relative;overflow:hidden}
+.search-module::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--orange),var(--yellow),transparent)}
+.sm-row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.sm-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:180px}
+.sm-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
+.sm-input{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.sm-input:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
+.sm-select{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:12px;color:var(--text);font-family:'Geist Mono',monospace;cursor:pointer;outline:none;appearance:none;width:100%;transition:border-color .2s}
+.sm-btn{padding:11px 20px;background:linear-gradient(135deg,var(--orange),var(--yellow));color:#fff;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Geist Mono',monospace;border:none;white-space:nowrap;box-shadow:var(--button-shadow);transition:all .2s}
+.sm-btn:hover{transform:translateY(-1px)}
+
+.content-grid{display:grid;grid-template-columns:minmax(0,1.5fr) 360px;gap:14px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--key-shadow);overflow:hidden}
+.card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.card-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.ct-tag{font-family:'Geist Mono',monospace;font-size:8px;padding:3px 8px;border-radius:999px;font-weight:700}
+.tag-blue{background:var(--blue-dim);color:var(--blue)}.tag-green{background:var(--green-dim);color:var(--green)}.tag-yellow{background:var(--yellow-dim);color:var(--yellow)}.tag-orange{background:var(--orange-dim);color:var(--orange)}.tag-purple{background:var(--purple-dim);color:var(--purple)}
+
+/* SUPPLIER LIST */
+.sup-list{display:flex;flex-direction:column;gap:10px;padding:16px 18px}
+.sup-card{padding:14px;border-radius:14px;border:1px solid var(--border);background:linear-gradient(180deg,var(--surface2),color-mix(in srgb,var(--surface2) 72%,var(--panel-highlight)));box-shadow:var(--soft-shadow);cursor:pointer;transition:all .18s}
+.sup-card:hover{transform:translateY(-1px);box-shadow:var(--key-shadow-strong);border-color:var(--focus-blue-border)}
+.sup-card.selected{border-color:var(--focus-blue-border);box-shadow:var(--key-shadow-strong);background:color-mix(in srgb,var(--blue-dim) 30%,var(--surface2))}
+.sc-top{display:grid;grid-template-columns:42px 1fr auto;gap:12px;align-items:center;margin-bottom:10px}
+.sc-avatar{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid var(--border)}
+.sc-avatar.ali{background:var(--orange-dim)}.sc-avatar.cj{background:var(--blue-dim)}.sc-avatar.baba{background:var(--yellow-dim)}
+.sc-info{min-width:0}
+.sc-name{font-size:13px;font-weight:700;letter-spacing:-.2px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sc-source{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2)}
+.sc-trust{padding:4px 8px;border-radius:999px;font-size:9px;font-weight:700;font-family:'Geist Mono',monospace}
+.trust-high{background:var(--green-dim);color:var(--green)}.trust-med{background:var(--yellow-dim);color:var(--yellow)}.trust-low{background:var(--orange-dim);color:var(--orange)}
+
+.sc-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.scm{padding:8px;background:var(--surface);border-radius:9px;border:1px solid var(--border)}
+.scm-l{font-family:'Geist Mono',monospace;font-size:7.5px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+.scm-v{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;letter-spacing:-.3px}
+.scm-v.g{color:var(--green)}.scm-v.o{color:var(--orange)}.scm-v.b{color:var(--blue)}.scm-v.y{color:var(--yellow)}
+
+.sc-tags{display:flex;gap:5px;flex-wrap:wrap}
+.sc-tag{font-family:'Geist Mono',monospace;font-size:8px;padding:3px 7px;border-radius:999px;background:color-mix(in srgb,var(--text) 4%,transparent);color:var(--muted);font-weight:600}
+
+/* SIDE PANEL */
+.side-stack{display:flex;flex-direction:column;gap:12px;position:sticky;top:24px}
+.detail-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--key-shadow)}
+.dc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
+.dc-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
+.dc-live{display:flex;align-items:center;gap:5px;font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2)}
+.dc-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* PRICE COMPARE */
+.price-compare{margin-bottom:12px}
+.pc-row{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);margin-bottom:6px}
+.pc-label{font-size:10px;color:var(--muted);font-weight:600}
+.pc-val{font-family:'Poppins',sans-serif;font-size:14px;font-weight:800}
+.pc-val.g{color:var(--green)}.pc-val.o{color:var(--orange)}.pc-val.b{color:var(--blue)}.pc-val.y{color:var(--yellow)}
+
+/* RELIABILITY */
+.rel-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.rel{padding:10px;border-radius:10px;background:var(--surface2);border:1px solid var(--border)}
+.rel-label{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.rel-value{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700}
+.rel-value.g{color:var(--green)}.rel-value.o{color:var(--orange)}.rel-value.y{color:var(--yellow)}.rel-value.b{color:var(--blue)}
+.rel-sub{font-size:9px;color:var(--muted2);margin-top:2px}
+
+/* AI STRATEGY */
+.advice-text{font-size:11.5px;color:var(--muted);line-height:1.75;padding:12px;background:var(--surface2);border-radius:10px;border-left:2px solid var(--orange);margin-bottom:10px}
+.advice-text strong{color:var(--text)}
+.advice-actions{display:flex;flex-direction:column;gap:7px}
+.aa-item{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;gap:8px}
+.aa-item:hover{border-color:var(--focus-blue-border);background:var(--blue-dim);color:var(--blue)}
+.aa-arrow{color:var(--muted2);font-size:10px;transition:.15s}
+.aa-item:hover .aa-arrow{color:var(--blue);transform:translateX(2px)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade1{animation:fadeUp .35s ease both}.fade2{animation:fadeUp .35s .05s ease both}.fade3{animation:fadeUp .35s .1s ease both}.fade4{animation:fadeUp .35s .15s ease both}
+@keyframes panelFade{0%{opacity:.6;transform:translateY(3px)}100%{opacity:1;transform:translateY(0)}}.panel-flash{animation:panelFade .25s ease forwards}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+@media(max-width:1200px){.content-grid{grid-template-columns:1fr 340px}}
+@media(max-width:1100px){.content-grid{grid-template-columns:1fr}.side-stack{position:static}}
+@media(max-width:900px){.mobile-menu-btn{display:flex}.sidebar{transform:translateX(-110%);transition:transform .24s;will-change:transform;width:min(82vw,300px);height:100dvh;overflow-y:auto}.sidebar.open{transform:translateX(0)}.main{margin-left:0;padding:18px 16px 26px}.stat-strip{grid-template-columns:repeat(2,1fr)}.sm-row{flex-direction:column}.sm-group{min-width:0}}
+@media(max-width:700px){.stat-strip{grid-template-columns:1fr}.sc-metrics{grid-template-columns:1fr 1fr}.rel-grid{grid-template-columns:1fr}.page-title{font-size:17px}}
+@media(max-width:480px){.main{padding:14px 12px 22px}.sb-value{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="logo"><a class="logo-link" href="./dropscout.html"><div class="logo-icon">🎯</div><div class="logo-text">Drop<span>Scout</span></div></a></div>
+  <div class="nav-group"><div class="nav-label">Keşif</div><a class="nav-item" href="./trend-radar.html"><span class="nav-icon">📡</span>Trend Radar</a><a class="nav-item" href="./gap-radar.html"><span class="nav-icon">🌍</span>Gap Radar <span class="nav-badge nb-purple">YENİ</span></a><a class="nav-item" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi <span class="nav-badge nb-blue">YENİ</span></a><a class="nav-item" href="./rakip-analizi.html"><span class="nav-icon">🔬</span>Rakip Analizi</a></div>
+  <div class="nav-group"><div class="nav-label">Araçlar</div><a class="nav-item" href="./net-kar.html"><span class="nav-icon">💰</span>Net Kâr Hesabı</a><a class="nav-item" href="./takip-listem.html"><span class="nav-icon">⭐</span>Takip Listem</a><a class="nav-item" href="./yasal-kontrol.html"><span class="nav-icon">⚖️</span>Yasal Kontrol</a><a class="nav-item active" href="./tedarikci-bul.html"><span class="nav-icon">🔗</span>Tedarikçi Bul</a><a class="nav-item" href="./raporlar.html"><span class="nav-icon">📊</span>Raporlar</a></div>
+  <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
+  <div class="sidebar-bottom">
+    <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
+    <div class="plan-card"><div class="plan-tier">Pro Plan</div><div class="plan-name">Tedarikçi Radar Aktif ✓</div><div class="plan-meta"><span>₺499/ay · Sınırsız arama</span><div class="upgrade-btn">Yönet</div></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar fade1">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div>
+        <div class="page-title">🔗 Tedarikçi Bul</div>
+        <div class="page-meta">// ALIEXPRESS · CJ DROPSHIPPING · ALIBABA · FİYAT + GÜVENİLİRLİK + KARGO ANALİZİ</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn">↻ Güncelle</button>
+      <button class="icon-btn">📥 Rapor İndir</button>
+      <button class="icon-btn primary">+ Yeni Ürün Ara</button>
+    </div>
+  </div>
+
+  <div class="stat-strip fade2">
+    <div class="stat-box g"><div class="sb-label">Eşleşen</div><div class="sb-value g" id="kpiMatch">7</div><div class="sb-sub">Tedarikçi bulundu</div></div>
+    <div class="stat-box o"><div class="sb-label">En Ucuz</div><div class="sb-value o" id="kpiCheap">$2.80</div><div class="sb-sub">Birim maliyet</div></div>
+    <div class="stat-box b"><div class="sb-label">Ort. Kargo</div><div class="sb-value b" id="kpiShip">12 gün</div><div class="sb-sub">TR'ye teslimat</div></div>
+    <div class="stat-box y"><div class="sb-label">En Güvenilir</div><div class="sb-value y" id="kpiTrust">4.9 ⭐</div><div class="sb-sub">Mağaza puanı</div></div>
+  </div>
+
+  <div class="search-module fade3">
+    <div class="sm-row">
+      <div class="sm-group" style="flex:2">
+        <div class="sm-label">Ürün Adı veya Link</div>
+        <input class="sm-input" id="searchInput" value="Minimal Masaüstü Köpük Sabunluk" placeholder="Ürün adı veya AliExpress linki girin...">
+      </div>
+      <div class="sm-group" style="flex:.7">
+        <div class="sm-label">Kaynak</div>
+        <select class="sm-select" id="searchSource">
+          <option selected>Tümü</option><option>AliExpress</option><option>CJ Dropshipping</option><option>Alibaba</option>
+        </select>
+      </div>
+      <div class="sm-group" style="flex:.6">
+        <div class="sm-label">Sıralama</div>
+        <select class="sm-select" id="searchSort">
+          <option>Fiyat ↑</option><option>Güvenilirlik ↓</option><option>Kargo Hızı ↑</option><option>Sipariş ↓</option>
+        </select>
+      </div>
+      <button class="sm-btn" onclick="renderAll()">🔍 Tedarikçi Ara</button>
+    </div>
+  </div>
+
+  <section class="content-grid fade4">
+    <div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Tedarikçi Eşleşmeleri</div>
+          <div class="ct-tag tag-orange" id="listCount">7 TEDARİKÇİ</div>
+        </div>
+        <div class="sup-list" id="supList"></div>
+      </div>
+    </div>
+
+    <aside class="side-stack">
+      <div class="detail-card" id="pricePanel">
+        <div class="dc-head"><div class="dc-title">Fiyat Karşılaştırma</div><div class="dc-live"><div class="dc-dot"></div>CANLI</div></div>
+        <div class="price-compare" id="priceCompare"></div>
+      </div>
+      <div class="detail-card" id="relPanel">
+        <div class="dc-head"><div class="dc-title">Güvenilirlik Analizi</div><div class="ct-tag tag-green">SKOR</div></div>
+        <div class="rel-grid" id="relGrid"></div>
+      </div>
+      <div class="detail-card" id="advicePanel">
+        <div class="dc-head"><div class="dc-title">AI Tedarik Önerisi</div><div class="ct-tag tag-yellow">TAVSİYE</div></div>
+        <div class="advice-text" id="adviceText"></div>
+        <div class="advice-actions" id="adviceActions"></div>
+      </div>
+    </aside>
+  </section>
+</main>
+
+<script>
+const suppliers = [
+  { id:1, name:'Shenzhen GreenHome Co.', source:'AliExpress', emoji:'🏭', type:'ali',
+    price:3.20, moq:10, shipping:14, rating:4.8, orders:8420, trust:'high', trustLabel:'YÜKSEK',
+    tags:['ÜCRETSİZ KARGO','HIZLI SEVK','VİDEOLU'],
+    advice:'<strong>En iyi fiyat/kalite oranı.</strong> Yüksek satış hacmi ve güçlü puan. ePacket ile 14 günde teslimat yapılıyor. İlk deneme siparişi verilebilir.',
+    actions:['Fiyat teklifi iste','Örnek sipariş ver','Mağaza iletişim bilgilerini al','Alternatif ürün listesini gör'] },
+  { id:2, name:'CJ Soap Dispenser Line', source:'CJ Dropshipping', emoji:'📦', type:'cj',
+    price:3.85, moq:1, shipping:8, rating:4.9, orders:3210, trust:'high', trustLabel:'YÜKSEK',
+    tags:['MOQ YOK','TR DEPO','HIZLI SEVK','BRANDED'],
+    advice:'<strong>Türkiye deposu avantajı!</strong> MOQ olmadan tek parça sipariş verilebilir. Branding hizmeti mevcut. Kargo süresi sadece 8 gün.',
+    actions:['CJ hesabıyla bağlan','Branding seçeneklerini gör','Depo stok durumunu kontrol et','Otomatik sipariş kur'] },
+  { id:3, name:'Yiwu MinimalLife Trading', source:'Alibaba', emoji:'🏪', type:'baba',
+    price:2.80, moq:100, shipping:18, rating:4.6, orders:15800, trust:'med', trustLabel:'ORTA',
+    tags:['EN UCUZ','TOPTAN','ÖZELLEŞTİRME'],
+    advice:'En düşük birim fiyat ama yüksek MOQ. Toptan alım yapılacaksa ideal. Özelleştirme (logo, renk) imkânı var ama ilk sipariş riskli.',
+    actions:['Toptan fiyat teklifi al','Özelleştirme detaylarını sor','Gold Supplier doğrulaması yap','Kargo maliyetini hesapla'] },
+  { id:4, name:'Guangzhou Dispenser Factory', source:'AliExpress', emoji:'🔧', type:'ali',
+    price:3.50, moq:5, shipping:12, rating:4.7, orders:5640, trust:'high', trustLabel:'YÜKSEK',
+    tags:['HIZLI SEVK','GARANTİLİ','VİDEOLU'],
+    advice:'Güvenilir üretici. Fabrika doğrudan satış yapıyor. Kalite kontrol raporları mevcut. Orta ölçek siparişler için uygun.',
+    actions:['Fabrika sertifikasını incele','Kalite kontrol raporunu iste','Fiyat kırılımlarını gör','Karşılaştırmalı analiz yap'] },
+  { id:5, name:'HomeStyle Direct Co.', source:'AliExpress', emoji:'🏠', type:'ali',
+    price:4.20, moq:3, shipping:10, rating:4.5, orders:2180, trust:'med', trustLabel:'ORTA',
+    tags:['PREMİUM','HIZLI KARGO','KUTULU'],
+    advice:'Premium sunum ve ambalaj. Fiyat biraz yüksek ama kutulu teslimat ve profesyonel paketleme avantajı var. Yüksek segment hedefler için düşünülebilir.',
+    actions:['Ambalaj örneklerini iste','Premium set teklifini al','Teslimat sürelerini karşılaştır'] },
+  { id:6, name:'CJ Home Solutions', source:'CJ Dropshipping', emoji:'🎯', type:'cj',
+    price:4.10, moq:1, shipping:7, rating:4.8, orders:1890, trust:'high', trustLabel:'YÜKSEK',
+    tags:['MOQ YOK','EN HIZLI','AUTO FULFILL'],
+    advice:'<strong>En hızlı kargo!</strong> 7 gün teslimat ile müşteri memnuniyeti yüksek olur. Otomatik sipariş yönetimi entegrasyonu mevcut.',
+    actions:['Otomatik sipariş kurulumunu yap','Hız karşılaştırması gör','API entegrasyonu incele','Stok alarmı kur'] },
+  { id:7, name:'Ningbo EcoDispensers', source:'Alibaba', emoji:'🌿', type:'baba',
+    price:2.95, moq:50, shipping:20, rating:4.4, orders:9200, trust:'low', trustLabel:'DÜŞÜK',
+    tags:['EKO','TOPTAN','UZUN KARGO'],
+    advice:'Fiyat avantajı var ama teslimat süresi uzun ve güvenilirlik skoru düşük. Trade Assurance ile korumalı sipariş önerilir.',
+    actions:['Trade Assurance detaylarını gör','Kargo alternatifleri ara','Referans müşterileri sor','Çin depo testi yap'] }
+];
+
+let selectedId = 1;
+
+function renderSupList(){
+  document.getElementById('supList').innerHTML = suppliers.map(s => `
+    <div class="sup-card${s.id===selectedId?' selected':''}" onclick="selectSup(${s.id})">
+      <div class="sc-top">
+        <div class="sc-avatar ${s.type}">${s.emoji}</div>
+        <div class="sc-info">
+          <div class="sc-name">${s.name}</div>
+          <div class="sc-source">${s.source} · ⭐ ${s.rating} · ${s.orders.toLocaleString()} sipariş</div>
+        </div>
+        <div class="sc-trust trust-${s.trust}">${s.trustLabel}</div>
+      </div>
+      <div class="sc-metrics">
+        <div class="scm"><div class="scm-l">Fiyat</div><div class="scm-v g">$${s.price.toFixed(2)}</div></div>
+        <div class="scm"><div class="scm-l">MOQ</div><div class="scm-v ${s.moq<=5?'g':s.moq<=50?'y':'o'}">${s.moq} adet</div></div>
+        <div class="scm"><div class="scm-l">Kargo</div><div class="scm-v ${s.shipping<=10?'g':s.shipping<=15?'y':'o'}">${s.shipping} gün</div></div>
+        <div class="scm"><div class="scm-l">Puan</div><div class="scm-v b">⭐ ${s.rating}</div></div>
+      </div>
+      <div class="sc-tags">${s.tags.map(t => `<span class="sc-tag">${t}</span>`).join('')}</div>
+    </div>
+  `).join('');
+}
+
+function selectSup(id){ selectedId=id; renderSupList(); renderDetail(); }
+
+function renderDetail(){
+  const s = suppliers.find(x=>x.id===selectedId);
+  if(!s) return;
+
+  const cheapest = Math.min(...suppliers.map(x=>x.price));
+  const avgPrice = (suppliers.reduce((a,b)=>a+b.price,0)/suppliers.length).toFixed(2);
+
+  document.getElementById('priceCompare').innerHTML = `
+    <div class="pc-row"><div class="pc-label">Bu Tedarikçi</div><div class="pc-val ${s.price<=parseFloat(avgPrice)?'g':'o'}">$${s.price.toFixed(2)}</div></div>
+    <div class="pc-row"><div class="pc-label">En Ucuz</div><div class="pc-val g">$${cheapest.toFixed(2)}</div></div>
+    <div class="pc-row"><div class="pc-label">Ortalama</div><div class="pc-val b">$${avgPrice}</div></div>
+    <div class="pc-row"><div class="pc-label">MOQ</div><div class="pc-val ${s.moq<=5?'g':s.moq<=50?'y':'o'}">${s.moq} adet</div></div>
+    <div class="pc-row"><div class="pc-label">Kargo Süresi</div><div class="pc-val ${s.shipping<=10?'g':s.shipping<=15?'y':'o'}">${s.shipping} gün → TR</div></div>
+  `;
+
+  const trustScore = s.trust==='high'?92:s.trust==='med'?74:56;
+  const responseRate = s.trust==='high'?'%96':s.trust==='med'?'%82':'%68';
+  const disputeRate = s.trust==='high'?'%1.2':s.trust==='med'?'%3.8':'%7.1';
+  document.getElementById('relGrid').innerHTML = `
+    <div class="rel"><div class="rel-label">Güvenilirlik</div><div class="rel-value ${trustScore>=80?'g':trustScore>=60?'y':'o'}">${trustScore}/100</div><div class="rel-sub">${s.trustLabel}</div></div>
+    <div class="rel"><div class="rel-label">Mağaza Puanı</div><div class="rel-value b">⭐ ${s.rating}</div><div class="rel-sub">${s.orders.toLocaleString()} sipariş</div></div>
+    <div class="rel"><div class="rel-label">Yanıt Oranı</div><div class="rel-value g">${responseRate}</div><div class="rel-sub">24 saat içinde</div></div>
+    <div class="rel"><div class="rel-label">İhtilaf Oranı</div><div class="rel-value ${s.trust==='high'?'g':s.trust==='med'?'y':'o'}">${disputeRate}</div><div class="rel-sub">Son 90 gün</div></div>
+  `;
+
+  document.getElementById('adviceText').innerHTML = s.advice;
+  document.getElementById('adviceActions').innerHTML = s.actions.map(a => `
+    <div class="aa-item"><span>${a}</span><span class="aa-arrow">→</span></div>
+  `).join('');
+
+  document.querySelectorAll('#pricePanel,#relPanel,#advicePanel').forEach(el => {
+    el.classList.remove('panel-flash'); void el.offsetWidth; el.classList.add('panel-flash');
+  });
+}
+
+function updateKPIs(){
+  const cheapest = Math.min(...suppliers.map(x=>x.price));
+  const avgShip = Math.round(suppliers.reduce((a,b)=>a+b.shipping,0)/suppliers.length);
+  const bestRating = Math.max(...suppliers.map(x=>x.rating));
+  document.getElementById('kpiMatch').textContent = suppliers.length;
+  document.getElementById('kpiCheap').textContent = '$'+cheapest.toFixed(2);
+  document.getElementById('kpiShip').textContent = avgShip+' gün';
+  document.getElementById('kpiTrust').textContent = bestRating+' ⭐';
+  document.getElementById('listCount').textContent = suppliers.length+' TEDARİKÇİ';
+}
+
+function renderAll(){ updateKPIs(); renderSupList(); renderDetail(); }
+renderAll();
+
+</script>
+</body>
+</html>

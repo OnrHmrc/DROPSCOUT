@@ -1,0 +1,14 @@
+/* ══════════════════════════════════════
+   DropScout TR — Main CSS Entry Point
+   ══════════════════════════════════════
+   Tüm HTML sayfaları bu dosyayı referans alır.
+   Sayfa-özel CSS'ler inline <style> olarak kalır.
+*/
+
+@import './variables.css';
+@import './sidebar.css';
+@import './theme-toggle.css';
+@import './topbar.css';
+@import './components.css';
+@import './user-menu.css';
+@import './responsive.css';

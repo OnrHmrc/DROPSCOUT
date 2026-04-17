@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropScout TR — Raporlar</title>
+<meta name="description" content="Trend, kârlılık ve performans raporlarınızı yönetin. Haftalık/aylık PDF ve CSV çıktıları alın.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  // Tema anında uygula (FOUC/flaş önleme)
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<link rel="stylesheet" href="/src/css/main.css">
+<script type="module" src="/src/js/main.js"></script>
+<style>
+/* Page-Specific Styles */
+
+/* FILTER PILLS */
+.filter-row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.fpill{padding:8px 14px;border-radius:999px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s;box-shadow:var(--key-shadow);font-family:'Inter',sans-serif;display:flex;align-items:center;gap:6px}
+.fpill:hover{border-color:var(--focus-blue-border);color:var(--blue);background:var(--blue-dim)}
+.fpill.active{background:var(--blue-dim);border-color:var(--focus-blue-border);color:var(--blue)}
+.fpill-count{font-family:'Geist Mono',monospace;font-size:9px;padding:1px 6px;border-radius:999px;background:color-mix(in srgb,var(--text) 5%,transparent)}
+.fpill.active .fpill-count{background:color-mix(in srgb,var(--blue) 14%,transparent);color:var(--blue)}
+
+/* REPORTS GRID */
+.reports-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.report-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:var(--key-shadow);position:relative;overflow:hidden;cursor:pointer;transition:all .18s}
+.report-card:hover{transform:translateY(-2px);box-shadow:var(--key-shadow-strong);border-color:var(--focus-blue-border)}
+.report-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.report-card.trend::before{background:linear-gradient(90deg,var(--green),var(--blue))}
+.report-card.profit::before{background:linear-gradient(90deg,var(--yellow),var(--orange))}
+.report-card.competitor::before{background:linear-gradient(90deg,var(--purple),var(--blue))}
+.report-card.performance::before{background:linear-gradient(90deg,var(--orange),var(--red))}
+.report-card.legal::before{background:linear-gradient(90deg,var(--red),var(--yellow))}
+.report-card.supplier::before{background:linear-gradient(90deg,var(--blue),var(--green))}
+
+.rc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;gap:8px}
+.rc-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;border:1px solid var(--border);flex-shrink:0}
+.rc-icon.trend{background:var(--green-dim)}.rc-icon.profit{background:var(--yellow-dim)}.rc-icon.competitor{background:var(--purple-dim)}.rc-icon.performance{background:var(--orange-dim)}.rc-icon.legal{background:var(--red-dim)}.rc-icon.supplier{background:var(--blue-dim)}
+.rc-status{font-family:'Geist Mono',monospace;font-size:8px;padding:3px 8px;border-radius:999px;font-weight:700}
+.rs-ready{background:var(--green-dim);color:var(--green)}.rs-generating{background:var(--yellow-dim);color:var(--yellow)}.rs-scheduled{background:var(--blue-dim);color:var(--blue)}.rs-new{background:var(--purple-dim);color:var(--purple)}
+
+.rc-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;letter-spacing:-.2px;margin-bottom:4px}
+.rc-desc{font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:12px}
+
+.rc-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.rcm{padding:8px;background:var(--surface2);border-radius:8px;border:1px solid var(--border)}
+.rcm-label{font-family:'Geist Mono',monospace;font-size:7px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+.rcm-value{font-family:'Poppins',sans-serif;font-size:11px;font-weight:700}
+.rcm-value.g{color:var(--green)}.rcm-value.o{color:var(--orange)}.rcm-value.b{color:var(--blue)}.rcm-value.y{color:var(--yellow)}.rcm-value.p{color:var(--purple)}
+
+.rc-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.rc-date{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2)}
+.rc-actions{display:flex;gap:6px}
+.rc-btn{padding:5px 10px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-size:9px;font-weight:700;font-family:'Geist Mono',monospace;color:var(--muted);cursor:pointer;transition:all .15s}
+.rc-btn:hover{border-color:var(--focus-blue-border);color:var(--blue);background:var(--blue-dim)}
+.rc-btn.primary{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-color:transparent;box-shadow:var(--button-shadow)}
+.rc-btn.primary:hover{opacity:.9}
+
+/* MINI CHART */
+.mini-chart{display:flex;align-items:end;gap:2px;height:32px;margin-bottom:12px}
+.mc-bar{flex:1;border-radius:2px 2px 0 0;min-width:0;transition:height .3s}
+
+/* SCHEDULED SECTION */
+.schedule-section{margin-top:24px}
+.schedule-title{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.schedule-grid{display:flex;flex-direction:column;gap:10px}
+.sched-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--key-shadow);gap:12px;flex-wrap:wrap}
+.sched-left{display:flex;align-items:center;gap:10px}
+.sched-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid var(--border)}
+.sched-info{min-width:0}
+.sched-name{font-size:12px;font-weight:700;margin-bottom:2px}
+.sched-meta{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2)}
+.sched-right{display:flex;align-items:center;gap:8px}
+.sched-freq{font-family:'Geist Mono',monospace;font-size:9px;padding:4px 9px;border-radius:999px;background:var(--blue-dim);color:var(--blue);font-weight:700}
+.sched-toggle{position:relative;width:40px;height:22px;cursor:pointer}
+.sched-toggle input{display:none}
+.sched-track{position:absolute;inset:0;border-radius:999px;background:var(--surface3);border:1px solid var(--border);transition:all .2s}
+.sched-toggle input:checked+.sched-track{background:var(--green);border-color:var(--green)}
+.sched-knob{position:absolute;left:2px;top:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 2px 4px rgba(0,0,0,.15);transition:transform .2s}
+.sched-toggle input:checked~.sched-knob{transform:translateX(18px)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade1{animation:fadeUp .35s ease both}.fade2{animation:fadeUp .35s .05s ease both}.fade3{animation:fadeUp .35s .1s ease both}.fade4{animation:fadeUp .35s .15s ease both}
+
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+@media(max-width:900px){.mobile-menu-btn{display:flex}.sidebar{transform:translateX(-110%);transition:transform .24s;will-change:transform;width:min(82vw,300px);height:100dvh;overflow-y:auto}.sidebar.open{transform:translateX(0)}.main{margin-left:0;padding:18px 16px 26px}.stat-strip{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.stat-strip{grid-template-columns:1fr}.reports-grid{grid-template-columns:1fr}.rc-meta{grid-template-columns:1fr 1fr}.page-title{font-size:17px}}
+@media(max-width:480px){.main{padding:14px 12px 22px}.sb-value{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="logo"><a class="logo-link" href="./dropscout.html"><div class="logo-icon">🎯</div><div class="logo-text">Drop<span>Scout</span></div></a></div>
+  <div class="nav-group"><div class="nav-label">Keşif</div><a class="nav-item" href="./trend-radar.html"><span class="nav-icon">📡</span>Trend Radar</a><a class="nav-item" href="./gap-radar.html"><span class="nav-icon">🌍</span>Gap Radar <span class="nav-badge nb-purple">YENİ</span></a><a class="nav-item" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi <span class="nav-badge nb-blue">YENİ</span></a><a class="nav-item" href="./rakip-analizi.html"><span class="nav-icon">🔬</span>Rakip Analizi</a></div>
+  <div class="nav-group"><div class="nav-label">Araçlar</div><a class="nav-item" href="./net-kar.html"><span class="nav-icon">💰</span>Net Kâr Hesabı</a><a class="nav-item" href="./takip-listem.html"><span class="nav-icon">⭐</span>Takip Listem</a><a class="nav-item" href="./yasal-kontrol.html"><span class="nav-icon">⚖️</span>Yasal Kontrol</a><a class="nav-item" href="./tedarikci-bul.html"><span class="nav-icon">🔗</span>Tedarikçi Bul</a><a class="nav-item active" href="./raporlar.html"><span class="nav-icon">📊</span>Raporlar</a></div>
+  <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
+  <div class="sidebar-bottom">
+    <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
+    <div class="plan-card"><div class="plan-tier">Pro Plan</div><div class="plan-name">Raporlar Aktif ✓</div><div class="plan-meta"><span>₺499/ay · Sınırsız rapor</span><div class="upgrade-btn">Yönet</div></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar fade1">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div>
+        <div class="page-title">📊 Raporlar</div>
+        <div class="page-meta">// TREND · KÂRLILIK · REKABET · PERFORMANS · HAFTALIK / AYLIK ÇIKTILAR</div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <button class="icon-btn">↻ Güncelle</button>
+      <button class="icon-btn primary">+ Yeni Rapor Oluştur</button>
+    </div>
+  </div>
+
+  <div class="stat-strip fade2">
+    <div class="stat-box b"><div class="sb-label">Toplam Rapor</div><div class="sb-value b">12</div><div class="sb-sub">Son 30 gün</div></div>
+    <div class="stat-box g"><div class="sb-label">Hazır</div><div class="sb-value g">8</div><div class="sb-sub">İndirilebilir</div></div>
+    <div class="stat-box y"><div class="sb-label">Zamanlanmış</div><div class="sb-value y">3</div><div class="sb-sub">Otomatik rapor</div></div>
+    <div class="stat-box p"><div class="sb-label">AI İçgörü</div><div class="sb-value p">24</div><div class="sb-sub">Aksiyon önerisi</div></div>
+  </div>
+
+  <div class="filter-row fade3" id="filterRow"></div>
+
+  <div class="reports-grid fade4" id="reportsGrid"></div>
+
+  <div class="schedule-section fade4">
+    <div class="schedule-title">⏰ Zamanlanmış Raporlar</div>
+    <div class="schedule-grid" id="scheduleGrid"></div>
+  </div>
+</main>
+
+<script>
+const reports = [
+  { id:1, type:'trend', title:'Haftalık Trend Özeti', desc:'Son 7 günün trend verilerini, yükselen kategorileri ve patlama potansiyeli olan ürünleri özetler.',
+    icon:'📈', status:'ready', statusLabel:'HAZIR', date:'12 Nis 2026', format:'PDF', pages:8, insights:5,
+    chart:[45,52,58,61,67,72,78] },
+  { id:2, type:'profit', title:'Aylık Kârlılık Raporu', desc:'Takip edilen ürünlerin net kâr marjı, maliyet dağılımı ve komisyon analizini içerir.',
+    icon:'💰', status:'ready', statusLabel:'HAZIR', date:'10 Nis 2026', format:'PDF + CSV', pages:12, insights:8,
+    chart:[32,38,35,42,45,48,52] },
+  { id:3, type:'competitor', title:'Rakip Benchmarking Raporu', desc:'İzlenen rakiplerin fiyat, yorum ve görsel performans karşılaştırmasını sunar.',
+    icon:'🔬', status:'ready', statusLabel:'HAZIR', date:'09 Nis 2026', format:'PDF', pages:15, insights:6,
+    chart:[60,58,62,65,63,68,71] },
+  { id:4, type:'performance', title:'Ürün Performans Kartı', desc:'Takip listesindeki ürünlerin AI skor değişimi, fiyat hareketleri ve rekabet durumu.',
+    icon:'⚡', status:'ready', statusLabel:'HAZIR', date:'08 Nis 2026', format:'PDF', pages:6, insights:4,
+    chart:[78,80,82,79,85,87,91] },
+  { id:5, type:'legal', title:'Yasal Uygunluk Özeti', desc:'Sorgulanmış ürünlerin TİTCK, CE ve ithalat durumlarının genel değerlendirmesi.',
+    icon:'⚖️', status:'generating', statusLabel:'HAZIRLANIYOR', date:'Bugün', format:'PDF', pages:'—', insights:'—',
+    chart:[20,25,30,28,35,40,42] },
+  { id:6, type:'supplier', title:'Tedarikçi Analiz Raporu', desc:'En uygun tedarikçilerin fiyat, güvenilirlik ve kargo karşılaştırması.',
+    icon:'🔗', status:'ready', statusLabel:'HAZIR', date:'07 Nis 2026', format:'PDF + CSV', pages:10, insights:3,
+    chart:[55,52,58,62,60,65,68] },
+  { id:7, type:'trend', title:'Gap Radar Fırsat Raporu', desc:'Global ile TR pazarı arasında tespit edilen boşluklar ve büyüme fırsatları.',
+    icon:'🌍', status:'ready', statusLabel:'HAZIR', date:'06 Nis 2026', format:'PDF', pages:9, insights:7,
+    chart:[40,45,48,55,60,58,65] },
+  { id:8, type:'profit', title:'Haftalık Maliyet Takibi', desc:'Kargo, komisyon ve vergi bazlı maliyet değişimlerinin haftalık izlemesi.',
+    icon:'📉', status:'ready', statusLabel:'HAZIR', date:'05 Nis 2026', format:'CSV', pages:4, insights:2,
+    chart:[88,85,82,80,78,76,74] }
+];
+
+const schedules = [
+  { name:'Haftalık Trend Özeti', icon:'📈', freq:'Her Pazartesi', bg:'var(--green-dim)', active:true },
+  { name:'Aylık Kârlılık Raporu', icon:'💰', freq:'Her ayın 1\'i', bg:'var(--yellow-dim)', active:true },
+  { name:'Rakip Değişim Raporu', icon:'🔬', freq:'Her 15 günde', bg:'var(--purple-dim)', active:false }
+];
+
+let activeFilter = 'all';
+const filters = [
+  { key:'all', label:'Tümü' },
+  { key:'trend', label:'Trend' },
+  { key:'profit', label:'Kârlılık' },
+  { key:'competitor', label:'Rekabet' },
+  { key:'performance', label:'Performans' },
+  { key:'legal', label:'Yasal' },
+  { key:'supplier', label:'Tedarik' }
+];
+
+function getFiltered(){
+  if(activeFilter==='all') return reports;
+  return reports.filter(r=>r.type===activeFilter);
+}
+
+function renderFilterRow(){
+  document.getElementById('filterRow').innerHTML = filters.map(f => {
+    const count = f.key==='all' ? reports.length : reports.filter(r=>r.type===f.key).length;
+    if(f.key!=='all' && count===0) return '';
+    return `<button class="fpill${f.key===activeFilter?' active':''}" onclick="setFilter('${f.key}')">${f.label} <span class="fpill-count">${count}</span></button>`;
+  }).join('');
+}
+
+function setFilter(f){ activeFilter=f; renderFilterRow(); renderReports(); }
+
+function chartColor(val, max){ const p = val/max; return p>=.7?'var(--green)':p>=.5?'var(--yellow)':'var(--orange)'; }
+
+function renderReports(){
+  const list = getFiltered();
+  document.getElementById('reportsGrid').innerHTML = list.map(r => {
+    const maxH = Math.max(...r.chart);
+    const bars = r.chart.map(v => `<div class="mc-bar" style="height:${(v/maxH*100)}%;background:${chartColor(v,100)}"></div>`).join('');
+    return `
+    <div class="report-card ${r.type}">
+      <div class="rc-top">
+        <div class="rc-icon ${r.type}">${r.icon}</div>
+        <div class="rc-status ${r.status==='ready'?'rs-ready':r.status==='generating'?'rs-generating':'rs-scheduled'}">${r.statusLabel}</div>
+      </div>
+      <div class="rc-title">${r.title}</div>
+      <div class="rc-desc">${r.desc}</div>
+      <div class="mini-chart">${bars}</div>
+      <div class="rc-meta">
+        <div class="rcm"><div class="rcm-label">Format</div><div class="rcm-value b">${r.format}</div></div>
+        <div class="rcm"><div class="rcm-label">Sayfa</div><div class="rcm-value p">${r.pages}</div></div>
+        <div class="rcm"><div class="rcm-label">İçgörü</div><div class="rcm-value g">${r.insights}</div></div>
+      </div>
+      <div class="rc-footer">
+        <div class="rc-date">${r.date}</div>
+        <div class="rc-actions">
+          ${r.status==='ready'?'<button class="rc-btn">👁️ Önizle</button><button class="rc-btn primary">📥 İndir</button>':'<button class="rc-btn">⏳ Bekliyor...</button>'}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderSchedules(){
+  document.getElementById('scheduleGrid').innerHTML = schedules.map((s,i) => `
+    <div class="sched-row">
+      <div class="sched-left">
+        <div class="sched-icon" style="background:${s.bg}">${s.icon}</div>
+        <div class="sched-info">
+          <div class="sched-name">${s.name}</div>
+          <div class="sched-meta">${s.active?'Aktif · Otomatik gönderim':'Pasif · Duraklatıldı'}</div>
+        </div>
+      </div>
+      <div class="sched-right">
+        <div class="sched-freq">${s.freq}</div>
+        <label class="sched-toggle">
+          <input type="checkbox" ${s.active?'checked':''} onchange="toggleSchedule(${i})">
+          <div class="sched-track"></div>
+          <div class="sched-knob"></div>
+        </label>
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleSchedule(i){
+  schedules[i].active = !schedules[i].active;
+  renderSchedules();
+}
+
+renderFilterRow(); renderReports(); renderSchedules();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+/* ══════════════════════════════════════
+   DropScout TR — Design Tokens & Reset
+   ══════════════════════════════════════ */
+
+/* ── Light Theme (default) ── */
+:root {
+  --bg:#f4f6f9;
+  --surface:#ffffff;
+  --surface2:#f8fafc;
+  --surface3:#e2e8f0;
+  --border:rgba(15,23,42,0.08);
+  --border2:rgba(15,23,42,0.12);
+
+  --green:#059669;
+  --green-dim:rgba(5,150,105,0.12);
+  --orange:#ea580c;
+  --orange-dim:rgba(234,88,12,0.12);
+  --purple:#6366f1;
+  --purple-dim:rgba(99,102,241,0.12);
+  --yellow:#d97706;
+  --yellow-dim:rgba(217,119,6,0.12);
+  --red:#ef4444;
+  --red-dim:rgba(239,68,68,0.10);
+  --blue:#2563eb;
+  --blue-dim:rgba(37,99,235,0.12);
+
+  --text:#1e293b;
+  --muted:#64748b;
+  --muted2:#94a3b8;
+
+  --key-shadow:0 4px 20px -2px rgba(15,23,42,0.05);
+  --soft-shadow:0 12px 28px -22px rgba(15,23,42,0.18);
+  --key-shadow-strong:0 10px 26px -12px rgba(37,99,235,0.18),0 1px 0 rgba(255,255,255,0.75) inset;
+
+  --body-grad-start:#f8fafc;
+  --body-grad-end:#f4f6f9;
+  --body-glow:rgba(99,102,241,0.06);
+  --noise-opacity:0.008;
+
+  --sidebar-bg:rgba(255,255,255,0.82);
+  --nav-item-bg-start:#ffffff;
+  --nav-item-bg-end:#f8fbff;
+
+  --accent-shadow:0 12px 24px -12px rgba(37,99,235,0.35);
+  --button-shadow:0 12px 24px -16px rgba(37,99,235,0.42);
+
+  --focus-blue-border:rgba(37,99,235,0.16);
+  --focus-green-border:rgba(5,150,105,0.16);
+  --focus-green-shadow:0 10px 26px -12px rgba(5,150,105,0.18),0 1px 0 rgba(255,255,255,0.75) inset;
+
+  --panel-highlight:rgba(255,255,255,0.75);
+}
+
+/* ── Dark Theme ── */
+html[data-theme="dark"] {
+  --bg:#030307;
+  --surface:#0b0b14;
+  --surface2:#10111e;
+  --surface3:#17192a;
+  --border:rgba(224,224,234,0.08);
+  --border2:rgba(224,224,234,0.14);
+
+  --green:#08f7d0;
+  --green-dim:rgba(8,247,208,0.12);
+  --orange:#ff8a5b;
+  --orange-dim:rgba(255,138,91,0.12);
+  --purple:#8e68ff;
+  --purple-dim:rgba(142,104,255,0.12);
+  --yellow:#fdbb2d;
+  --yellow-dim:rgba(253,187,45,0.12);
+  --red:#ff5f78;
+  --red-dim:rgba(255,95,120,0.08);
+  --blue:#8e68ff;
+  --blue-dim:rgba(142,104,255,0.14);
+
+  --text:#e0e0ea;
+  --muted:#8d93a8;
+  --muted2:#666d84;
+
+  --key-shadow:0 18px 40px -24px rgba(0,0,0,0.88),0 1px 0 rgba(255,255,255,0.03) inset;
+  --soft-shadow:0 18px 40px -28px rgba(0,0,0,0.6);
+  --key-shadow-strong:0 24px 52px -28px rgba(142,104,255,0.48),0 1px 0 rgba(255,255,255,0.05) inset;
+
+  --body-grad-start:#070811;
+  --body-grad-end:#030307;
+  --body-glow:rgba(142,104,255,0.12);
+  --noise-opacity:0.018;
+
+  --sidebar-bg:rgba(11,11,20,0.84);
+  --nav-item-bg-start:#111320;
+  --nav-item-bg-end:#0b0b14;
+
+  --accent-shadow:0 18px 32px -18px rgba(142,104,255,0.46);
+  --button-shadow:0 20px 36px -22px rgba(142,104,255,0.42);
+
+  --focus-blue-border:rgba(142,104,255,0.22);
+  --focus-green-border:rgba(8,247,208,0.22);
+  --focus-green-shadow:0 20px 38px -24px rgba(8,247,208,0.34),0 1px 0 rgba(255,255,255,0.04) inset;
+
+  --panel-highlight:rgba(255,255,255,0.05);
+}
+
+/* ── Reset ── */
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+html, body { transition:background-color .22s ease, color .22s ease; }
+
+body {
+  background:
+    radial-gradient(circle at top right, var(--body-glow), transparent 28%),
+    linear-gradient(180deg, var(--body-grad-start) 0%, var(--body-grad-end) 100%);
+  color:var(--text);
+  font-family:'Inter', sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* Noise overlay */
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity:var(--noise-opacity);
+  pointer-events:none;
+  z-index:999;
+}
+
+/* Base element resets */
+button, input, select { font:inherit; }
+button { border:none; background:none; cursor:pointer; }
+a { text-decoration:none; color:inherit; }
+
+/* Scrollbar */
+::-webkit-scrollbar { width:3px; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }

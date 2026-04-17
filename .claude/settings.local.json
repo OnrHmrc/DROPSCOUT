@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(js|css|html|json\\)$|^d\")",
+      "Bash(grep -i \"console.log\\\\|debugger\\\\|TODO\\\\|FIXME\\\\|HACK\" /c/Users/onur1/OneDrive/Belgeler/DROPSCOUT/*.html)",
+      "Bash(grep -o \"<style>\" /c/Users/onur1/OneDrive/Belgeler/DROPSCOUT/*.html)",
+      "Bash(grep -i \"escape\\\\|sanitiz\\\\|htmlencode\" /c/Users/onur1/OneDrive/Belgeler/DROPSCOUT/*.html /c/Users/onur1/OneDrive/Belgeler/DROPSCOUT/app.js)",
+      "Bash(npx vite *)",
+      "Bash(npm install *)"
+    ]
+  }
+}
