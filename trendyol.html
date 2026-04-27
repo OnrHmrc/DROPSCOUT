@@ -127,7 +127,6 @@
   <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item active" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
   <div class="sidebar-bottom">
     <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
-    <div class="plan-card"><div class="plan-tier">Pro Plan</div><div class="plan-name">Platform Entegrasyonu Aktif ✓</div><div class="plan-meta"><span>₺499/ay · 4 platform</span><div class="upgrade-btn">Yönet</div></div></div>
   </div>
 </aside>
 
@@ -267,76 +266,31 @@
 
 <script type="module">
 import { onAuthChange } from '/src/js/auth.js';
-import { savePlatformConnection, getPlatformConnection, deletePlatformConnection, addSyncEntry } from '/src/js/store.js';
+import { connectPlatform, syncPlatform, getPlatformStatus, disconnectPlatform, ApiError } from '/src/js/api.js';
+import { handleApiError } from '/src/js/plan.js';
 
 const PLATFORM = 'trendyol';
-let currentUid = null;
-
-// Kullanici UID'sini al
-onAuthChange((user) => { if (user) { currentUid = user.uid; loadSavedState(); } });
 
 const state = {
   connected: false,
+  storeName: '',
   store: null,
-  credentials: null,
   syncHistory: []
 };
 
-// Mock store data (API bağlantısı simülasyonu)
-const mockStoreData = {
-  name: '',
-  supplierId: '',
-  totalProducts: 347,
-  activeProducts: 312,
-  rating: 9.4,
-  joinDate: '2023-06-14',
-  categories: [
-    { name: 'Elektronik', commission: 12.0, kdv: 20, products: 89, buybox: '₺149 - ₺2.490' },
-    { name: 'Ev & Yaşam', commission: 15.5, kdv: 20, products: 124, buybox: '₺29 - ₺899' },
-    { name: 'Kozmetik', commission: 18.0, kdv: 20, products: 67, buybox: '₺19 - ₺349' },
-    { name: 'Giyim', commission: 22.0, kdv: 10, products: 45, buybox: '₺49 - ₺599' },
-    { name: 'Spor & Outdoor', commission: 14.0, kdv: 20, products: 22, buybox: '₺59 - ₺1.290' }
-  ],
-  avgCommission: 16.3,
-  lastSync: null
-};
-
-async function loadSavedState() {
-  if (!currentUid) return;
+onAuthChange(async (user) => {
+  if (!user) return;
   try {
-    const data = await getPlatformConnection(currentUid, PLATFORM);
-    if (data && data.connected) {
-      state.connected = true;
-      state.credentials = data.credentials || null;
-      state.syncHistory = data.syncHistory || [];
-      if (state.credentials) {
-        mockStoreData.name = state.credentials.storeName || 'Mağaza';
-        mockStoreData.supplierId = state.credentials.supplierId || '';
-        state.store = mockStoreData;
-      }
-    }
-  } catch(e) { console.warn('Platform verisi yüklenemedi:', e); }
+    const status = await getPlatformStatus(PLATFORM);
+    state.connected = !!status.connected;
+    state.storeName = status.storeName || '';
+    state.store = status.store || null;
+    state.syncHistory = status.syncHistory || [];
+  } catch (e) {
+    console.warn('Platform durumu yüklenemedi:', e);
+  }
   renderAll();
-}
-
-async function saveState() {
-  if (!currentUid) return;
-  try {
-    await savePlatformConnection(currentUid, PLATFORM, {
-      storeName: state.credentials?.storeName || '',
-      credentials: state.credentials || {},
-      syncHistory: state.syncHistory.slice(-10)
-    });
-  } catch(e) { console.warn('Platform verisi kaydedilemedi:', e); }
-}
-
-function addSyncLog(text) {
-  const now = new Date();
-  const time = now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
-  state.syncHistory.unshift({ time, text, date: now.toISOString() });
-  if (state.syncHistory.length > 10) state.syncHistory.pop();
-  saveState();
-}
+});
 
 function renderKPIs() {
   const kpiStatus = document.getElementById('kpiStatus');
@@ -349,12 +303,15 @@ function renderKPIs() {
   if (state.connected && state.store) {
     kpiStatus.textContent = 'Aktif';
     kpiStatusSub.textContent = 'Bağlantı kuruldu';
-    kpiProducts.textContent = state.store.totalProducts.toLocaleString('tr-TR');
-    kpiCommission.textContent = '%' + state.store.avgCommission.toFixed(1);
+    kpiProducts.textContent = Number(state.store.totalProducts || 0).toLocaleString('tr-TR');
+    kpiCommission.textContent = '%' + Number(state.store.avgCommission || 0).toFixed(1);
     if (state.syncHistory.length > 0) {
       const last = new Date(state.syncHistory[0].date);
       kpiSync.textContent = last.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' });
       kpiSyncSub.textContent = last.toLocaleDateString('tr-TR');
+    } else {
+      kpiSync.textContent = '--';
+      kpiSyncSub.textContent = 'Senkron kaydı yok';
     }
   } else {
     kpiStatus.textContent = '--';
@@ -374,12 +331,12 @@ function renderConnectionStatus() {
     text.textContent = 'BAĞLI';
     document.getElementById('disconnectBtn').style.display = '';
     document.getElementById('connectBtn').textContent = 'Bağlantıyı Güncelle';
-    if (state.credentials) {
-      document.getElementById('inputSupplierId').value = state.credentials.supplierId || '';
-      document.getElementById('inputApiKey').value = state.credentials.apiKey ? '••••••••••••' : '';
-      document.getElementById('inputApiSecret').value = state.credentials.apiSecret ? '••••••••••••' : '';
-      document.getElementById('inputStoreName').value = state.credentials.storeName || '';
-    }
+    document.getElementById('inputSupplierId').value = state.store?.storeId || '';
+    document.getElementById('inputApiKey').value = '';
+    document.getElementById('inputApiSecret').value = '';
+    document.getElementById('inputStoreName').value = state.storeName || '';
+    document.getElementById('inputApiKey').placeholder = 'Güncellemek için yeniden girin';
+    document.getElementById('inputApiSecret').placeholder = 'Güncellemek için yeniden girin';
   } else {
     el.className = 'cm-status disconnected';
     text.textContent = 'BAĞLI DEĞİL';
@@ -402,14 +359,16 @@ function renderStoreInfo() {
   tag.textContent = 'AKTİF';
   tag.className = 'ct-tag tag-green';
   const s = state.store;
+  const rating = typeof s.rating === 'number' ? `${s.rating.toFixed(1)} / 10` : '—';
+  const joinDate = s.joinDate ? new Date(s.joinDate).toLocaleDateString('tr-TR') : '—';
   content.innerHTML = `
     <div class="store-info">
       <div class="si-row"><span class="si-label">Mağaza Adı</span><span class="si-value">${s.name || 'Belirtilmedi'}</span></div>
-      <div class="si-row"><span class="si-label">Supplier ID</span><span class="si-value b">${s.supplierId}</span></div>
+      <div class="si-row"><span class="si-label">Supplier ID</span><span class="si-value b">${s.storeId}</span></div>
       <div class="si-row"><span class="si-label">Toplam Ürün</span><span class="si-value o">${s.totalProducts}</span></div>
       <div class="si-row"><span class="si-label">Aktif Ürün</span><span class="si-value g">${s.activeProducts}</span></div>
-      <div class="si-row"><span class="si-label">Mağaza Puanı</span><span class="si-value y">${s.rating} / 10</span></div>
-      <div class="si-row"><span class="si-label">Kayıt Tarihi</span><span class="si-value">${new Date(s.joinDate).toLocaleDateString('tr-TR')}</span></div>
+      <div class="si-row"><span class="si-label">Mağaza Puanı</span><span class="si-value y">${rating}</span></div>
+      <div class="si-row"><span class="si-label">Kayıt Tarihi</span><span class="si-value">${joinDate}</span></div>
     </div>`;
 }
 
@@ -421,20 +380,26 @@ function renderParams() {
     return;
   }
 
-  const cats = state.store.categories;
+  const cats = state.store.categories || [];
+  if (cats.length === 0) {
+    content.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Kategori verisi yok</div><div class="empty-desc">Mağazada henüz ürün olmayabilir. Ürün ekledikten sonra senkronize edin.</div></div>';
+    return;
+  }
+
   let html = '<div class="params-grid">';
   cats.forEach(c => {
+    const buyboxText = c.buybox ? ` · BuyBox: ${c.buybox}` : '';
     html += `
       <div class="param-box">
         <div class="pb-label">${c.name}</div>
-        <div class="pb-value" style="color:var(--orange)">%${c.commission.toFixed(1)}</div>
-        <div class="pb-sub">KDV: %${c.kdv} · ${c.products} ürün · BuyBox: ${c.buybox}</div>
+        <div class="pb-value" style="color:var(--orange)">%${Number(c.commission).toFixed(1)}</div>
+        <div class="pb-sub">KDV: %${c.kdv} · ${c.products} ürün${buyboxText}</div>
       </div>`;
   });
   html += `
     <div class="param-box" style="border-color:var(--focus-blue-border);background:color-mix(in srgb,var(--blue-dim) 30%,var(--surface2))">
       <div class="pb-label">Ortalama Komisyon</div>
-      <div class="pb-value" style="color:var(--blue)">%${state.store.avgCommission.toFixed(1)}</div>
+      <div class="pb-value" style="color:var(--blue)">%${Number(state.store.avgCommission || 0).toFixed(1)}</div>
       <div class="pb-sub">Tüm kategoriler ortalaması</div>
     </div>`;
   html += '</div>';
@@ -460,6 +425,15 @@ function renderAll() {
   renderSyncLog();
 }
 
+function errorMessage(err) {
+  // Plan/quota hatasi → upgrade toast goster, kullaniciya kisa metin dondur
+  if (handleApiError(err)) {
+    return err?.body?.message || err?.message || 'Plan limiti aşıldı';
+  }
+  if (err instanceof ApiError) return err.message || 'İstek başarısız';
+  return err?.message || 'Beklenmeyen hata';
+}
+
 // Connect handler
 document.getElementById('connectBtn').addEventListener('click', async () => {
   const supplierId = document.getElementById('inputSupplierId').value.trim();
@@ -477,61 +451,77 @@ document.getElementById('connectBtn').addEventListener('click', async () => {
 
   btn.disabled = true;
   btn.textContent = 'Test ediliyor...';
-  msg.textContent = 'API bağlantısı kontrol ediliyor...';
+  msg.textContent = 'Trendyol API doğrulanıyor ve mağaza verisi çekiliyor...';
   msg.className = 'af-msg';
 
-  // Simulate API connection test
-  await new Promise(r => setTimeout(r, 1800));
-
-  state.connected = true;
-  state.credentials = { supplierId, apiKey, apiSecret, storeName };
-  mockStoreData.name = storeName || 'Trendyol Mağaza';
-  mockStoreData.supplierId = supplierId;
-  state.store = mockStoreData;
-
-  addSyncLog('<strong>Bağlantı kuruldu.</strong> Trendyol API doğrulandı. ' + mockStoreData.totalProducts + ' ürün senkronize edildi.');
-
-  btn.disabled = false;
-  msg.textContent = 'Bağlantı başarılı! Veriler senkronize edildi.';
-  msg.className = 'af-msg success';
-
-  saveState();
-  renderAll();
+  try {
+    const result = await connectPlatform(PLATFORM, { supplierId, apiKey, apiSecret }, storeName);
+    state.connected = true;
+    state.storeName = result.storeName || storeName;
+    state.store = result.store;
+    state.syncHistory = [result.syncEntry];
+    msg.textContent = 'Bağlantı başarılı — mağaza verisi çekildi.';
+    msg.className = 'af-msg success';
+  } catch (err) {
+    msg.textContent = errorMessage(err);
+    msg.className = 'af-msg error';
+  } finally {
+    btn.disabled = false;
+    renderAll();
+  }
 });
 
 // Disconnect handler
 document.getElementById('disconnectBtn').addEventListener('click', async () => {
-  state.connected = false;
-  state.store = null;
-  state.credentials = null;
-
-  document.getElementById('inputSupplierId').value = '';
-  document.getElementById('inputApiKey').value = '';
-  document.getElementById('inputApiSecret').value = '';
-  document.getElementById('inputStoreName').value = '';
-  document.getElementById('formMsg').textContent = '';
-
-  if (currentUid) {
-    try { await deletePlatformConnection(currentUid, PLATFORM); } catch(e) {}
+  const msg = document.getElementById('formMsg');
+  const btn = document.getElementById('disconnectBtn');
+  btn.disabled = true;
+  try {
+    await disconnectPlatform(PLATFORM);
+    state.connected = false;
+    state.store = null;
+    state.storeName = '';
+    state.syncHistory = [];
+    document.getElementById('inputSupplierId').value = '';
+    document.getElementById('inputApiKey').value = '';
+    document.getElementById('inputApiSecret').value = '';
+    document.getElementById('inputStoreName').value = '';
+    msg.textContent = '';
+    msg.className = 'af-msg';
+  } catch (err) {
+    msg.textContent = errorMessage(err);
+    msg.className = 'af-msg error';
+  } finally {
+    btn.disabled = false;
+    renderAll();
   }
-  state.syncHistory = [];
-  renderAll();
 });
 
 // Sync handler
 document.getElementById('syncBtn').addEventListener('click', async () => {
   if (!state.connected) return;
   const btn = document.getElementById('syncBtn');
+  const originalText = btn.textContent;
   btn.textContent = '↻ Senkronize ediliyor...';
   btn.disabled = true;
-  await new Promise(r => setTimeout(r, 1500));
-  addSyncLog('<strong>Senkronizasyon tamamlandı.</strong> ' + mockStoreData.totalProducts + ' ürün, ' + mockStoreData.categories.length + ' kategori güncellendi.');
-  btn.textContent = '↻ Senkronize Et';
-  btn.disabled = false;
-  renderAll();
+  try {
+    const result = await syncPlatform(PLATFORM);
+    state.store = result.store;
+    state.syncHistory = [result.syncEntry, ...state.syncHistory].slice(0, 10);
+  } catch (err) {
+    const entry = {
+      time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+      text: `<strong>Senkronizasyon başarısız.</strong> ${errorMessage(err)}`,
+      date: new Date().toISOString()
+    };
+    state.syncHistory = [entry, ...state.syncHistory].slice(0, 10);
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+    renderAll();
+  }
 });
 
-// Init — renderAll cagrilir, veriler onAuthChange callback'inden yuklenir
 renderAll();
 </script>
 </body>

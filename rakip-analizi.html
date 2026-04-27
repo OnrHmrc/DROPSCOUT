@@ -109,6 +109,30 @@
 .sa-arrow{color:var(--muted2);font-size:10px;transition:.15s}
 .sa-item:hover .sa-arrow{color:var(--blue);transform:translateX(2px)}
 
+/* AI INSIGHT (Claude Haiku) */
+.ai-insight-block{margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
+.ai-insight-head{display:flex;align-items:center;gap:6px;font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.ai-insight-badge{background:rgba(138,97,233,0.12);color:var(--purple);padding:2px 6px;border-radius:3px;font-weight:700}
+.ai-insight-cached{background:rgba(0,240,160,0.12);color:var(--green);padding:2px 6px;border-radius:3px;font-weight:700}
+.ai-insight-status{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);padding:10px 12px;background:var(--surface2);border-radius:8px}
+.ai-insight-spinner{width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:ai-spin 0.8s linear infinite}
+@keyframes ai-spin{to{transform:rotate(360deg)}}
+.ai-insight-error{font-size:11px;color:var(--orange);padding:10px 12px;background:rgba(255,95,56,0.06);border:1px solid rgba(255,95,56,0.18);border-radius:8px;line-height:1.5}
+.ai-insight-reasoning{font-size:11.5px;color:var(--text);line-height:1.7;padding:10px 12px;background:var(--surface2);border-radius:8px;border-left:2px solid var(--purple);margin-bottom:10px}
+.ai-insight-lists{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.ai-insight-col{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:9px 10px}
+.ai-insight-col-head{font-family:'Geist Mono',monospace;font-size:8.5px;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:700}
+.ai-insight-col.pros .ai-insight-col-head{color:var(--green)}
+.ai-insight-col.cons .ai-insight-col-head{color:var(--orange)}
+.ai-insight-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px}
+.ai-insight-col li{font-size:10.5px;color:var(--muted);line-height:1.5;padding-left:10px;position:relative}
+.ai-insight-col.pros li::before{content:'✓';position:absolute;left:0;top:0;color:var(--green);font-weight:700}
+.ai-insight-col.cons li::before{content:'△';position:absolute;left:0;top:0;color:var(--orange);font-weight:700}
+.ai-insight-strategy{font-size:11.5px;color:var(--text);line-height:1.7;padding:10px 12px;background:rgba(138,97,233,0.05);border:1px solid rgba(138,97,233,0.15);border-radius:8px;margin-bottom:10px}
+.ai-insight-actions-head{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:700}
+.ai-insight-actions{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px}
+.ai-insight-actions li{font-size:11px;color:var(--muted);line-height:1.5;padding:7px 10px;background:var(--surface2);border-radius:6px;border-left:2px solid var(--blue)}
+
 /* ANIMATION */
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .fade1{animation:fadeUp .35s ease both}
@@ -185,11 +209,6 @@
         </label>
       </div>
     </div>
-    <div class="plan-card">
-      <div class="plan-tier">Pro Plan</div>
-      <div class="plan-name">Rakip Radar Aktif ✓</div>
-      <div class="plan-meta"><span>₺499/ay · Canlı analiz</span><div class="upgrade-btn">Yönet</div></div>
-    </div>
   </div>
 </aside>
 
@@ -203,39 +222,40 @@
       </div>
     </div>
     <div class="topbar-right">
-      <button class="icon-btn">↻ Güncelle</button>
-      <button class="icon-btn">📥 Rapor İndir</button>
-      <button class="icon-btn primary">+ Yeni Ürün Tara</button>
+      <button class="icon-btn" onclick="location.reload()">↻ Güncelle</button>
+      <a class="icon-btn primary" href="./dropscout.html">+ Yeni Ürün Analizi</a>
     </div>
   </div>
 
   <div class="stat-strip fade2" id="kpiStrip">
-    <div class="stat-box b"><div class="sb-label">İzlenen Rakip</div><div class="sb-value b" id="kpiTotal">8</div><div class="sb-sub">Aktif takip edilen</div></div>
-    <div class="stat-box y"><div class="sb-label">Ort. Fiyat Bandı</div><div class="sb-value y" id="kpiPrice">₺289</div><div class="sb-sub">Kategori ortalaması</div></div>
-    <div class="stat-box o"><div class="sb-label">Yorum Baskısı</div><div class="sb-value o" id="kpiReview">Orta</div><div class="sb-sub">Pazar ortalama basıncı</div></div>
-    <div class="stat-box p"><div class="sb-label">Doygunluk</div><div class="sb-value p" id="kpiSat">%47</div><div class="sb-sub">Kategori doygunluğu</div></div>
+    <div class="stat-box b"><div class="sb-label">Analiz Edilen Ürün</div><div class="sb-value b" id="kpiTotal">0</div><div class="sb-sub" id="kpiTotalSub">Portföyündeki ürünler</div></div>
+    <div class="stat-box y"><div class="sb-label">Ort. Fiyat Bandı</div><div class="sb-value y" id="kpiPrice">—</div><div class="sb-sub">Kayıtlı ürünler</div></div>
+    <div class="stat-box o"><div class="sb-label">Rakip Yoğunluğu</div><div class="sb-value o" id="kpiReview">—</div><div class="sb-sub" id="kpiReviewSub">Ortalama rakip sayısı</div></div>
+    <div class="stat-box p"><div class="sb-label">Pazar Doygunluğu</div><div class="sb-value p" id="kpiSat">—</div><div class="sb-sub">Tüm ürünler ortalaması</div></div>
   </div>
 
   <!-- SEARCH -->
   <div class="search-module fade3">
     <div class="sm-row">
       <div class="sm-group" style="flex:2">
-        <div class="sm-label">Ürün veya Kategori</div>
-        <input class="sm-input" id="searchInput" value="Minimal Masaüstü Köpük Sabunluk" placeholder="Ürün adı veya link girin...">
+        <div class="sm-label">Karşılaştırılacak Ürün</div>
+        <select class="sm-input" id="productSelect">
+          <option value="">— Henüz analiz edilmiş ürün yok —</option>
+        </select>
       </div>
       <div class="sm-group" style="flex:.7">
-        <div class="sm-label">Platform</div>
+        <div class="sm-label">Platform Filtresi</div>
         <select class="sm-select" id="searchPlatform">
-          <option selected>Tümü</option><option>Trendyol</option><option>Hepsiburada</option><option>N11</option><option>Amazon TR</option>
+          <option value="">Tümü</option><option value="trendyol">Trendyol</option><option value="hepsiburada">Hepsiburada</option><option value="n11">N11</option><option value="amazon-tr">Amazon TR</option>
         </select>
       </div>
       <div class="sm-group" style="flex:.6">
         <div class="sm-label">Sıralama</div>
         <select class="sm-select" id="searchSort">
-          <option>AI Skoru ↓</option><option>Fiyat ↑</option><option>Yorum ↓</option><option>Tehdit Düzeyi ↓</option>
+          <option value="score">DropScore ↓</option><option value="price-asc">Fiyat ↑</option><option value="competitors">Rakip Sayısı ↓</option><option value="margin">Marj ↓</option>
         </select>
       </div>
-      <button class="sm-btn" onclick="renderAll()">🔍 Tara</button>
+      <button class="sm-btn" onclick="window.renderAll()">🔍 Karşılaştır</button>
     </div>
   </div>
 
@@ -266,127 +286,385 @@
         <div class="dc-head"><div class="dc-title">AI Strateji Önerisi</div><div class="ct-tag tag-green">TAKTİK</div></div>
         <div class="strategy-text" id="strategyText"></div>
         <div class="strategy-actions" id="strategyActions"></div>
+        <div class="ai-insight-block" id="aiInsightBlock" style="display:none;">
+          <div class="ai-insight-head">
+            <span class="ai-insight-badge">AI</span>
+            <span>Claude Haiku 4.5 derin analiz</span>
+            <span class="ai-insight-cached" id="aiInsightCached" style="display:none;">CACHE</span>
+          </div>
+          <div class="ai-insight-status" id="aiInsightStatus">
+            <div class="ai-insight-spinner"></div>
+            <span>AI içgörü hazırlanıyor...</span>
+          </div>
+          <div class="ai-insight-error" id="aiInsightError" style="display:none;"></div>
+          <div class="ai-insight-body" id="aiInsightBody" style="display:none;">
+            <div class="ai-insight-reasoning" id="aiReasoning"></div>
+            <div class="ai-insight-lists">
+              <div class="ai-insight-col pros">
+                <div class="ai-insight-col-head">Güçlü Yönler</div>
+                <ul id="aiStrengths"></ul>
+              </div>
+              <div class="ai-insight-col cons">
+                <div class="ai-insight-col-head">Zayıf Yönler</div>
+                <ul id="aiWeaknesses"></ul>
+              </div>
+            </div>
+            <div class="ai-insight-strategy" id="aiStrategy"></div>
+            <div class="ai-insight-actions-head">Somut Aksiyonlar</div>
+            <ul class="ai-insight-actions" id="aiActions"></ul>
+          </div>
+        </div>
       </div>
     </aside>
   </section>
 </main>
 
-<script>
-/* ── DEMO DATA ── */
-const competitors = [
-  { id:1, name:'Zen Yaşam Shop', platform:'Trendyol', emoji:'🏪', price:279, reviews:342, rating:4.6, visual:72, saturation:41, strength:'medium', strengthLabel:'Orta Tehdit',
-    pos:'Pozitif: Hızlı kargo ve paketleme · Negatif: Boyut uyumsuzluğu şikâyetleri', strategy:'Bu rakip orta segment fiyatlama yapıyor, ancak görsel kalitesi düşük. Lifestyle fotoğraflar ve video içerikle net şekilde öne geçilebilir.',
-    actions:['Görsel benchmark raporu indir','Fiyat alarmı kur','Yorum analizini detaylandır'] },
-  { id:2, name:'Premium Ev Dekor', platform:'Trendyol', emoji:'✨', price:349, reviews:128, rating:4.8, visual:88, saturation:35, strength:'strong', strengthLabel:'Güçlü Tehdit',
-    pos:'Pozitif: Premium sunum + yüksek puan · Negatif: Düşük hacim', strategy:'Premium konumlanmış ve görsel dili güçlü. Doğrudan fiyat savaşı yerine, set ürün stratejisi ve paketleme farkı ile ayrışmak gerekir.',
-    actions:['Premium segment analizi yap','Paket strateji önerisi al','Hedef kitle farklılaştır'] },
-  { id:3, name:'Hızlı Kargo Dünyası', platform:'Hepsiburada', emoji:'📦', price:219, reviews:812, rating:4.2, visual:54, saturation:62, strength:'strong', strengthLabel:'Güçlü Tehdit',
-    pos:'Pozitif: Yüksek hacim + hızlı teslimat · Negatif: Ucuz hissi, düşük görsel kalite', strategy:'Hacim liderliği artık fiyat kıran bir rakip yaratıyor. Bu mağazayla fiyat yarışmak yerine niş ve premium alana kayılmalı.',
-    actions:['Fiyat karşılaştırması detaylandır','Hacim analizi yap','Niş segment fırsatı ara'] },
-  { id:4, name:'EcoLiving TR', platform:'N11', emoji:'🌿', price:299, reviews:67, rating:4.5, visual:78, saturation:28, strength:'weak', strengthLabel:'Zayıf Tehdit',
-    pos:'Pozitif: Sürdürülebilir mesaj · Negatif: Düşük bilinirlik, az yorum', strategy:'Yeni girenlerden biri. Niş ekosistem teklifleri güçlü ancak hacim düşük. Market büyürse orta vadede tehdit olabilir.',
-    actions:['İzlemeye al','Eko segment trendini takip et','Fiyat alarmı kur'] },
-  { id:5, name:'Casa Minimal', platform:'Trendyol', emoji:'🏠', price:329, reviews:215, rating:4.7, visual:82, saturation:38, strength:'medium', strengthLabel:'Orta Tehdit',
-    pos:'Pozitif: Marka hikâyesi güçlü · Negatif: Teslimat süreleri uzun', strategy:'Minimalist konumlanma doğru ama lojistik zayıf. Hızlı kargo ve profesyonel paketleme vurgusunda avantaj yakalanabilir.',
-    actions:['Teslimat süresi karşılaştır','Marka analizi yap','Ürün listing optimizasyonu öner'] },
-  { id:6, name:'DekorPunkt', platform:'Amazon TR', emoji:'🎨', price:259, reviews:156, rating:4.3, visual:65, saturation:49, strength:'medium', strengthLabel:'Orta Tehdit',
-    pos:'Pozitif: Amazon güvenilirliği · Negatif: Ortalama sunum kalitesi', strategy:'Amazon altyapısını kullanan rakip. Fiyat esnekliği var ama listing kalitesi orta. Daha iyi A+ içerik ile ayrışmak mümkün.',
-    actions:['Amazon listing analizi','A+ içerik önerisi al','Cross-platform fiyat takibi'] },
-  { id:7, name:'Stil Ev Market', platform:'N11', emoji:'🔖', price:289, reviews:94, rating:4.4, visual:71, saturation:33, strength:'weak', strengthLabel:'Zayıf Tehdit',
-    pos:'Pozitif: Hediye segmentinde güçlü · Negatif: Platform trafiği düşük', strategy:'N11 nişinde konumlanmış. Platform trafiği düşük olsa da hediye dönemi satışlarında ivme kazanabilir. Özel gün kampanyalarında izlenmeli.',
-    actions:['Hediye segmenti analizi','Kampanya takvimi çıkar','Fiyat alarmı kur'] },
-  { id:8, name:'MegaStore Online', platform:'Hepsiburada', emoji:'🏬', price:199, reviews:1240, rating:3.9, visual:42, saturation:74, strength:'strong', strengthLabel:'Güçlü Tehdit',
-    pos:'Pozitif: En yüksek hacim + en düşük fiyat · Negatif: Düşük puan, kalite şikâyetleri', strategy:'Fiyat kırıcı ve yüksek hacimli ama kalite algısı düşük. Bu rakiple asla fiyat yarışına girilmemeli. Kalite + sunum ile tamamen farklı segmentte konumlanılmalı.',
-    actions:['Kalite şikâyetlerini analiz et','Fiyat alt limitini belirle','Premium konumlanma stratejisi oluştur'] }
-];
+<script type="module">
+import { getUserProducts } from '/src/js/store.js';
+import { auth } from '/src/js/firebase-config.js';
+import { onAuthStateChanged } from 'firebase/auth';
+import { analyzeProduct } from '/src/js/api.js';
+import { ensureQuota, handleApiError } from '/src/js/plan.js';
 
-let selectedId = 1;
+const PLATFORM_LABEL = {
+  trendyol: 'Trendyol', hepsiburada: 'Hepsiburada', 'amazon-tr': 'Amazon TR', amazon: 'Amazon TR', n11: 'N11'
+};
+const CATEGORY_LABEL = {
+  elektronik: 'Elektronik', moda: 'Moda & Giyim', kozmetik: 'Kozmetik',
+  'ev-yasam': 'Ev & Yaşam', ev: 'Ev & Yaşam', 'anne-bebek': 'Anne & Bebek',
+  spor: 'Spor & Outdoor', kirtasiye: 'Kırtasiye', supermarket: 'Süpermarket',
+  otomotiv: 'Otomotiv', mutfak: 'Mutfak', pet: 'Pet Ürünleri', ofis: 'Ofis & Kırtasiye',
+  diger: 'Diğer'
+};
+const PLATFORM_EMOJI = { trendyol:'🛍️', hepsiburada:'🏪', 'amazon-tr':'📦', amazon:'📦', n11:'🔖' };
 
-function renderCompList(){
+let allProducts = [];
+let filteredProducts = [];
+let selectedId = null;
+
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function productLabel(p) {
+  if (p.url) {
+    try { const u = new URL(p.url); return u.hostname.replace(/^www\./,'') + u.pathname.slice(0, 32); }
+    catch { return p.url.slice(0, 48); }
+  }
+  return `${CATEGORY_LABEL[p.category] || p.category || 'Ürün'} — ${PLATFORM_LABEL[p.platform] || p.platform || ''}`;
+}
+
+function saturationOf(p) {
+  // Doygunluk = rakip yoğunluğunun normalize edilmiş hâli (0-100)
+  const c = Number(p.competitorCount) || 0;
+  return Math.min(100, Math.round(c * 1.8));
+}
+
+function strengthOf(p) {
+  const c = Number(p.competitorCount) || 0;
+  const s = Number(p.dropScore) || 0;
+  // Yüksek rakip + düşük skor = güçlü tehdit
+  if (c >= 30 || s < 50) return { key:'strong', label:'Yüksek Rekabet' };
+  if (c >= 18 || s < 70) return { key:'medium', label:'Orta Rekabet' };
+  return { key:'weak', label:'Düşük Rekabet' };
+}
+
+function platformPicker() {
+  const selected = document.getElementById('searchPlatform').value;
+  return selected ? filteredProducts.filter(p => p.platform === selected) : filteredProducts;
+}
+
+function sortProducts(list) {
+  const sort = document.getElementById('searchSort').value;
+  const arr = [...list];
+  if (sort === 'price-asc') arr.sort((a,b) => (Number(a.salePrice)||0) - (Number(b.salePrice)||0));
+  else if (sort === 'competitors') arr.sort((a,b) => (Number(b.competitorCount)||0) - (Number(a.competitorCount)||0));
+  else if (sort === 'margin') arr.sort((a,b) => (Number(b.marginPct)||0) - (Number(a.marginPct)||0));
+  else arr.sort((a,b) => (Number(b.dropScore)||0) - (Number(a.dropScore)||0));
+  return arr;
+}
+
+function refreshProductSelect() {
+  const sel = document.getElementById('productSelect');
+  if (allProducts.length === 0) {
+    sel.innerHTML = '<option value="">— Henüz analiz edilmiş ürün yok —</option>';
+    return;
+  }
+  sel.innerHTML = allProducts.map(p =>
+    `<option value="${escapeHtml(p.id)}"${p.id === selectedId ? ' selected' : ''}>${escapeHtml(productLabel(p))} · ${PLATFORM_LABEL[p.platform] || ''}</option>`
+  ).join('');
+  sel.onchange = () => { selectedId = sel.value; renderAll(); };
+}
+
+function renderCompList() {
   const host = document.getElementById('compList');
-  host.innerHTML = competitors.map(c => `
-    <div class="comp-card${c.id === selectedId ? ' selected' : ''}" onclick="selectComp(${c.id})">
+  const others = sortProducts(platformPicker().filter(p => p.id !== selectedId));
+
+  document.getElementById('compCount').textContent = (others.length) + ' ÜRÜN';
+
+  if (allProducts.length === 0) {
+    host.innerHTML = `
+      <div style="padding:40px 20px;text-align:center;color:var(--muted);">
+        <div style="font-size:38px;margin-bottom:10px;">🔬</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;">Henüz analiz edilmiş ürün yok</div>
+        <div style="font-size:12px;margin-bottom:16px;line-height:1.6;">Rekabet karşılaştırması için önce Link Analizi sayfasından ürün eklemen gerekiyor.</div>
+        <a href="./dropscout.html" class="sm-btn" style="display:inline-block;text-decoration:none;">🔗 Link Analizine Git</a>
+      </div>`;
+    return;
+  }
+
+  if (others.length === 0) {
+    host.innerHTML = `<div style="padding:30px 20px;text-align:center;color:var(--muted);font-size:12px;">Karşılaştırılacak başka ürün bulunamadı. Bir başka platform seç ya da yeni ürün ekle.</div>`;
+    return;
+  }
+
+  host.innerHTML = others.map(c => {
+    const score = Math.round(Number(c.dropScore)||0);
+    const competitors = Number(c.competitorCount)||0;
+    const monthlySales = Number(c.monthlySales)||0;
+    const margin = Math.round((Number(c.marginPct)||0)*10)/10;
+    const sat = saturationOf(c);
+    const str = strengthOf(c);
+    const platformName = PLATFORM_LABEL[c.platform] || c.platform || '';
+    const emoji = PLATFORM_EMOJI[c.platform] || '🛒';
+    return `
+    <div class="comp-card${c.id === selectedId ? ' selected' : ''}" onclick="window.selectComp('${escapeHtml(c.id)}')">
       <div class="cc-top">
-        <div class="cc-avatar">${c.emoji}</div>
+        <div class="cc-avatar">${emoji}</div>
         <div class="cc-info">
-          <div class="cc-name">${c.name}</div>
-          <div class="cc-platform">${c.platform} · ⭐ ${c.rating}</div>
+          <div class="cc-name">${escapeHtml(productLabel(c))}</div>
+          <div class="cc-platform">${escapeHtml(platformName)} · ${escapeHtml(CATEGORY_LABEL[c.category] || c.category || '')}</div>
         </div>
-        <div class="cc-strength ${c.strength === 'strong' ? 'str-strong' : c.strength === 'medium' ? 'str-medium' : 'str-weak'}">${c.strengthLabel}</div>
+        <div class="cc-strength ${str.key === 'strong' ? 'str-strong' : str.key === 'medium' ? 'str-medium' : 'str-weak'}">${str.label}</div>
       </div>
       <div class="cc-metrics">
-        <div class="ccm"><div class="ccm-label">Fiyat</div><div class="ccm-value b">₺${c.price}</div></div>
-        <div class="ccm"><div class="ccm-label">Yorum</div><div class="ccm-value ${c.reviews > 500 ? 'o' : 'g'}">${c.reviews}</div></div>
-        <div class="ccm"><div class="ccm-label">Görsel</div><div class="ccm-value ${c.visual >= 75 ? 'g' : c.visual >= 55 ? 'y' : 'o'}">${c.visual}/100</div></div>
-        <div class="ccm"><div class="ccm-label">Doygunluk</div><div class="ccm-value ${c.saturation >= 60 ? 'r' : c.saturation >= 40 ? 'y' : 'g'}">%${c.saturation}</div></div>
+        <div class="ccm"><div class="ccm-label">Fiyat</div><div class="ccm-value b">₺${Math.round(Number(c.salePrice)||0).toLocaleString('tr-TR')}</div></div>
+        <div class="ccm"><div class="ccm-label">DropScore</div><div class="ccm-value ${score >= 70 ? 'g' : score >= 50 ? 'y' : 'o'}">${score}/100</div></div>
+        <div class="ccm"><div class="ccm-label">Rakip</div><div class="ccm-value ${competitors >= 30 ? 'r' : competitors >= 20 ? 'y' : 'g'}">${competitors}</div></div>
+        <div class="ccm"><div class="ccm-label">Marj</div><div class="ccm-value ${margin >= 22 ? 'g' : margin >= 15 ? 'y' : 'o'}">%${margin.toLocaleString('tr-TR')}</div></div>
       </div>
       <div class="cc-bar-wrap">
         <div class="cc-bar-label">Doygunluk</div>
-        <div class="cc-bar-track"><div class="cc-bar-fill sat" style="width:${c.saturation}%"></div></div>
-        <div class="cc-bar-val">${c.saturation}%</div>
+        <div class="cc-bar-track"><div class="cc-bar-fill sat" style="width:${sat}%"></div></div>
+        <div class="cc-bar-val">${sat}%</div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
-function selectComp(id){
+window.selectComp = function(id) {
+  // İki ürün karşılaştırması için karşılaştırılan ürünü vurgula (gerçek seçim seç=ana ürün)
+  // Burada onclick ile başka karta geçiş = o kartı yeni "ana" yapmak
   selectedId = id;
-  renderCompList();
-  renderDetail();
-}
+  const sel = document.getElementById('productSelect');
+  if (sel) sel.value = id;
+  renderAll();
+};
 
-function renderDetail(){
-  const c = competitors.find(x => x.id === selectedId);
-  if(!c) return;
+function renderDetail() {
+  const me = allProducts.find(p => p.id === selectedId);
+  const priceHost = document.getElementById('priceBars');
+  const reviewHost = document.getElementById('reviewGrid');
+  const stratText = document.getElementById('strategyText');
+  const stratActions = document.getElementById('strategyActions');
 
-  const avgPrice = Math.round(competitors.reduce((a,b) => a+b.price,0) / competitors.length);
-  const maxPrice = Math.max(...competitors.map(x => x.price));
-  const myPrice = 329;
+  if (!me) {
+    priceHost.innerHTML = '<div style="font-size:11px;color:var(--muted);text-align:center;padding:18px 0;">Bir ürün seç.</div>';
+    reviewHost.innerHTML = '';
+    stratText.innerHTML = 'Karşılaştırma için bir ürün seçmelisin.';
+    stratActions.innerHTML = '';
+    const aiBlock = document.getElementById('aiInsightBlock');
+    if (aiBlock) aiBlock.style.display = 'none';
+    _aiInsightReqId++;
+    return;
+  }
 
-  document.getElementById('priceBars').innerHTML = `
-    <div class="pb-row"><div class="pb-name" style="font-weight:700;color:var(--blue)">Senin</div><div class="pb-track"><div class="pb-fill mine" style="width:${(myPrice/maxPrice*100).toFixed(0)}%">₺${myPrice}</div></div></div>
-    <div class="pb-row"><div class="pb-name">${c.name.split(' ')[0]}</div><div class="pb-track"><div class="pb-fill comp" style="width:${(c.price/maxPrice*100).toFixed(0)}%">₺${c.price}</div></div></div>
-    <div class="pb-row"><div class="pb-name">Ort.</div><div class="pb-track"><div class="pb-fill avg" style="width:${(avgPrice/maxPrice*100).toFixed(0)}%">₺${avgPrice}</div></div></div>
+  const sameCat = filteredProducts.filter(p => p.category === me.category);
+  const others = sameCat.filter(p => p.id !== me.id);
+  const myPrice = Math.round(Number(me.salePrice)||0);
+  const myScore = Math.round(Number(me.dropScore)||0);
+  const myComp = Number(me.competitorCount)||0;
+  const myMargin = Math.round((Number(me.marginPct)||0)*10)/10;
+
+  const avgPrice = others.length ? Math.round(others.reduce((a,b) => a + (Number(b.salePrice)||0), 0) / others.length) : myPrice;
+  const minPrice = others.length ? Math.min(...others.map(p => Number(p.salePrice)||0)) : myPrice;
+  const maxPrice = others.length ? Math.max(myPrice, ...others.map(p => Number(p.salePrice)||0)) : myPrice;
+  const denom = Math.max(maxPrice, 1);
+
+  priceHost.innerHTML = `
+    <div class="pb-row"><div class="pb-name" style="font-weight:700;color:var(--blue)">Senin</div><div class="pb-track"><div class="pb-fill mine" style="width:${(myPrice/denom*100).toFixed(0)}%">₺${myPrice.toLocaleString('tr-TR')}</div></div></div>
+    <div class="pb-row"><div class="pb-name">Min</div><div class="pb-track"><div class="pb-fill comp" style="width:${(minPrice/denom*100).toFixed(0)}%">₺${minPrice.toLocaleString('tr-TR')}</div></div></div>
+    <div class="pb-row"><div class="pb-name">Ort.</div><div class="pb-track"><div class="pb-fill avg" style="width:${(avgPrice/denom*100).toFixed(0)}%">₺${avgPrice.toLocaleString('tr-TR')}</div></div></div>
   `;
 
-  const posParts = c.pos.split(' · ');
-  document.getElementById('reviewGrid').innerHTML = `
-    <div class="rv"><div class="rv-label">Toplam Yorum</div><div class="rv-value b">${c.reviews}</div><div class="rv-sub">${c.platform}</div></div>
-    <div class="rv"><div class="rv-label">Ortalama Puan</div><div class="rv-value ${c.rating >= 4.5 ? 'g' : c.rating >= 4 ? 'y' : 'o'}">⭐ ${c.rating}</div><div class="rv-sub">${c.rating >= 4.5 ? 'Çok iyi' : c.rating >= 4 ? 'İyi' : 'Orta'}</div></div>
-    <div class="rv"><div class="rv-label">Pozitif Sinyal</div><div class="rv-value g" style="font-size:11px;font-weight:600">${posParts[0]?.replace('Pozitif: ','')}</div></div>
-    <div class="rv"><div class="rv-label">Negatif Sinyal</div><div class="rv-value o" style="font-size:11px;font-weight:600">${posParts[1]?.replace('Negatif: ','')}</div></div>
+  const avgScore = others.length ? Math.round(others.reduce((a,b) => a + (Number(b.dropScore)||0), 0) / others.length) : myScore;
+  const avgComp  = others.length ? Math.round(others.reduce((a,b) => a + (Number(b.competitorCount)||0), 0) / others.length) : myComp;
+  const myMonthly = Number(me.monthlySales)||0;
+
+  reviewHost.innerHTML = `
+    <div class="rv"><div class="rv-label">DropScore</div><div class="rv-value ${myScore>=70?'g':myScore>=50?'y':'o'}">${myScore}</div><div class="rv-sub">Kategori ort. ${avgScore}</div></div>
+    <div class="rv"><div class="rv-label">Rakip Sayısı</div><div class="rv-value ${myComp>=30?'r':myComp>=20?'y':'g'}">${myComp}</div><div class="rv-sub">Kategori ort. ${avgComp}</div></div>
+    <div class="rv"><div class="rv-label">Net Marj</div><div class="rv-value ${myMargin>=22?'g':myMargin>=15?'y':'o'}">%${myMargin.toLocaleString('tr-TR')}</div><div class="rv-sub">Adet başı ${Math.round(Number(me.netProfit)||0).toLocaleString('tr-TR')} ₺</div></div>
+    <div class="rv"><div class="rv-label">Aylık Satış</div><div class="rv-value b">${myMonthly.toLocaleString('tr-TR')}</div><div class="rv-sub">Tahmini hacim</div></div>
   `;
 
-  document.getElementById('strategyText').innerHTML = c.strategy;
-  document.getElementById('strategyActions').innerHTML = c.actions.map(a => `
-    <div class="sa-item"><span>${a}</span><span class="sa-arrow">→</span></div>
-  `).join('');
+  // ── Stratejik içgörü (gerçek değerlerden türetilmiş) ──
+  const insights = [];
+  if (myPrice > avgPrice * 1.15) insights.push('<strong>Fiyatın kategori ortalamasının üzerinde.</strong> Premium konumlanma değilse fiyat optimizasyonu yapmalısın.');
+  else if (myPrice < avgPrice * 0.85) insights.push('<strong>Fiyatın ortalamanın altında.</strong> Marjını koruyabiliyorsan agresif pozisyon avantajlı.');
+  else insights.push('<strong>Fiyatın kategori ortalamasıyla uyumlu.</strong> Farklılaşma için sunum/kalite vurgusu ön plana çıkmalı.');
+
+  if (myComp >= 30) insights.push('Rakip yoğunluğu <strong>kritik seviyede</strong>; niş alt segmentlere ya da farklı bir kategori varyantına bakmalısın.');
+  else if (myComp <= 10) insights.push('Rakip sayısı <strong>düşük</strong>; öncü avantajını hızla genişletecek listing/kampanya yapılabilir.');
+
+  if (myScore >= 70 && myMargin >= 22) insights.push('DropScore + marj kombinasyonu <strong>güçlü</strong>; bu ürün portföyünde flagship olarak konumlandırılmalı.');
+  else if (myScore < 50) insights.push('DropScore <strong>düşük</strong>; yeniden değerlendirme veya çıkış kararı verilmeli.');
+
+  stratText.innerHTML = insights.join(' ');
+
+  const actions = [];
+  if (myPrice > avgPrice * 1.1) actions.push('Fiyatı %5 düşürerek dönüşüm testi yap');
+  if (myComp >= 25) actions.push('Alt-niş varyant veya bundle hazırla');
+  if (myMargin < 15) actions.push('Tedarikçi/komisyon optimizasyonu yap');
+  if (myScore >= 70) actions.push('Bu ürünü Takip Listesi favorisine al');
+  if (actions.length === 0) actions.push('Mevcut konumunu koru, haftalık yeniden değerlendir');
+
+  stratActions.innerHTML = actions.map(a => `<div class="sa-item"><span>${escapeHtml(a)}</span><span class="sa-arrow">→</span></div>`).join('');
 
   document.querySelectorAll('#pricePanel,#reviewPanel,#strategyPanel').forEach(el => {
-    el.classList.remove('panel-flash');
-    void el.offsetWidth;
-    el.classList.add('panel-flash');
+    el.classList.remove('panel-flash'); void el.offsetWidth; el.classList.add('panel-flash');
   });
+
+  loadAIInsight(me);
 }
 
-function updateKPIs(){
-  const avgPrice = Math.round(competitors.reduce((a,b) => a+b.price,0) / competitors.length);
-  const avgSat = Math.round(competitors.reduce((a,b) => a+b.saturation,0) / competitors.length);
-  const avgReviews = Math.round(competitors.reduce((a,b) => a+b.reviews,0) / competitors.length);
-  document.getElementById('kpiTotal').textContent = competitors.length;
-  document.getElementById('kpiPrice').textContent = '₺' + avgPrice;
-  document.getElementById('kpiReview').textContent = avgReviews > 400 ? 'Yüksek' : avgReviews > 200 ? 'Orta' : 'Düşük';
+let _aiInsightReqId = 0;
+async function loadAIInsight(product) {
+  const block = document.getElementById('aiInsightBlock');
+  const status = document.getElementById('aiInsightStatus');
+  const body = document.getElementById('aiInsightBody');
+  const errorEl = document.getElementById('aiInsightError');
+  const cachedTag = document.getElementById('aiInsightCached');
+  if (!block) return;
+
+  const reqId = ++_aiInsightReqId;
+
+  block.style.display = 'block';
+  status.style.display = 'flex';
+  body.style.display = 'none';
+  errorEl.style.display = 'none';
+  cachedTag.style.display = 'none';
+
+  if (!auth.currentUser) {
+    status.style.display = 'none';
+    errorEl.style.display = 'block';
+    errorEl.textContent = 'AI içgörü için giriş yapmalısın.';
+    return;
+  }
+
+  const payload = {
+    source: 'store_product',
+    productId: product.id,
+    url: product.url,
+    platform: product.platform,
+    category: product.category,
+    salePrice: Number(product.salePrice) || undefined,
+    cost: Number(product.cost) || undefined,
+    dropScore: Number(product.dropScore) || undefined,
+    marginPct: Number.isFinite(Number(product.marginPct)) ? Math.round(Number(product.marginPct) * 10) / 10 : undefined,
+    competitorCount: Number(product.competitorCount) || undefined,
+    monthlySales: Number(product.monthlySales) || undefined,
+    trend: product.trend
+  };
+
+  // On-demand kota on-kontrolu (cache hit ise backend kotayi tuketmez)
+  const allowed = await ensureQuota('storeProductAnalysis', { showAlert: true });
+  if (!allowed) {
+    if (reqId !== _aiInsightReqId) return;
+    status.style.display = 'none';
+    errorEl.style.display = 'block';
+    errorEl.textContent = 'Mağaza ürünü analiz hakkınız dolmuş. Plan sayfasından yükseltebilirsiniz.';
+    return;
+  }
+
+  try {
+    const result = await analyzeProduct(payload);
+    if (reqId !== _aiInsightReqId) return;
+
+    const ins = result.insight || {};
+    document.getElementById('aiReasoning').textContent = ins.scoreReasoning || '';
+    document.getElementById('aiStrengths').innerHTML = (ins.strengths || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
+    document.getElementById('aiWeaknesses').innerHTML = (ins.weaknesses || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
+    document.getElementById('aiStrategy').textContent = ins.strategy || '';
+    document.getElementById('aiActions').innerHTML = (ins.actions || []).map(s => `<li>${escapeHtml(s)}</li>`).join('');
+
+    cachedTag.style.display = result.cached ? 'inline-block' : 'none';
+    status.style.display = 'none';
+    body.style.display = 'block';
+  } catch (err) {
+    if (reqId !== _aiInsightReqId) return;
+    status.style.display = 'none';
+    errorEl.style.display = 'block';
+    if (handleApiError(err)) {
+      errorEl.textContent = err?.body?.message || err?.message || 'Analiz hakkı doldu.';
+    } else {
+      errorEl.textContent = 'AI içgörü alınamadı: ' + (err?.message || 'bilinmeyen hata') + '. Farklı bir ürün seçmeyi dene.';
+    }
+  }
+}
+
+function updateKPIs() {
+  const total = allProducts.length;
+  document.getElementById('kpiTotal').textContent = total;
+  document.getElementById('kpiTotalSub').textContent = total > 0 ? 'Portföyündeki ürünler' : 'Henüz ürün yok';
+
+  if (total === 0) {
+    document.getElementById('kpiPrice').textContent = '—';
+    document.getElementById('kpiReview').textContent = '—';
+    document.getElementById('kpiSat').textContent = '—';
+    return;
+  }
+
+  const avgPrice = Math.round(allProducts.reduce((s,p) => s + (Number(p.salePrice)||0), 0) / total);
+  const avgComp  = Math.round(allProducts.reduce((s,p) => s + (Number(p.competitorCount)||0), 0) / total);
+  const avgSat   = Math.round(allProducts.reduce((s,p) => s + saturationOf(p), 0) / total);
+
+  document.getElementById('kpiPrice').textContent = '₺' + avgPrice.toLocaleString('tr-TR');
+  document.getElementById('kpiReview').textContent = avgComp >= 30 ? 'Yüksek' : avgComp >= 18 ? 'Orta' : 'Düşük';
+  document.getElementById('kpiReviewSub').textContent = `Ort. ${avgComp} rakip / ürün`;
   document.getElementById('kpiSat').textContent = '%' + avgSat;
-  document.getElementById('compCount').textContent = competitors.length + ' RAKİP';
 }
 
-function renderAll(){
+window.renderAll = function() {
+  filteredProducts = allProducts;
+  if (!selectedId && allProducts.length) selectedId = allProducts[0].id;
+  refreshProductSelect();
   updateKPIs();
   renderCompList();
   renderDetail();
-}
-renderAll();
+};
 
+async function loadData() {
+  if (!auth.currentUser) return;
+  try {
+    allProducts = await getUserProducts(auth.currentUser.uid) || [];
+  } catch (err) {
+    console.warn('Ürünler yüklenemedi:', err);
+    allProducts = [];
+  }
+  window.renderAll();
+}
+
+document.getElementById('searchPlatform').addEventListener('change', () => window.renderAll());
+document.getElementById('searchSort').addEventListener('change', () => window.renderAll());
+
+window.renderAll();
+
+if (auth.currentUser) {
+  loadData();
+} else {
+  onAuthStateChanged(auth, user => { if (user) loadData(); });
+}
 </script>
 </body>
 </html>

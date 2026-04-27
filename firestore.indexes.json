@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "platforms",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "connected", "order": "ASCENDING" },
+        { "fieldPath": "lastSyncAt", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "usageDaily",
+      "fieldPath": "date",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    }
+  ]
+}

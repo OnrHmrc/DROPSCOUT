@@ -16,6 +16,11 @@
 </script>
 <link rel="stylesheet" href="/src/css/main.css">
 <script type="module" src="/src/js/main.js"></script>
+<script type="module">
+  // Gap Radar yalnizca Business plani — diger planlar pricing'e yonlendirilir
+  import { gateFeature } from '/src/js/plan.js';
+  gateFeature('main.main', 'business', { mode: 'disable' });
+</script>
 <style>
 /* ═══════════════════════════════════
    GAP RADAR — Page-Specific Styles
@@ -52,7 +57,7 @@
 .tag-red{background:var(--red-dim);color:var(--red)}
 
 .filter-card{margin-bottom:18px}
-.filter-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;padding:16px 18px}
+.filter-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:16px 18px}
 .param-group{display:flex;flex-direction:column;gap:6px}
 .param-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
 .param-select,.action-button{
@@ -93,7 +98,7 @@
 .meta-pill{
   display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;border:1px solid var(--border);
   background:linear-gradient(180deg,var(--surface2),color-mix(in srgb,var(--surface2) 72%,var(--panel-highlight)));
-  font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted)
+  font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);text-decoration:none
 }
 .meta-pill strong{color:var(--text)}
 .op-score-stack{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
@@ -125,35 +130,8 @@
 .metric-value.warn{color:var(--orange)}
 .metric-value.bad{color:var(--red)}
 
-.fit-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
-.fit{
-  padding:11px 12px;border-radius:14px;border:1px solid var(--border);background:var(--surface2);
-}
-.fit-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
-.fit-title{font-size:10px;font-weight:700}
-.fit-num{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted)}
-.fit-bar{height:6px;border-radius:999px;background:color-mix(in srgb,var(--text) 8%, transparent);overflow:hidden}
-.fit-fill{height:100%;display:block;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--green))}
 .op-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px}
 .legal-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.legal-badge{
-  display:inline-flex;align-items:center;gap:8px;padding:7px 10px;border-radius:999px;font-size:10px;font-weight:700;
-  font-family:'Geist Mono',monospace;border:1px solid transparent;position:relative
-}
-.legal-badge.free{background:var(--green-dim);color:var(--green);border-color:color-mix(in srgb,var(--green) 18%, transparent)}
-.legal-badge.doc{background:var(--yellow-dim);color:var(--yellow);border-color:color-mix(in srgb,var(--yellow) 18%, transparent)}
-.legal-badge.ban{background:var(--red-dim);color:var(--red);border-color:color-mix(in srgb,var(--red) 18%, transparent)}
-.info-dot{
-  width:18px;height:18px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
-  background:var(--surface);border:1px solid currentColor;font-size:10px;position:relative;cursor:help
-}
-.tooltip{
-  position:absolute;left:0;top:calc(100% + 10px);width:240px;padding:11px 12px;border-radius:12px;
-  background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--border);box-shadow:var(--key-shadow-strong);
-  color:var(--text);font-size:10px;line-height:1.7;opacity:0;transform:translateY(6px);pointer-events:none;transition:opacity .18s ease, transform .18s ease;z-index:6
-}
-.tooltip strong{color:var(--text)}
-.info-dot:hover .tooltip,.info-dot:focus-within .tooltip{opacity:1;transform:translateY(0)}
 .cta-row{display:flex;gap:8px;flex-wrap:wrap}
 .cta-btn{
   padding:9px 12px;border-radius:10px;font-size:10px;font-weight:700;font-family:'Geist Mono',monospace;cursor:pointer;border:1px solid var(--border);
@@ -174,14 +152,11 @@
 .ai-insight-grid{display:flex;flex-direction:column;gap:12px;height:auto;min-height:0}
 .ai-subcard{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--key-shadow);display:flex;flex-direction:column;min-height:auto}
 .ai-subcard-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
-#legalTrustContent,.ai-subcard .list-points{display:flex;flex-direction:column;gap:10px;overflow:visible;min-height:0;padding-right:0}
+.ai-subcard .list-points{display:flex;flex-direction:column;gap:10px;overflow:visible;min-height:0;padding-right:0}
 
 .ai-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:var(--key-shadow)}
 .ai-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .ai-card-title{font-size:13px;font-weight:700}
-.ai-live{display:flex;align-items:center;gap:5px;font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2)}
-.ai-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.4s ease infinite}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
 
 .score-big-row{display:flex;align-items:center;gap:12px;padding:12px;background:var(--green-dim);border:1px solid var(--focus-green-border);border-radius:14px;margin-bottom:12px}
 .score-big-num{font-size:42px;font-weight:800;line-height:1;color:var(--green);letter-spacing:-2px}
@@ -203,27 +178,6 @@
 .mm-v{font-size:14px;font-weight:700}
 .mm-v.g{color:var(--green)} .mm-v.o{color:var(--orange)} .mm-v.p{color:var(--purple)} .mm-v.y{color:var(--yellow)} .mm-v.r{color:var(--red)}
 
-.legal-mini{border-radius:14px;padding:13px;border:1px solid}
-.lm-free{background:rgba(0,240,160,0.04);border-color:rgba(0,240,160,0.15)}
-.lm-warn{background:rgba(245,200,66,0.04);border-color:rgba(245,200,66,0.2)}
-.lm-ban{background:rgba(255,95,120,0.05);border-color:rgba(255,95,120,0.18)}
-.lm-head{display:flex;align-items:center;gap:7px;margin-bottom:7px}
-.lm-icon{font-size:14px}
-.lm-title{font-size:12px;font-weight:700}
-.lm-title.g{color:var(--green)} .lm-title.y{color:var(--yellow)} .lm-title.r{color:var(--red)}
-.lm-desc{font-size:11px;color:var(--muted2);line-height:1.7;margin-bottom:9px}
-.permit-row{display:flex;align-items:flex-start;gap:6px;font-size:10.5px;color:var(--muted2);margin-bottom:5px;line-height:1.6}
-.permit-row strong{color:var(--text)}
-.permit-row-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:9px 0}
-.prm{background:var(--surface2);border-radius:8px;padding:7px 8px}
-.prm-l{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.8px;margin-bottom:2px}
-.prm-v{font-size:11px;font-weight:600;color:var(--yellow)}
-.prm-v.g{color:var(--green)} .prm-v.r{color:var(--red)}
-.filter-reason-list{display:flex;flex-direction:column;gap:8px}
-.filter-item{padding:10px 11px;border-radius:12px;border:1px dashed var(--border2);background:linear-gradient(180deg,var(--nav-item-bg-start),var(--nav-item-bg-end))}
-.filter-item-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:5px}
-.filter-item-name{font-size:11px;font-weight:700}
-.filter-item-reason{font-size:10px;color:var(--muted2);line-height:1.6}
 .empty-state{
   padding:28px 16px;border-radius:18px;border:1px dashed var(--border2);background:linear-gradient(180deg,var(--nav-item-bg-start),var(--nav-item-bg-end));
   text-align:center;font-size:12px;color:var(--muted2);line-height:1.8
@@ -233,12 +187,13 @@
   font-size:11px;font-weight:700;font-family:'Geist Mono',monospace;box-shadow:var(--key-shadow-strong);opacity:0;transform:translateY(10px);pointer-events:none;transition:all .2s ease;z-index:20
 }
 .snackbar.show{opacity:1;transform:translateY(0)}
+.spinner-ring{width:16px;height:16px;border:2px solid rgba(99,102,241,0.2);border-top-color:var(--blue);border-radius:50%;animation:gr-spin 0.8s linear infinite;display:inline-block;vertical-align:middle}
+@keyframes gr-spin{to{transform:rotate(360deg)}}
 
 @media (max-width:1200px){
   .hero-grid{grid-template-columns:1fr}
   .content-grid{grid-template-columns:1fr 330px}
   .op-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .fit-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:1100px){
   .content-grid{grid-template-columns:1fr}
@@ -253,9 +208,7 @@
   .main{margin-left:0;padding:18px 16px 26px}
   .topbar{gap:14px;align-items:flex-start;flex-wrap:wrap}
   .topbar-left{width:100%}
-  .topbar-right{width:100%;justify-content:space-between;flex-wrap:wrap}
-  .platform-pills{max-width:100%;overflow:auto}
-  .pp{white-space:nowrap}
+  .topbar-right{width:100%;justify-content:flex-end;flex-wrap:wrap}
   .stat-strip{grid-template-columns:repeat(2,minmax(0,1fr))}
   .filter-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .sidebar-bottom{padding-bottom:16px}
@@ -263,8 +216,6 @@
 @media (max-width:700px){
   .page-title{font-size:17px;line-height:1.2}
   .page-meta{line-height:1.5}
-  .platform-pills{width:100%}
-  .pp{flex:1;text-align:center;padding:8px 10px}
   .icon-btn{width:100%;text-align:center}
   .stat-strip{grid-template-columns:1fr}
   .mini-overview{grid-template-columns:1fr}
@@ -274,7 +225,6 @@
   .op-thumb{width:48px;height:48px;font-size:22px}
   .op-score-stack{grid-column:2;align-items:flex-start;flex-direction:row;flex-wrap:wrap}
   .op-metrics{grid-template-columns:1fr 1fr}
-  .fit-grid{grid-template-columns:1fr}
   .op-footer{flex-direction:column;align-items:flex-start}
   .cta-row{width:100%}
   .cta-btn{flex:1}
@@ -290,7 +240,6 @@
   .card-title,.ai-card-title{font-size:12.5px}
   .score-big-num{font-size:36px}
   .op-metrics{grid-template-columns:1fr}
-  .tooltip{width:210px}
 }
 </style>
 </head>
@@ -357,11 +306,6 @@
       </div>
     </div>
 
-    <div class="plan-card">
-      <div class="plan-tier">Pro Plan</div>
-      <div class="plan-name">Gap Radar Beta Aktif ✓</div>
-      <div class="plan-meta"><span>Global → TR fırsat takibi</span><div class="upgrade-btn">Yönet</div></div>
-    </div>
   </div>
 </aside>
 
@@ -372,43 +316,35 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
       <div>
-        <div class="page-title">Gap Radar — Global Boşluk Fırsatları</div>
-        <div class="page-meta">// GLOBAL TREND → TÜRKİYE UYGUNLUK SKORU · DEMO VERİ · ERKEN GİRİŞ PENCERESİ</div>
+        <div class="page-title">Gap Radar — Kategori Fırsat Taraması</div>
+        <div class="page-meta" id="pageMeta">// APIFY TARAMASI + AI FIRSAT ANALİZİ · 24 SAATLİK CACHE</div>
       </div>
     </div>
     <div class="topbar-right">
-      <div class="platform-pills">
-        <div class="pp">Trendyol</div>
-        <div class="pp">Hepsiburada</div>
-        <div class="pp">N11</div>
-        <div class="pp">Amazon TR</div>
-        <div class="pp">Shopify</div>
-        <div class="pp active">Tümü</div>
-      </div>
-      <button class="icon-btn" id="shuffleBtn">↻ Havuzu Karıştır</button>
+      <button class="icon-btn" id="refreshBtn">↻ Yenile</button>
     </div>
   </div>
 
   <section class="stat-strip" id="kpiStrip">
     <div class="stat-box p">
-      <div class="sb-label">Bulunan Gap Fırsatı</div>
-      <div class="sb-value p" id="kpiOpportunities">0</div>
-      <div class="sb-sub">Filtreye göre hesaplanır</div>
+      <div class="sb-label">Bulunan Fırsat</div>
+      <div class="sb-value p" id="kpiOpportunities">—</div>
+      <div class="sb-sub">Kategori taraması</div>
     </div>
     <div class="stat-box g">
-      <div class="sb-label">Düşük Rekabetli Fırsat</div>
-      <div class="sb-value g" id="kpiLowCompetition">0</div>
-      <div class="sb-sub">Erken giriş odaklı</div>
+      <div class="sb-label">Az Rakipli Fırsat</div>
+      <div class="sb-value g" id="kpiLowCompetition">—</div>
+      <div class="sb-sub">10 rakip altı</div>
     </div>
     <div class="stat-box o">
-      <div class="sb-label">Ort. Giriş Süresi</div>
-      <div class="sb-value o" id="kpiEntryDays">0 gün</div>
-      <div class="sb-sub">Kaynak + lojistik + kurulum</div>
+      <div class="sb-label">Ortalama Fiyat</div>
+      <div class="sb-value o" id="kpiEntryDays">—</div>
+      <div class="sb-sub">Pazar örneği</div>
     </div>
     <div class="stat-box y">
-      <div class="sb-label">Ort. Net Marj Potansiyeli</div>
-      <div class="sb-value y" id="kpiMargin">%0</div>
-      <div class="sb-sub">Demo varsayımı</div>
+      <div class="sb-label">Ort. Aylık Satış</div>
+      <div class="sb-value y" id="kpiMargin">—</div>
+      <div class="sb-sub">Adet tahmini</div>
     </div>
   </section>
 
@@ -416,87 +352,87 @@
     <div class="card">
       <div class="card-head">
         <div>
-          <div class="card-title">Erken giriş kararını hızlandıran görünüm</div>
+          <div class="card-title">Kategori fırsat taraması</div>
         </div>
         <div class="tag-row">
-          <div class="ct-tag tag-blue">GLOBAL → TR</div>
-          <div class="ct-tag tag-green">AI ÖNCELİKLENDİRME</div>
+          <div class="ct-tag tag-blue">BACKEND</div>
+          <div class="ct-tag tag-green">AI DETAY</div>
         </div>
       </div>
       <div class="card-copy">
         <div class="kicker">Karar mantığı</div>
         <div class="hero-copy">
-          Gap Radar, globalde yükselen fakat Türkiye’de doygunluğu henüz düşük kalan ürünleri tek görünümde toplar.
-          Her fırsat; <strong>trend sinyali</strong>, <strong>TR doygunluğu</strong>, <strong>yasal statü</strong>, <strong>lojistik sürtünme</strong> ve
-          <strong>net marj potansiyeli</strong> ile birlikte değerlendirilir. Amaç, yalnızca “trend ürün” göstermek değil,
-          <strong>Türkiye’de uygulanabilir erken giriş fırsatını</strong> ayıklamaktır.
+          Gap Radar, Türkiye pazaryerlerinde yüksek talep–düşük rekabet kesişimindeki ürünleri tarar.
+          Her fırsat; <strong>fırsat skoru</strong>, <strong>aylık tahmini satış</strong>, <strong>rakip sayısı</strong> ve
+          <strong>ortalama pazar fiyatı</strong> ile sıralanır. Bir ürüne tıkladığında
+          <strong>Claude AI</strong> karar brief'i üretir: güçlü yönler, riskler ve ilk aksiyonlar.
         </div>
 
         <div class="signal-row">
-          <div class="signal-pill">⚡ <span>Erken giriş penceresi <strong id="pulseEntryWindow">10–18 gün</strong></span></div>
-          <div class="signal-pill">📉 <span>TR doygunluğu <strong id="pulseSaturation">düşük–orta</strong></span></div>
-          <div class="signal-pill">🛡️ <span>Güven katmanı <strong>yasal + lojistik filtreli</strong></span></div>
+          <div class="signal-pill">📡 <span>Kaynak <strong id="pulseEntryWindow">—</strong></span></div>
+          <div class="signal-pill">🕐 <span>Tazelik <strong id="pulseSaturation">—</strong></span></div>
+          <div class="signal-pill">🛡️ <span>Güven <strong>24 saat cache</strong></span></div>
         </div>
 
         <div class="mini-overview">
           <div class="mini">
-            <div class="ml">Gap yoğunluğu</div>
-            <div class="mv" id="miniGapIntensity">73</div>
-            <div class="ms">Trend / doygunluk farkından türetilir</div>
+            <div class="ml">Ort. fırsat skoru</div>
+            <div class="mv" id="miniGapIntensity">—</div>
+            <div class="ms">Backend taraması ortalaması</div>
           </div>
           <div class="mini">
-            <div class="ml">TR fit ortalaması</div>
-            <div class="mv" id="miniTrFit">81</div>
-            <div class="ms">Yasal + lojistik + rekabet + marj</div>
+            <div class="ml">Yüksek fırsat adedi</div>
+            <div class="mv" id="miniTrFit">—</div>
+            <div class="ms">Skor 70+ ürün sayısı</div>
           </div>
           <div class="mini">
-            <div class="ml">Hızlı kazanım adedi</div>
-            <div class="mv" id="miniQuickWins">4</div>
-            <div class="ms">12 gün altı giriş süresi</div>
+            <div class="ml">Az rakipli adedi</div>
+            <div class="mv" id="miniQuickWins">—</div>
+            <div class="ms">5 rakip altı ürün sayısı</div>
           </div>
         </div>
       </div>
     </div>
     <div class="card hero-ai-card">
       <div class="card-head">
-        <div class="card-title">AI Gap Yorumu</div>
-        <div class="ct-tag tag-blue">SEÇİLİ ÜRÜN</div>
+        <div class="card-title">AI Fırsat Brief'i <span id="aiCachedTag" style="display:none;font-family:'Geist Mono',monospace;font-size:9px;background:var(--blue-dim);color:var(--blue);padding:3px 8px;border-radius:999px;letter-spacing:.6px;margin-left:8px;">CACHE</span></div>
+        <div class="ct-tag tag-blue" id="aiCardTag">SEÇİLİ ÜRÜN</div>
       </div>
       <div class="card-copy">
-        <div class="kicker">Canlı karar özeti</div>
+        <div class="kicker" id="aiKicker">Claude Haiku 4.5 içgörüsü</div>
 
         <div class="score-big-row">
-          <div class="score-big-num" id="aiScore">0</div>
+          <div class="score-big-num" id="aiScore">—</div>
           <div>
-            <div class="score-big-label">AI karar özeti</div>
-            <div class="score-big-decision" id="aiDecision">Bekleniyor</div>
+            <div class="score-big-label">Fırsat skoru / karar</div>
+            <div class="score-big-decision" id="aiDecision">Bir ürün seç</div>
           </div>
         </div>
 
         <div class="brief-text" id="aiSummary">
-          Listeden bir ürün seçildiğinde kısa fırsat özeti burada görünecek.
+          Listeden bir ürüne tıkladığında Claude AI, o ürün için Türkçe karar özeti üretir (3–8 saniye, cache'li tekrarlar anlık).
         </div>
 
         <div class="mini-metrics hero-mini-metrics">
           <div class="mm">
-            <div class="mm-l">Global trend</div>
-            <div class="mm-v p" id="aiTrendMetric">0 / 100</div>
+            <div class="mm-l">Ort. fiyat</div>
+            <div class="mm-v p" id="aiTrendMetric">—</div>
           </div>
           <div class="mm">
-            <div class="mm-l">TR doygunluk</div>
-            <div class="mm-v o" id="aiSaturationMetric">0 / 100</div>
+            <div class="mm-l">Rakip sayısı</div>
+            <div class="mm-v o" id="aiSaturationMetric">—</div>
           </div>
           <div class="mm">
-            <div class="mm-l">Giriş zamanı</div>
-            <div class="mm-v y" id="aiEntryMetric">0 gün</div>
+            <div class="mm-l">Aylık satış</div>
+            <div class="mm-v y" id="aiEntryMetric">—</div>
           </div>
           <div class="mm">
-            <div class="mm-l">Net marj</div>
-            <div class="mm-v g" id="aiMarginMetric">%0</div>
+            <div class="mm-l">Kaynak</div>
+            <div class="mm-v g" id="aiMarginMetric">—</div>
           </div>
         </div>
 
-        <div class="ai-summary-note">Alt sağ karar grubu seçili ürünle birlikte anlık güncellenir ve ürün listesi boyunca sabit görünür.</div>
+        <div class="ai-summary-note" id="aiSummaryNote">AI çağrısı yalnızca sen bir ürüne tıkladığında tetiklenir. Cache hit'ler ücretsiz, yeni çağrılar analiz kotandan tüketilir.</div>
       </div>
     </div>
   </section>
@@ -504,75 +440,43 @@
   <section class="card filter-card">
     <div class="card-head">
       <div>
-        <div class="card-title">Filtre barı</div>
-        <div class="list-sub">Kaynak, rekabet, yasal durum ve hedef platformu birlikte daralt.</div>
+        <div class="card-title">Kategori taraması</div>
+        <div class="list-sub">Kategori seçtiğinde backend taramayı tetikler (ya da 24 saat cache'ten döner). İlk yüklemede Elektronik gelir.</div>
       </div>
-      <div class="ct-tag tag-blue">CANLI FİLTRE</div>
+      <div class="ct-tag tag-blue" id="dataSourceTag">BACKEND</div>
     </div>
     <div class="filter-grid">
       <div class="param-group">
-        <label class="param-label" for="sourceFilter">Kaynak</label>
-        <select class="param-select" id="sourceFilter">
-          <option value="all">Tümü</option>
-          <option value="TikTok">TikTok</option>
-          <option value="Instagram">Instagram</option>
-          <option value="Amazon">Amazon</option>
-          <option value="AliExpress">AliExpress</option>
-        </select>
-      </div>
-      <div class="param-group">
         <label class="param-label" for="categoryFilter">Kategori</label>
-        <select class="param-select" id="categoryFilter">
-          <option value="all">Tümü</option>
-        </select>
-      </div>
-      <div class="param-group">
-        <label class="param-label" for="competitionFilter">Rekabet Seviyesi</label>
-        <select class="param-select" id="competitionFilter">
-          <option value="all">Tümü</option>
-          <option value="low">Düşük</option>
-          <option value="medium">Orta</option>
-          <option value="high">Yüksek</option>
-        </select>
-      </div>
-      <div class="param-group">
-        <label class="param-label" for="legalFilter">Yasal Durum</label>
-        <select class="param-select" id="legalFilter">
-          <option value="all">Tümü</option>
-          <option value="Serbest">Serbest</option>
-          <option value="Belge Gerekli">Belge Gerekli</option>
-          <option value="Yasaklı">Yasaklı</option>
-        </select>
-      </div>
-      <div class="param-group">
-        <label class="param-label" for="platformFilter">Hedef Platform</label>
-        <select class="param-select" id="platformFilter">
-          <option value="all">Tümü</option>
-          <option value="Trendyol">Trendyol</option>
-          <option value="Hepsiburada">Hepsiburada</option>
-          <option value="N11">N11</option>
-          <option value="Amazon TR">Amazon TR</option>
-          <option value="Shopify">Shopify</option>
-        </select>
+        <select class="param-select" id="categoryFilter"></select>
       </div>
       <div class="param-group">
         <label class="param-label" for="sortFilter">Sıralama</label>
         <select class="param-select" id="sortFilter">
-          <option value="ai-desc">AI Skoru ↓</option>
-          <option value="entry-asc">Giriş Süresi ↑</option>
-          <option value="margin-desc">Net Marj ↓</option>
-          <option value="saturation-asc">TR Doygunluk ↑ fırsat</option>
+          <option value="score-desc">Fırsat skoru ↓</option>
+          <option value="competitors-asc">Az rakip ↑</option>
+          <option value="sales-desc">Aylık satış ↓</option>
+          <option value="price-asc">Fiyat ↑</option>
+          <option value="price-desc">Fiyat ↓</option>
+        </select>
+      </div>
+      <div class="param-group">
+        <label class="param-label" for="minScoreFilter">Minimum fırsat skoru</label>
+        <select class="param-select" id="minScoreFilter">
+          <option value="0">Tümü</option>
+          <option value="60">60+</option>
+          <option value="70">70+ (yüksek)</option>
+          <option value="80">80+ (çok yüksek)</option>
         </select>
       </div>
     </div>
     <div class="filter-footer">
       <div class="filter-note">
-        <strong>Not:</strong> KPI alanı ve liste, seçili filtrelere göre yeniden hesaplanır.
-        Yasaklı ürünler görünür kalsa bile güven katmanında ayrıca uyarılır.
+        <strong>Not:</strong> Ürün bazlı AI brief'i (güçlü/zayıf yön + strateji + aksiyon) kart üzerindeki "AI fırsat analizi" butonuna tıkladığında üretilir. Cache hit'ler ücretsiz.
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="action-button secondary" id="resetFiltersBtn">Filtreleri sıfırla</button>
-        <button class="action-button primary" id="showBestBtn">En iyi fırsatları göster</button>
+        <button class="action-button secondary" id="resetFiltersBtn">Sıfırla</button>
+        <button class="action-button primary" id="showBestBtn">Yüksek fırsat + az rakip</button>
       </div>
     </div>
   </section>
@@ -582,10 +486,10 @@
       <div class="card">
         <div class="list-head">
           <div>
-            <div class="card-title">Gap Fırsat Listesi</div>
-            <div class="list-sub">Kartlar global trend gücü ile Türkiye doygunluğunu yan yana gösterir. Kart seçtiğinde üst AI yorumu ve sağ karar kartları birlikte güncellenir.</div>
+            <div class="card-title">Fırsat Listesi</div>
+            <div class="list-sub">Kartlar backend'in döndürdüğü fırsat skoru, fiyat, tahmini aylık satış ve rakip sayısını gösterir. "AI fırsat analizi" butonuna tıkladığında Claude Haiku 4.5 karar brief'i üretir.</div>
           </div>
-          <div class="count-badge" id="listCountBadge">0 fırsat</div>
+          <div class="count-badge" id="listCountBadge">—</div>
         </div>
       </div>
 
@@ -595,36 +499,42 @@
     <aside class="side-stack">
       <div class="sticky-cluster">
         <div class="ai-insight-grid">
-          <div class="ai-subcard" id="legalTrustCard">
+          <div class="ai-subcard" id="strategyCard" style="display:none;">
             <div class="ai-subcard-head">
-              <div class="ai-card-title">Güven katmanı detayı</div>
-              <div class="ct-tag tag-yellow">LEGAL CHECK</div>
+              <div class="ai-card-title">AI stratejisi</div>
+              <div class="ct-tag tag-yellow">STRATEGY</div>
             </div>
-            <div id="legalTrustContent"></div>
+            <div id="strategyContent" style="font-size:13px;line-height:1.6;color:var(--text);"></div>
           </div>
 
           <div class="ai-subcard">
             <div class="ai-subcard-head">
-              <div class="ai-card-title">Neden fırsat</div>
+              <div class="ai-card-title">Güçlü yönler</div>
               <div class="ct-tag tag-green">UPSIDE</div>
             </div>
-            <div class="list-points" id="whyOpportunity"></div>
+            <div class="list-points" id="whyOpportunity">
+              <div class="empty-state" style="padding:10px;">Ürün seçildiğinde AI üretir.</div>
+            </div>
           </div>
 
           <div class="ai-subcard">
             <div class="ai-subcard-head">
-              <div class="ai-card-title">Neden riskli</div>
+              <div class="ai-card-title">Zayıf yönler / riskler</div>
               <div class="ct-tag tag-red">RISK</div>
             </div>
-            <div class="list-points" id="whyRisk"></div>
+            <div class="list-points" id="whyRisk">
+              <div class="empty-state" style="padding:10px;">—</div>
+            </div>
           </div>
 
           <div class="ai-subcard">
             <div class="ai-subcard-head">
-              <div class="ai-card-title">İlk aksiyon önerisi</div>
-              <div class="ct-tag tag-blue">3 ADIM</div>
+              <div class="ai-card-title">İlk aksiyonlar</div>
+              <div class="ct-tag tag-blue">ACTION</div>
             </div>
-            <div class="list-points" id="firstActions"></div>
+            <div class="list-points" id="firstActions">
+              <div class="empty-state" style="padding:10px;">—</div>
+            </div>
           </div>
         </div>
       </div>
@@ -634,781 +544,462 @@
 
 <div class="snackbar" id="snackbar">Takip listesine eklendi</div>
 
-<script>
-const products = [
-  {
-    id:'p1',
-    emoji:'🐾',
-    name:'Kompakt Tüy Toplama Vakumu',
-    description:'Evcil hayvan sahipleri için masaüstü ve koltuk üstü hızlı temizlik çözümü.',
-    source:'TikTok',
-    category:'Evcil Hayvan',
-    competition:'low',
-    legalStatus:'Serbest',
-    targetPlatforms:['Trendyol','Amazon TR','Shopify'],
-    trendScore:92,
-    saturationScore:28,
-    entryDays:9,
-    entryWindow:'7–12 gün',
-    marginMin:24,
-    marginMax:32,
-    aiScore:91,
-    decision:'Hızlı giriş',
-    logisticScore:84,
-    legalFit:92,
-    competitionFit:88,
-    marginFit:79,
-    opportunityReasons:[
-      'Global kısa video akışlarında <strong>gösterimi kolay</strong>; dönüşüm odaklı kreatif üretmek basit.',
-      'TR’de listelenme yoğunluğu düşük, bu yüzden <strong>ilk sayfa rekabeti</strong> nispeten yönetilebilir.',
-      'Hacmi küçük olduğu için kargo sürtünmesi düşük; hızlı test bütçesi ile doğrulama yapılabilir.'
-    ],
-    riskReasons:[
-      'Ucuz kopya ürünler gelirse fiyat savaşı başlayabilir.',
-      'Evcil hayvan nişinde yorum kalitesi düşük mağazalar güven sorununa yol açabilir.',
-      'Pil ömrü ve çekiş performansı kötü olursa iade oranı yükselir.'
-    ],
-    firstActions:[
-      '3 yaratıcı açı test et: tüy toplama hızı, koltuk demo, araç içi kullanım.',
-      'Trendyol ve Amazon TR’de benzer ürün yorumlarını kalite şikâyeti açısından topla.',
-      'İlk siparişte 2 farklı tedarikçi varyantı ile kalite karşılaştırması yap.'
-    ],
-    legalInfo:{type:'free',label:'Standart e-ticaret uygunluğu içinde, ek belge ihtiyacı öngörülmüyor.'}
-  },
-  {
-    id:'p2',
-    emoji:'🧳',
-    name:'Modüler Seyahat Kablo Organizer',
-    description:'Kompakt bölmeli çanta; kablo, adaptör ve powerbank düzeni için tasarlanmış.',
-    source:'Amazon',
-    category:'Seyahat',
-    competition:'low',
-    legalStatus:'Serbest',
-    targetPlatforms:['Trendyol','Hepsiburada','Shopify'],
-    trendScore:81,
-    saturationScore:34,
-    entryDays:11,
-    entryWindow:'9–14 gün',
-    marginMin:22,
-    marginMax:30,
-    aiScore:84,
-    decision:'Teste değer',
-    logisticScore:87,
-    legalFit:94,
-    competitionFit:82,
-    marginFit:74,
-    opportunityReasons:[
-      'Seyahat içerikleri ve work-from-anywhere teması ile birlikte çapraz satış potansiyeli güçlü.',
-      'TR listelerinde benzer ürün var fakat çoğu <strong>zayıf görselliğe</strong> sahip.',
-      'Varyasyonlu renk ve bundle stratejisi ile ortalama sepet tutarı artırılabilir.'
-    ],
-    riskReasons:[
-      'Fonksiyon farkı net anlatılmazsa ürün sıradan organizer gibi algılanabilir.',
-      'Benzer ürünler hızla çoğalırsa fiyat basıncı artar.',
-      'Dikiş kalitesi kötü tedarikçide yorum skoru hızlı düşer.'
-    ],
-    firstActions:[
-      'Seyahat + ofis + araç kullanımını aynı içerikte gösteren ürün sayfası hazırla.',
-      'İlk listeyi 3 renk ve 2 bundle ile açarak marj esnekliğini test et.',
-      'Rakip başlıklarında sık geçen anahtar kelimeleri SEO açıklamasına taşı.'
-    ],
-    legalInfo:{type:'free',label:'Genel aksesuar sınıfında; ek izin beklenmiyor.'}
-  },
-  {
-    id:'p3',
-    emoji:'🍱',
-    name:'Kendinden Isıtmalı Öğle Yemeği Kutusu',
-    description:'Ofis ve araç kullanımına yönelik taşınabilir ısıtmalı yemek kabı.',
-    source:'AliExpress',
-    category:'Mutfak',
-    competition:'medium',
-    legalStatus:'Belge Gerekli',
-    targetPlatforms:['Hepsiburada','Amazon TR','Shopify'],
-    trendScore:86,
-    saturationScore:38,
-    entryDays:18,
-    entryWindow:'15–22 gün',
-    marginMin:26,
-    marginMax:34,
-    aiScore:82,
-    decision:'Kontrollü giriş',
-    logisticScore:68,
-    legalFit:63,
-    competitionFit:72,
-    marginFit:83,
-    opportunityReasons:[
-      'Çalışan kitle ve kamp/karavan kullanım senaryolarında <strong>işlev çok net</strong> anlatılabiliyor.',
-      'Net marj bandı yüksek; bundle ile kaşık/taşıma çantası upsell yapılabilir.',
-      'Yerel pazarda ürün mevcut olsa da içerik kalitesi ve güven katmanı zayıf.'
-    ],
-    riskReasons:[
-      'Elektrikli ürün olduğu için uygunluk ve ithalat evrakı süreci zaman uzatabilir.',
-      'Ağırlık ve kırılgan parça riski lojistik maliyetini yükseltir.',
-      'Isıtma performansı beklentiyi karşılamazsa iade oranı artar.'
-    ],
-    firstActions:[
-      'Belge ve uygunluk maliyetini ilk sipariş adedine bölerek gerçek marj hesabı çıkar.',
-      'Kırılma riski için güçlendirilmiş paketleme numunesi talep et.',
-      'Ürün sayfasında “ısıtma süresi” ve “kullanım senaryosu” net tablo ile ver.'
-    ],
-    legalInfo:{
-      type:'doc',
-      authority:'Ticaret Bakanlığı / TAREKS',
-      duration:'5–10 iş günü',
-      note:'Elektrikli mutfak ürünü olarak uygunluk kontrolü ve evrak doğrulaması gerekebilir.',
-      permit:'Uygunluk / ithalat ön kontrolü'
-    }
-  },
-  {
-    id:'p4',
-    emoji:'🚗',
-    name:'Mıknatıslı Araç Koltuk Arası Organizer',
-    description:'Telefon, kart ve anahtar için araç içinde boşluğu verimli kullanan organizer.',
-    source:'Instagram',
-    category:'Otomotiv',
-    competition:'medium',
-    legalStatus:'Serbest',
-    targetPlatforms:['Trendyol','N11','Shopify'],
-    trendScore:78,
-    saturationScore:31,
-    entryDays:10,
-    entryWindow:'8–13 gün',
-    marginMin:21,
-    marginMax:27,
-    aiScore:80,
-    decision:'Hızlı test',
-    logisticScore:90,
-    legalFit:95,
-    competitionFit:70,
-    marginFit:69,
-    opportunityReasons:[
-      'Sorun çözen ürün kategorisinde; görsel önce/sonra demoları dönüşümü destekler.',
-      'Araç aksesuarı kategorisi geniş ama bu formatta ürün hâlâ nispeten ayrışıyor.',
-      'Stok tutma ve paketleme kolay, test maliyeti düşüktür.'
-    ],
-    riskReasons:[
-      'Benzer ürünler hızla kopyalanabilir.',
-      'Araç tipine göre uyum problemi yaşanırsa iade oluşabilir.',
-      'Kullanıcı beklentisi iyi yönetilmezse ürün sıradan aksesuar gibi algılanabilir.'
-    ],
-    firstActions:[
-      'Ürün açıklamasına uyumlu araç boşluğu ölçülerini net ekle.',
-      'Kreatiflerde “düşen telefon / kaybolan anahtar” problemini vurgu yap.',
-      'İlk hafta yorum toplamak için küçük kupon stratejisi uygula.'
-    ],
-    legalInfo:{type:'free',label:'Genel otomotiv aksesuarı; standart satış akışına uygun.'}
-  },
-  {
-    id:'p5',
-    emoji:'🦷',
-    name:'UV Diş Fırçası Sterilizasyon Kutusu',
-    description:'Banyo tezgâhı için hijyen odaklı kompakt steril tutucu çözümü.',
-    source:'TikTok',
-    category:'Kişisel Bakım',
-    competition:'medium',
-    legalStatus:'Belge Gerekli',
-    targetPlatforms:['Trendyol','Amazon TR'],
-    trendScore:88,
-    saturationScore:27,
-    entryDays:21,
-    entryWindow:'18–25 gün',
-    marginMin:25,
-    marginMax:33,
-    aiScore:79,
-    decision:'Belge sonrası test',
-    logisticScore:73,
-    legalFit:56,
-    competitionFit:77,
-    marginFit:81,
-    opportunityReasons:[
-      'Hijyen anlatısı güçlü; kısa video demolarında dönüşüm potansiyeli yüksek.',
-      'TR’de kategori var ama ürünün sterilizasyon iddiasını iyi anlatan mağaza az.',
-      'Aile kullanımı üzerinden bundle ve çoklu satış senaryosu güçlü.'
-    ],
-    riskReasons:[
-      'UV ve hijyen iddiaları nedeniyle belge/uygunluk değerlendirmesi gerekebilir.',
-      'Yanlış sağlık vaadi dili kullanılırsa ilan riski oluşur.',
-      'Pil/şarj kalitesi zayıf ürünlerde kullanıcı memnuniyeti düşer.'
-    ],
-    firstActions:[
-      'Pazarlama dilini sağlık vaadinden kaçınacak şekilde yeniden kurgula.',
-      'Belge gerekliliğini tedarikçi evrakı ile birlikte ön teyide sok.',
-      'İlk görsellerde kullanım kolaylığı ve saklama avantajını öne çıkar.'
-    ],
-    legalInfo:{
-      type:'doc',
-      authority:'TİTCK / ÜTS ön kontrolü',
-      duration:'7–15 iş günü',
-      note:'Hijyen veya cihaz iddiası nedeniyle ürün sınıfı önceden teyit edilmelidir.',
-      permit:'Ürün sınıfı / kayıt teyidi'
-    }
-  },
-  {
-    id:'p6',
-    emoji:'🧊',
-    name:'Jel Soğutmalı Yüz Silindiri',
-    description:'Makyaj öncesi rahatlatma ve sabah rutini için yeniden kullanılabilir yüz bakım aksesuarı.',
-    source:'Instagram',
-    category:'Güzellik',
-    competition:'low',
-    legalStatus:'Serbest',
-    targetPlatforms:['Trendyol','Hepsiburada','Shopify'],
-    trendScore:76,
-    saturationScore:29,
-    entryDays:8,
-    entryWindow:'6–10 gün',
-    marginMin:23,
-    marginMax:29,
-    aiScore:83,
-    decision:'Hızlı giriş',
-    logisticScore:88,
-    legalFit:90,
-    competitionFit:84,
-    marginFit:71,
-    opportunityReasons:[
-      'Sabah rutini ve self-care içeriklerinde ürün kullanımı doğal görünüyor.',
-      'TR pazaryerlerinde ürün mevcut fakat premium konumlandırma boşluğu açık.',
-      'Hızlı giriş süresi sayesinde düşük bütçeli test yapılabilir.'
-    ],
-    riskReasons:[
-      'Güzellik kategorisinde trend ömrü kısa olabilir.',
-      'Paketleme kalitesi zayıf olursa ürün hasarlı teslim edilebilir.',
-      'Farklılaşma için paket ve marka dili gerekecektir.'
-    ],
-    firstActions:[
-      'Premium kutu + kese ile daha yüksek fiyat bandı dene.',
-      'Soğuk kullanım ve sabah şişkinlik demolarını tek video serisinde topla.',
-      'Rakip yorumlarında kırılma/çatlama şikâyetlerini kontrol et.'
-    ],
-    legalInfo:{type:'free',label:'Kozmetik cihaz iddiası olmadan aksesuar olarak listelenebilir.'}
-  },
-  {
-    id:'p7',
-    emoji:'📦',
-    name:'Vakumlu Buzdolabı Düzen Saklama Seti',
-    description:'Taze tutma ve dikey depolama odaklı şeffaf saklama seti.',
-    source:'Amazon',
-    category:'Ev Düzeni',
-    competition:'high',
-    legalStatus:'Serbest',
-    targetPlatforms:['Hepsiburada','N11','Shopify'],
-    trendScore:74,
-    saturationScore:49,
-    entryDays:13,
-    entryWindow:'11–16 gün',
-    marginMin:18,
-    marginMax:24,
-    aiScore:68,
-    decision:'Seçici yaklaş',
-    logisticScore:79,
-    legalFit:91,
-    competitionFit:46,
-    marginFit:58,
-    opportunityReasons:[
-      'Kullanım demosu güçlü, mutfak düzeni teması her zaman çalışır.',
-      'Bundle ve set yapısı ile ortalama sepet artırılabilir.',
-      'İçerik üretimi kolaydır.'
-    ],
-    riskReasons:[
-      'TR’de benzer ürün çok; fiyat savaşı belirgin.',
-      'Ürünün farkı net anlatılmazsa yeni giriş görünmez kalabilir.',
-      'Kırılabilir parça / hacim lojistiği marjı aşındırır.'
-    ],
-    firstActions:[
-      'Ancak farklılaştırılmış set kombinasyonu ile giriş düşün.',
-      'Fiyat yerine dikey depolama avantajı ve kalite vaadine odaklan.',
-      'Rakip yoğunluğu yüksek olduğu için düşük bütçeli test ile başla.'
-    ],
-    legalInfo:{type:'free',label:'Genel ev düzeni ürünü; özel izin beklenmiyor.'}
-  },
-  {
-    id:'p8',
-    emoji:'🔌',
-    name:'Katlanabilir Manyetik Şarj Standı',
-    description:'Telefon + kulaklık için seyahat dostu kompakt şarj standı.',
-    source:'AliExpress',
-    category:'Teknoloji Aksesuarı',
-    competition:'medium',
-    legalStatus:'Belge Gerekli',
-    targetPlatforms:['Trendyol','Amazon TR','Shopify'],
-    trendScore:89,
-    saturationScore:35,
-    entryDays:16,
-    entryWindow:'12–18 gün',
-    marginMin:27,
-    marginMax:36,
-    aiScore:85,
-    decision:'Belgeli güçlü aday',
-    logisticScore:76,
-    legalFit:64,
-    competitionFit:74,
-    marginFit:86,
-    opportunityReasons:[
-      'Seyahat + masa düzeni + Apple ekosistemi açılarından çoklu kreatif imkânı sunuyor.',
-      'Marj bandı yüksek, premium pozisyonlama mümkün.',
-      'TR’de ürün var ancak kompakt katlanır form faktöründe boşluk devam ediyor.'
-    ],
-    riskReasons:[
-      'Elektronik aksesuar belgeleri ve tedarikçi kalite standardı kritik.',
-      'Şarj performansı ve ısınma sorunları iade riskini büyütür.',
-      'Mıknatıs uyumu ve cihaz uyumluluğu açıklanmazsa memnuniyet düşer.'
-    ],
-    firstActions:[
-      'Tedarikçiden CE/uygunluk evrak seti iste ve seri bazlı teyit al.',
-      'Uyumluluk tablosu oluşturarak ürün sayfasında görünür yap.',
-      'Isınma/şarj hızı test videosunu içerik havuzuna ekle.'
-    ],
-    legalInfo:{
-      type:'doc',
-      authority:'Ticaret Bakanlığı / TAREKS',
-      duration:'4–9 iş günü',
-      note:'Elektronik aksesuar için uygunluk ve işaretleme belgeleri önceden doğrulanmalıdır.',
-      permit:'Uygunluk evrakı / işaretleme kontrolü'
-    }
-  },
-  {
-    id:'p9',
-    emoji:'🚫',
-    name:'Marka Logolu Replika Anahtarlık',
-    description:'Popüler otomobil markalarına benzeyen logolu replika aksesuar.',
-    source:'Instagram',
-    category:'Taklit / Riskli',
-    competition:'low',
-    legalStatus:'Yasaklı',
-    targetPlatforms:['Shopify'],
-    trendScore:71,
-    saturationScore:14,
-    entryDays:5,
-    entryWindow:'hemen',
-    marginMin:35,
-    marginMax:45,
-    aiScore:22,
-    decision:'Filtre dışı bırak',
-    logisticScore:92,
-    legalFit:5,
-    competitionFit:89,
-    marginFit:91,
-    opportunityReasons:[
-      'Arama hacmi ve impuls satın alma potansiyeli yüzeyde yüksek görünebilir.',
-      'Kısa vadede marj cazip durabilir.',
-      'Düşük rekabet hissi aldatıcı bir sinyal üretebilir.'
-    ],
-    riskReasons:[
-      'Taklit / marka ihlali nedeniyle platform ve hukuk riski çok yüksektir.',
-      'Hesap kapanması, ilan silinmesi ve stok zararı oluşabilir.',
-      'Kısa vadeli marj, uzun vadeli operasyon riskini karşılamaz.'
-    ],
-    firstActions:[
-      'Bu ürünü satış havuzundan çıkar.',
-      'Benzer problem çözen ama markasız / özgün alternatif ürün ara.',
-      'Riskli ürün kurallarını takip listesi filtresine kalıcı olarak ekle.'
-    ],
-    legalInfo:{
-      type:'ban',
-      authority:'Marka hakkı / platform politikaları',
-      duration:'Satışa uygun değil',
-      note:'Taklit veya marka ihlali şüphesi taşıyan ürünler satıştan çıkarılmalıdır.',
-      permit:'Satış önerilmez'
-    }
-  }
+<script type="module">
+import { analyzeProduct, getGapRadar } from '/src/js/api.js';
+import { ensureQuota, handleApiError } from '/src/js/plan.js';
+
+const CATEGORY_OPTIONS = [
+  { id: 'elektronik',   name: 'Elektronik',        emoji: '📱' },
+  { id: 'ev-yasam',     name: 'Ev & Yaşam',        emoji: '🏠' },
+  { id: 'kozmetik',     name: 'Kozmetik',          emoji: '💄' },
+  { id: 'giyim',        name: 'Giyim',             emoji: '👕' },
+  { id: 'spor-outdoor', name: 'Spor & Outdoor',    emoji: '⚽' },
+  { id: 'anne-bebek',   name: 'Anne & Bebek',      emoji: '🍼' },
+  { id: 'kirtasiye',    name: 'Kırtasiye',         emoji: '✏️' },
+  { id: 'otomotiv',     name: 'Otomotiv',          emoji: '🚗' },
+  { id: 'supermarket',  name: 'Süpermarket',       emoji: '🛒' },
+  { id: 'kitap-hobi',   name: 'Kitap & Hobi',      emoji: '📚' },
+  { id: 'mobilya',      name: 'Mobilya',           emoji: '🛋️' },
+  { id: 'aksesuar',     name: 'Aksesuar & Takı',   emoji: '💍' },
+  { id: 'oyuncak',      name: 'Oyuncak',           emoji: '🧸' },
+  { id: 'mutfak',       name: 'Mutfak Gereçleri',  emoji: '🍳' },
+  { id: 'evcil-hayvan', name: 'Evcil Hayvan',      emoji: '🐾' }
 ];
+const CATEGORY_EMOJI  = Object.fromEntries(CATEGORY_OPTIONS.map(c => [c.id, c.emoji]));
+const CATEGORY_BY_ID  = Object.fromEntries(CATEGORY_OPTIONS.map(c => [c.id, c]));
 
+const $ = (id) => document.getElementById(id);
 const els = {
-  opportunityList: document.getElementById('opportunityList'),
-  listCountBadge: document.getElementById('listCountBadge'),
-  kpiOpportunities: document.getElementById('kpiOpportunities'),
-  kpiLowCompetition: document.getElementById('kpiLowCompetition'),
-  kpiEntryDays: document.getElementById('kpiEntryDays'),
-  kpiMargin: document.getElementById('kpiMargin'),
-  pulseEntryWindow: document.getElementById('pulseEntryWindow'),
-  pulseSaturation: document.getElementById('pulseSaturation'),
-  miniGapIntensity: document.getElementById('miniGapIntensity'),
-  miniTrFit: document.getElementById('miniTrFit'),
-  miniQuickWins: document.getElementById('miniQuickWins'),
-  aiScore: document.getElementById('aiScore'),
-  aiDecision: document.getElementById('aiDecision'),
-  aiSummary: document.getElementById('aiSummary'),
-  aiTrendMetric: document.getElementById('aiTrendMetric'),
-  aiSaturationMetric: document.getElementById('aiSaturationMetric'),
-  aiEntryMetric: document.getElementById('aiEntryMetric'),
-  aiMarginMetric: document.getElementById('aiMarginMetric'),
-  whyOpportunity: document.getElementById('whyOpportunity'),
-  whyRisk: document.getElementById('whyRisk'),
-  firstActions: document.getElementById('firstActions'),
-  legalTrustContent: document.getElementById('legalTrustContent'),
-  snackbar: document.getElementById('snackbar')
+  opportunityList:   $('opportunityList'),
+  listCountBadge:    $('listCountBadge'),
+  kpiOpportunities:  $('kpiOpportunities'),
+  kpiLowCompetition: $('kpiLowCompetition'),
+  kpiEntryDays:      $('kpiEntryDays'),
+  kpiMargin:         $('kpiMargin'),
+  pulseEntryWindow:  $('pulseEntryWindow'),
+  pulseSaturation:   $('pulseSaturation'),
+  miniGapIntensity:  $('miniGapIntensity'),
+  miniTrFit:         $('miniTrFit'),
+  miniQuickWins:     $('miniQuickWins'),
+  aiScore:           $('aiScore'),
+  aiDecision:        $('aiDecision'),
+  aiSummary:         $('aiSummary'),
+  aiTrendMetric:     $('aiTrendMetric'),
+  aiSaturationMetric:$('aiSaturationMetric'),
+  aiEntryMetric:     $('aiEntryMetric'),
+  aiMarginMetric:    $('aiMarginMetric'),
+  aiCachedTag:       $('aiCachedTag'),
+  aiCardTag:         $('aiCardTag'),
+  aiSummaryNote:     $('aiSummaryNote'),
+  dataSourceTag:     $('dataSourceTag'),
+  strategyCard:      $('strategyCard'),
+  strategyContent:   $('strategyContent'),
+  whyOpportunity:    $('whyOpportunity'),
+  whyRisk:           $('whyRisk'),
+  firstActions:      $('firstActions'),
+  snackbar:          $('snackbar'),
+  categoryFilter:    $('categoryFilter'),
+  sortFilter:        $('sortFilter'),
+  minScoreFilter:    $('minScoreFilter'),
+  resetBtn:          $('resetFiltersBtn'),
+  showBestBtn:       $('showBestBtn'),
+  refreshBtn:        $('refreshBtn')
 };
 
-const filters = {
-  source: document.getElementById('sourceFilter'),
-  category: document.getElementById('categoryFilter'),
-  competition: document.getElementById('competitionFilter'),
-  legal: document.getElementById('legalFilter'),
-  platform: document.getElementById('platformFilter'),
-  sort: document.getElementById('sortFilter')
+const state = {
+  categoryId: 'elektronik',
+  items: [],
+  loading: false,
+  error: null,
+  selectedId: null,
+  snapshot: null
 };
-
-let selectedId = null;
 const saved = new Set();
 
-function formatCompetition(value){
-  return value === 'low' ? 'Düşük' : value === 'medium' ? 'Orta' : 'Yüksek';
+function escHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
 }
-function avgMargin(product){
-  return Math.round((product.marginMin + product.marginMax) / 2);
+function formatTl(v) {
+  if (v == null || !isFinite(v)) return '—';
+  return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(v) + ' ₺';
 }
-function gapIntensity(product){
-  return Math.max(0, Math.round(product.trendScore - (product.saturationScore * 0.55)));
+function formatNum(v) {
+  if (v == null || !isFinite(v)) return '—';
+  return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(v);
 }
-function trFit(product){
-  return Math.round((product.legalFit + product.logisticScore + product.competitionFit + product.marginFit) / 4);
+function freshnessLabel(fetchedAt) {
+  if (!fetchedAt) return '—';
+  const h = Math.round((Date.now() - fetchedAt) / 3600000);
+  if (h < 1) return '< 1 saat';
+  if (h < 24) return `${h} saat önce`;
+  const d = Math.round(h / 24);
+  return `${d} gün önce`;
 }
-
-function clampTextStatus(value){
-  if (value <= 32) return 'düşük';
-  if (value <= 55) return 'düşük–orta';
-  if (value <= 70) return 'orta';
-  return 'yüksek';
+function sourceLabel(s) {
+  return s === 'apify' ? 'Apify (canlı)' : 'Örnek veri';
 }
-
-function currentFilterValues(){
-  return {
-    source: filters.source.value,
-    category: filters.category.value,
-    competition: filters.competition.value,
-    legal: filters.legal.value,
-    platform: filters.platform.value,
-    sort: filters.sort.value
-  };
-}
-function matchesFilters(product, current){
-  return (current.source === 'all' || product.source === current.source) &&
-         (current.category === 'all' || product.category === current.category) &&
-         (current.competition === 'all' || product.competition === current.competition) &&
-         (current.legal === 'all' || product.legalStatus === current.legal) &&
-         (current.platform === 'all' || product.targetPlatforms.includes(current.platform));
-}
-function sortProducts(list, mode){
-  const cloned = [...list];
-  cloned.sort((a,b) => {
-    if (mode === 'entry-asc') return a.entryDays - b.entryDays || b.aiScore - a.aiScore;
-    if (mode === 'margin-desc') return avgMargin(b) - avgMargin(a) || b.aiScore - a.aiScore;
-    if (mode === 'saturation-asc') return a.saturationScore - b.saturationScore || b.trendScore - a.trendScore;
-    return b.aiScore - a.aiScore || gapIntensity(b) - gapIntensity(a);
-  });
-  return cloned;
-}
-function showToast(text){
+function showToast(text) {
   els.snackbar.textContent = text;
   els.snackbar.classList.add('show');
   clearTimeout(showToast._timer);
   showToast._timer = setTimeout(() => els.snackbar.classList.remove('show'), 1800);
 }
-function createPoint(text, icon){
-  return `<div class="point"><div class="point-icon">${icon}</div><div>${text}</div></div>`;
+function scoreClass(score) {
+  if (score >= 80) return 'good';
+  if (score >= 60) return 'mid';
+  return 'warn';
 }
-function legalBadgeHtml(product){
-  if (product.legalStatus === 'Serbest'){
-    return `
-      <div class="legal-badge free">Serbest
-        <span class="info-dot" tabindex="0">i
-          <span class="tooltip"><strong>Durum:</strong> ${product.legalInfo.label}</span>
-        </span>
-      </div>`;
-  }
-  if (product.legalStatus === 'Belge Gerekli'){
-    return `
-      <div class="legal-badge doc">Belge Gerekli
-        <span class="info-dot" tabindex="0">i
-          <span class="tooltip">
-            <strong>Kurum:</strong> ${product.legalInfo.authority}<br>
-            <strong>Süre:</strong> ${product.legalInfo.duration}<br>
-            <strong>Not:</strong> ${product.legalInfo.note}
-          </span>
-        </span>
-      </div>`;
-  }
-  return `
-    <div class="legal-badge ban">Yasaklı
-      <span class="info-dot" tabindex="0">!
-        <span class="tooltip">
-          <strong>Kanun uyarısı:</strong> ${product.legalInfo.note}<br>
-          <strong>Durum:</strong> ${product.legalInfo.duration}
-        </span>
-      </span>
-    </div>`;
+function competitorClass(n) {
+  if (n <= 10) return 'good';
+  if (n <= 20) return 'mid';
+  return 'warn';
 }
-function renderProductCard(product){
-  const selected = product.id === selectedId ? 'selected' : '';
-  const saveClass = saved.has(product.id) ? 'saved' : '';
-  const saveText = saved.has(product.id) ? 'Takipte' : 'Takip listesine ekle';
+function itemUid(item, idx) {
+  return `gap-${state.categoryId}-${idx}`;
+}
+
+function populateCategorySelect() {
+  els.categoryFilter.innerHTML = CATEGORY_OPTIONS
+    .map(c => `<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
+  els.categoryFilter.value = state.categoryId;
+}
+
+function applyFilters(items) {
+  const minScore = Number(els.minScoreFilter.value) || 0;
+  const sort = els.sortFilter.value;
+  const filtered = items.filter(it => (it.opportunityScore ?? 0) >= minScore);
+  return [...filtered].sort((a, b) => {
+    if (sort === 'competitors-asc') return (a.competitorCount ?? 0) - (b.competitorCount ?? 0);
+    if (sort === 'sales-desc')      return (b.estimatedMonthlySales ?? 0) - (a.estimatedMonthlySales ?? 0);
+    if (sort === 'price-asc')       return (a.avgPrice ?? 0) - (b.avgPrice ?? 0);
+    if (sort === 'price-desc')      return (b.avgPrice ?? 0) - (a.avgPrice ?? 0);
+    return (b.opportunityScore ?? 0) - (a.opportunityScore ?? 0);
+  });
+}
+
+function renderProductCard(item) {
+  const id = item._uid;
+  const selected = id === state.selectedId ? 'selected' : '';
+  const saveClass = saved.has(id) ? 'saved' : '';
+  const saveText  = saved.has(id) ? 'Takipte' : 'Takibe al';
+  const emoji     = CATEGORY_EMOJI[state.categoryId] || '📦';
+  const score     = Math.round(item.opportunityScore ?? 0);
+  const compCount = item.competitorCount ?? 0;
+  const sales     = item.estimatedMonthlySales ?? 0;
+  const price     = item.avgPrice ?? 0;
+  const keywords  = Array.isArray(item.keywords) ? item.keywords.slice(0, 4) : [];
+  const isHot     = score >= 75 && compCount <= 10;
+  const sampleUrl = Array.isArray(item.sampleUrls) && item.sampleUrls[0];
+
   return `
-    <article class="op-card ${selected}" data-id="${product.id}">
+    <article class="op-card ${selected}" data-id="${escHtml(id)}">
       <div class="op-top">
-        <div class="op-thumb">${product.emoji}</div>
+        <div class="op-thumb">${emoji}</div>
         <div class="op-main">
           <div class="op-name-row">
-            <div class="op-name">${product.name}</div>
-            ${product.entryDays <= 12 && product.legalStatus !== 'Yasaklı' ? '<div class="early-chip">ERKEN GİRİŞ</div>' : ''}
+            <div class="op-name">${escHtml(item.productName || 'İsimsiz ürün')}</div>
+            ${isHot ? '<div class="early-chip">YÜKSEK FIRSAT</div>' : ''}
           </div>
-          <div class="op-desc">${product.description}</div>
+          ${keywords.length
+            ? `<div class="op-desc">Anahtar kelimeler: ${keywords.map(k => escHtml(k)).join(' · ')}</div>`
+            : '<div class="op-desc">Ek anahtar kelime yok.</div>'}
           <div class="op-meta">
-            <div class="meta-pill">Kaynak <strong>${product.source}</strong></div>
-            <div class="meta-pill">Kategori <strong>${product.category}</strong></div>
-            <div class="meta-pill">Platform <strong>${product.targetPlatforms.join(' · ')}</strong></div>
+            <div class="meta-pill">Kategori <strong>${escHtml(item.category || CATEGORY_BY_ID[state.categoryId]?.name || '—')}</strong></div>
+            <div class="meta-pill">Kaynak <strong>${sourceLabel(item.source)}</strong></div>
           </div>
         </div>
         <div class="op-score-stack">
-          <div class="score-ring" style="--score:${product.aiScore}">
-            <span>${product.aiScore}</span>
+          <div class="score-ring" style="--score:${score}">
+            <span>${score}</span>
           </div>
-          <div class="entry-chip">${product.entryWindow}</div>
+          <div class="entry-chip">Fırsat skoru</div>
         </div>
       </div>
 
       <div class="op-metrics">
         <div class="metric">
-          <div class="metric-label">Global trend</div>
-          <div class="metric-value good">${product.trendScore}</div>
-          <div class="metric-sub">Sinyal gücü</div>
+          <div class="metric-label">Fırsat skoru</div>
+          <div class="metric-value ${scoreClass(score)}">${score}</div>
+          <div class="metric-sub">Backend</div>
         </div>
         <div class="metric">
-          <div class="metric-label">TR doygunluk</div>
-          <div class="metric-value ${product.saturationScore <= 32 ? 'good' : product.saturationScore <= 48 ? 'mid' : 'warn'}">${product.saturationScore}</div>
+          <div class="metric-label">Ortalama fiyat</div>
+          <div class="metric-value">${formatTl(price)}</div>
+          <div class="metric-sub">Pazar örneği</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Aylık satış tahmini</div>
+          <div class="metric-value ${sales >= 1000 ? 'good' : sales >= 300 ? 'mid' : 'warn'}">${formatNum(sales)}</div>
+          <div class="metric-sub">Adet / ay</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Rakip sayısı</div>
+          <div class="metric-value ${competitorClass(compCount)}">${compCount}</div>
           <div class="metric-sub">Düşük olan iyi</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Rekabet</div>
-          <div class="metric-value ${product.competition === 'low' ? 'good' : product.competition === 'medium' ? 'mid' : 'bad'}">${formatCompetition(product.competition)}</div>
-          <div class="metric-sub">Pazaryeri yoğunluğu</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Giriş zamanı</div>
-          <div class="metric-value ${product.entryDays <= 12 ? 'good' : product.entryDays <= 18 ? 'mid' : 'warn'}">${product.entryDays}g</div>
-          <div class="metric-sub">${product.entryWindow}</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Net marj</div>
-          <div class="metric-value good">%${product.marginMin}–${product.marginMax}</div>
-          <div class="metric-sub">Tahmini aralık</div>
-        </div>
-      </div>
-
-      <div class="fit-grid">
-        <div class="fit">
-          <div class="fit-head"><span class="fit-title">Legal fit</span><span class="fit-num">${product.legalFit}</span></div>
-          <div class="fit-bar"><span class="fit-fill" style="width:${product.legalFit}%"></span></div>
-        </div>
-        <div class="fit">
-          <div class="fit-head"><span class="fit-title">Lojistik</span><span class="fit-num">${product.logisticScore}</span></div>
-          <div class="fit-bar"><span class="fit-fill" style="width:${product.logisticScore}%"></span></div>
-        </div>
-        <div class="fit">
-          <div class="fit-head"><span class="fit-title">Rekabet</span><span class="fit-num">${product.competitionFit}</span></div>
-          <div class="fit-bar"><span class="fit-fill" style="width:${product.competitionFit}%"></span></div>
-        </div>
-        <div class="fit">
-          <div class="fit-head"><span class="fit-title">Marj fit</span><span class="fit-num">${product.marginFit}</span></div>
-          <div class="fit-bar"><span class="fit-fill" style="width:${product.marginFit}%"></span></div>
+          <div class="metric-label">Anahtar kelime</div>
+          <div class="metric-value">${keywords.length}</div>
+          <div class="metric-sub">Etiket adedi</div>
         </div>
       </div>
 
       <div class="op-footer">
         <div class="legal-wrap">
-          ${legalBadgeHtml(product)}
-          <div class="meta-pill">Gap yoğunluğu <strong>${gapIntensity(product)}</strong></div>
+          <div class="meta-pill">Skor seviyesi <strong>${score >= 80 ? 'Çok yüksek' : score >= 60 ? 'Orta' : 'Düşük'}</strong></div>
+          ${sampleUrl ? `<a class="meta-pill" href="${escHtml(sampleUrl)}" target="_blank" rel="noopener">Pazaryerinde gör ↗</a>` : ''}
         </div>
         <div class="cta-row">
-          <button class="cta-btn ${saveClass}" data-save="${product.id}">${saveText}</button>
-          <button class="cta-btn primary" data-detail="${product.id}">Detay analiz</button>
+          <button class="cta-btn ${saveClass}" data-save="${escHtml(id)}">${saveText}</button>
+          <button class="cta-btn primary" data-detail="${escHtml(id)}">AI fırsat analizi</button>
         </div>
       </div>
     </article>
   `;
 }
-function renderLegalTrust(product){
-  if (product.legalStatus === 'Serbest'){
-    return `
-      <div class="legal-mini lm-free">
-        <div class="lm-head">
-          <div class="lm-icon">✅</div>
-          <div class="lm-title g">Serbest ürün akışı</div>
-        </div>
-        <div class="lm-desc">${product.legalInfo.label}</div>
-        <div class="permit-row"><span>•</span><span><strong>Öneri:</strong> Yine de ilan metninde sağlık veya teknik iddia dili gereksiz yere genişletilmemeli.</span></div>
-        <div class="permit-row-meta">
-          <div class="prm"><div class="prm-l">Yasal sürtünme</div><div class="prm-v g">Düşük</div></div>
-          <div class="prm"><div class="prm-l">Başlama hızı</div><div class="prm-v g">${product.entryDays} gün</div></div>
-        </div>
-      </div>
-    `;
-  }
-  if (product.legalStatus === 'Belge Gerekli'){
-    return `
-      <div class="legal-mini lm-warn">
-        <div class="lm-head">
-          <div class="lm-icon">📄</div>
-          <div class="lm-title y">Belge gereken ürün</div>
-        </div>
-        <div class="lm-desc">${product.legalInfo.note}</div>
-        <div class="permit-row"><span>•</span><span><strong>Kurum:</strong> ${product.legalInfo.authority}</span></div>
-        <div class="permit-row"><span>•</span><span><strong>Tahmini başvuru süresi:</strong> ${product.legalInfo.duration}</span></div>
-        <div class="permit-row"><span>•</span><span><strong>Beklenen kontrol:</strong> ${product.legalInfo.permit}</span></div>
-        <div class="permit-row-meta">
-          <div class="prm"><div class="prm-l">Yasal sürtünme</div><div class="prm-v">${100 - product.legalFit}</div></div>
-          <div class="prm"><div class="prm-l">Planlanan giriş</div><div class="prm-v">${product.entryWindow}</div></div>
-        </div>
-      </div>
-    `;
-  }
-  return `
-    <div class="legal-mini lm-ban">
-      <div class="lm-head">
-        <div class="lm-icon">⛔</div>
-        <div class="lm-title r">Kanun uyarısı etiketi</div>
-      </div>
-      <div class="lm-desc">${product.legalInfo.note}</div>
-      <div class="permit-row"><span>•</span><span><strong>Filtre nedeni:</strong> Bu ürün taklit / hak ihlali riski taşıdığı için ticari havuza alınmıyor.</span></div>
-      <div class="permit-row"><span>•</span><span><strong>Durum:</strong> ${product.legalInfo.duration}</span></div>
-      <div class="permit-row-meta">
-        <div class="prm"><div class="prm-l">Yasal risk</div><div class="prm-v r">Çok yüksek</div></div>
-        <div class="prm"><div class="prm-l">Karar</div><div class="prm-v r">Filtre dışı</div></div>
-      </div>
-    </div>
-  `;
-}
-function updateSidePanel(product){
-  els.aiScore.textContent = product.aiScore;
-  els.aiDecision.textContent = product.decision;
-  els.aiSummary.innerHTML = `<strong>${product.name}</strong> için karar özeti: global trend skoru <strong>${product.trendScore}</strong>, TR doygunluk skoru <strong>${product.saturationScore}</strong> ve TR fit ortalaması <strong>${trFit(product)}</strong>. ${product.legalStatus === 'Yasaklı' ? 'Marj cazip görünse de ürün yüksek hukuk riski nedeniyle satış havuzundan çıkarılmalı.' : 'Mevcut sinyal seti, kontrollü ve hızlı bir test penceresi olduğunu gösteriyor.'}`;
-  els.aiTrendMetric.textContent = `${product.trendScore} / 100`;
-  els.aiSaturationMetric.textContent = `${product.saturationScore} / 100`;
-  els.aiEntryMetric.textContent = `${product.entryDays} gün`;
-  els.aiMarginMetric.textContent = `%${product.marginMin}–${product.marginMax}`;
-  els.whyOpportunity.innerHTML = product.opportunityReasons.map(item => createPoint(item, '✅')).join('');
-  els.whyRisk.innerHTML = product.riskReasons.map(item => createPoint(item, '⚠️')).join('');
-  els.firstActions.innerHTML = product.firstActions.map(item => createPoint(item, '→')).join('');
-  els.legalTrustContent.innerHTML = renderLegalTrust(product);
-}
 
-function updateKpis(filtered){
+function updateKpis(filtered) {
   const count = filtered.length;
-  const lowCompetition = filtered.filter(item => item.competition === 'low' && item.legalStatus !== 'Yasaklı').length;
-  const avgEntry = count ? Math.round(filtered.reduce((acc, item) => acc + item.entryDays, 0) / count) : 0;
-  const avgMarginValue = count ? Math.round(filtered.reduce((acc, item) => acc + avgMargin(item), 0) / count) : 0;
-  const avgGap = count ? Math.round(filtered.reduce((acc, item) => acc + gapIntensity(item), 0) / count) : 0;
-  const avgTrFit = count ? Math.round(filtered.reduce((acc, item) => acc + trFit(item), 0) / count) : 0;
-  const quickWins = filtered.filter(item => item.entryDays <= 12 && item.legalStatus !== 'Yasaklı').length;
-  const avgSat = count ? Math.round(filtered.reduce((acc, item) => acc + item.saturationScore, 0) / count) : 0;
+  const lowComp  = filtered.filter(it => (it.competitorCount ?? 0) <= 10).length;
+  const avgPrice = count ? Math.round(filtered.reduce((s, it) => s + (it.avgPrice || 0), 0) / count) : 0;
+  const avgSales = count ? Math.round(filtered.reduce((s, it) => s + (it.estimatedMonthlySales || 0), 0) / count) : 0;
+  const avgScore = count ? Math.round(filtered.reduce((s, it) => s + (it.opportunityScore || 0), 0) / count) : 0;
+  const highOpp  = filtered.filter(it => (it.opportunityScore ?? 0) >= 70).length;
+  const fewComp  = filtered.filter(it => (it.competitorCount ?? 0) <= 5).length;
 
-  els.kpiOpportunities.textContent = count;
-  els.kpiLowCompetition.textContent = lowCompetition;
-  els.kpiEntryDays.textContent = `${avgEntry} gün`;
-  els.kpiMargin.textContent = `%${avgMarginValue}`;
-  els.listCountBadge.textContent = `${count} fırsat`;
-  els.pulseEntryWindow.textContent = count ? `${Math.max(1, avgEntry - 3)}–${avgEntry + 3} gün` : '—';
-  els.pulseSaturation.textContent = clampTextStatus(avgSat);
-  els.miniGapIntensity.textContent = avgGap;
-  els.miniTrFit.textContent = avgTrFit;
-  els.miniQuickWins.textContent = quickWins;
+  els.kpiOpportunities.textContent  = count || '—';
+  els.kpiLowCompetition.textContent = count ? lowComp : '—';
+  els.kpiEntryDays.textContent      = count ? formatTl(avgPrice) : '—';
+  els.kpiMargin.textContent         = count ? formatNum(avgSales) : '—';
+  els.listCountBadge.textContent    = count ? `${count} fırsat` : '—';
+  els.miniGapIntensity.textContent  = count ? avgScore : '—';
+  els.miniTrFit.textContent         = count ? highOpp : '—';
+  els.miniQuickWins.textContent     = count ? fewComp : '—';
+  els.pulseEntryWindow.textContent  = state.snapshot ? sourceLabel(state.snapshot.source) : '—';
+  els.pulseSaturation.textContent   = state.snapshot?.fetchedAt ? freshnessLabel(state.snapshot.fetchedAt) : '—';
+  els.dataSourceTag.textContent     = state.snapshot?.source === 'apify' ? 'APIFY CANLI' : 'ÖRNEK VERİ';
 }
-function render(){
-  const current = currentFilterValues();
-  const filtered = sortProducts(products.filter(product => matchesFilters(product, current)), current.sort);
 
-  updateKpis(filtered);
+function resetAiPanel() {
+  els.aiScore.textContent         = '—';
+  els.aiDecision.textContent      = 'Bir ürün seç';
+  els.aiSummary.textContent       = 'Listeden bir ürüne tıkladığında Claude AI, o ürün için Türkçe karar özeti üretir (3–8 saniye, cache\'li tekrarlar anlık).';
+  els.aiTrendMetric.textContent   = '—';
+  els.aiSaturationMetric.textContent = '—';
+  els.aiEntryMetric.textContent   = '—';
+  els.aiMarginMetric.textContent  = '—';
+  els.aiCachedTag.style.display   = 'none';
+  els.strategyCard.style.display  = 'none';
+  els.strategyContent.textContent = '';
+  els.whyOpportunity.innerHTML    = '<div class="empty-state" style="padding:10px;">Ürün seçildiğinde AI üretir.</div>';
+  els.whyRisk.innerHTML           = '<div class="empty-state" style="padding:10px;">—</div>';
+  els.firstActions.innerHTML      = '<div class="empty-state" style="padding:10px;">—</div>';
+}
 
-  if (!filtered.length){
-    selectedId = null;
-    els.opportunityList.innerHTML = `<div class="empty-state">Seçili filtrelerle eşleşen ürün bulunamadı. Kaynak veya platform filtresini genişletip tekrar deneyin.</div>`;
-    els.aiScore.textContent = '0';
-    els.aiDecision.textContent = 'Sonuç yok';
-    els.aiSummary.textContent = 'Filtreleri gevşettiğinizde AI yorumu tekrar dolacaktır.';
-    els.aiTrendMetric.textContent = '0 / 100';
-    els.aiSaturationMetric.textContent = '0 / 100';
-    els.aiEntryMetric.textContent = '0 gün';
-    els.aiMarginMetric.textContent = '%0';
-    els.whyOpportunity.innerHTML = '';
-    els.whyRisk.innerHTML = '';
-    els.firstActions.innerHTML = '';
-    els.legalTrustContent.innerHTML = `<div class="empty-state">Güven katmanı seçili ürünle birlikte güncellenir.</div>`;
+function fillSelectedItemMetrics(item) {
+  els.aiScore.textContent            = Math.round(item.opportunityScore ?? 0);
+  els.aiTrendMetric.textContent      = formatTl(item.avgPrice ?? 0);
+  els.aiSaturationMetric.textContent = formatNum(item.competitorCount ?? 0);
+  els.aiEntryMetric.textContent      = formatNum(item.estimatedMonthlySales ?? 0);
+  els.aiMarginMetric.textContent     = sourceLabel(item.source);
+}
+
+function renderList() {
+  const filtered = applyFilters(state.items);
+
+  if (state.loading) {
+    els.opportunityList.innerHTML = `
+      <div class="empty-state" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px;">
+        <div class="spinner-ring" style="width:32px;height:32px;border-width:3px;"></div>
+        <div>Kategori taranıyor…</div>
+      </div>
+    `;
+    els.listCountBadge.textContent = 'yükleniyor…';
     return;
   }
 
-  if (!selectedId || !filtered.some(item => item.id === selectedId)){
-    selectedId = filtered[0].id;
+  if (state.error) {
+    els.opportunityList.innerHTML = `<div class="empty-state">${escHtml(state.error)}</div>`;
+    els.listCountBadge.textContent = 'hata';
+    return;
+  }
+
+  if (!filtered.length) {
+    els.opportunityList.innerHTML = `<div class="empty-state">Bu kategori ve filtrelerle eşleşen ürün bulunamadı. Filtreleri gevşet veya başka bir kategori dene.</div>`;
+    els.listCountBadge.textContent = '0 fırsat';
+    return;
   }
 
   els.opportunityList.innerHTML = filtered.map(renderProductCard).join('');
-  const active = filtered.find(item => item.id === selectedId) || filtered[0];
-  updateSidePanel(active);
 
-  document.querySelectorAll('.op-card').forEach(card => {
+  els.opportunityList.querySelectorAll('.op-card').forEach(card => {
     card.addEventListener('click', (event) => {
-      const detailBtn = event.target.closest('[data-detail]');
-      const saveBtn = event.target.closest('[data-save]');
-      if (saveBtn) return;
-      selectedId = card.dataset.id;
-      render();
+      if (event.target.closest('[data-save]') || event.target.closest('[data-detail]')) return;
+      selectItem(card.dataset.id);
     });
   });
 
-  document.querySelectorAll('[data-detail]').forEach(btn => {
+  els.opportunityList.querySelectorAll('[data-detail]').forEach(btn => {
     btn.addEventListener('click', (event) => {
       event.stopPropagation();
-      selectedId = btn.dataset.detail;
-      render();
-      document.querySelector('.hero-ai-card').scrollIntoView({behavior:'smooth', block:'start'});
+      selectItem(btn.dataset.detail, { triggerAI: true });
+      document.querySelector('.hero-ai-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   });
 
-  document.querySelectorAll('[data-save]').forEach(btn => {
+  els.opportunityList.querySelectorAll('[data-save]').forEach(btn => {
     btn.addEventListener('click', (event) => {
       event.stopPropagation();
       const id = btn.dataset.save;
-      if (saved.has(id)){
-        saved.delete(id);
-        showToast('Takip listesinden çıkarıldı');
-      } else {
-        saved.add(id);
-        showToast('Takip listesine eklendi');
-      }
-      render();
+      if (saved.has(id)) { saved.delete(id); showToast('Takip listesinden çıkarıldı'); }
+      else { saved.add(id); showToast('Takip listesine eklendi'); }
+      renderList();
     });
   });
 }
-function populateCategories(){
-  const categories = [...new Set(products.map(item => item.category))];
-  filters.category.innerHTML = '<option value="all">Tümü</option>' + categories.map(category => `<option value="${category}">${category}</option>`).join('');
+
+function selectItem(id, { triggerAI = false } = {}) {
+  const item = state.items.find(it => it._uid === id);
+  if (!item) return;
+  state.selectedId = id;
+  fillSelectedItemMetrics(item);
+  els.aiDecision.textContent      = item.productName || 'Seçili ürün';
+  els.aiSummary.textContent       = 'Bu ürün için AI analizi yapmak üzere "AI fırsat analizi" butonuna tıkla. Analiz 30 gün boyunca cache\'te saklanır.';
+  els.aiCachedTag.style.display   = 'none';
+  els.strategyCard.style.display  = 'none';
+  els.strategyContent.textContent = '';
+  els.whyOpportunity.innerHTML    = '<div class="empty-state" style="padding:10px;">AI analizi henüz çalıştırılmadı.</div>';
+  els.whyRisk.innerHTML           = '<div class="empty-state" style="padding:10px;">—</div>';
+  els.firstActions.innerHTML      = '<div class="empty-state" style="padding:10px;">—</div>';
+  renderList();
+  if (triggerAI) loadAIInsight(item);
 }
-populateCategories();
-Object.values(filters).forEach(el => el.addEventListener('change', render));
 
-document.getElementById('resetFiltersBtn').addEventListener('click', () => {
-  filters.source.value = 'all';
-  filters.category.value = 'all';
-  filters.competition.value = 'all';
-  filters.legal.value = 'all';
-  filters.platform.value = 'all';
-  filters.sort.value = 'ai-desc';
-  render();
-});
-document.getElementById('showBestBtn').addEventListener('click', () => {
-  filters.legal.value = 'Serbest';
-  filters.competition.value = 'low';
-  filters.platform.value = 'Trendyol';
-  filters.sort.value = 'ai-desc';
-  render();
-  showToast('Düşük rekabetli serbest fırsatlar gösteriliyor');
-});
-document.getElementById('shuffleBtn').addEventListener('click', () => {
-  products.sort(() => Math.random() - 0.5);
-  render();
-  showToast('Demo fırsat havuzu karıştırıldı');
-});
+let _aiInsightReqId = 0;
+async function loadAIInsight(item) {
+  const reqId = ++_aiInsightReqId;
+  els.aiCachedTag.style.display = 'none';
+  els.aiDecision.textContent    = 'Hazırlanıyor…';
+  els.aiSummary.innerHTML       = `
+    <div style="display:flex;align-items:center;gap:10px;color:var(--muted);">
+      <span class="spinner-ring"></span>
+      <span>Claude Haiku 4.5 <strong>${escHtml(item.productName)}</strong> için fırsat brief'i hazırlıyor…</span>
+    </div>
+  `;
+  els.whyOpportunity.innerHTML = '<div class="empty-state" style="padding:10px;">Yükleniyor…</div>';
+  els.whyRisk.innerHTML        = '<div class="empty-state" style="padding:10px;">Yükleniyor…</div>';
+  els.firstActions.innerHTML   = '<div class="empty-state" style="padding:10px;">Yükleniyor…</div>';
 
+  const allowed = await ensureQuota('storeProductAnalysis', { showAlert: true });
+  if (!allowed) {
+    if (reqId !== _aiInsightReqId) return;
+    els.aiDecision.textContent = 'Kota doldu';
+    els.aiSummary.textContent  = 'AI analiz hakkın bu dönem için dolmuş. Plan sayfasından yükseltebilirsin.';
+    return;
+  }
 
-render();
+  try {
+    const result = await analyzeProduct({
+      source: 'store_product',
+      platform: 'trendyol',
+      category: item.category || CATEGORY_BY_ID[state.categoryId]?.name || state.categoryId,
+      salePrice: item.avgPrice ?? undefined,
+      competitorCount: item.competitorCount ?? undefined,
+      monthlySales: item.estimatedMonthlySales ?? undefined,
+      dropScore: Math.round(item.opportunityScore ?? 0),
+      url: (Array.isArray(item.sampleUrls) && item.sampleUrls[0]) || undefined
+    });
+
+    if (reqId !== _aiInsightReqId) return;
+
+    const ins = result.insight || {};
+    els.aiDecision.textContent      = item.productName || 'Seçili ürün';
+    els.aiSummary.textContent       = ins.scoreReasoning || 'Özet üretilemedi.';
+    els.strategyCard.style.display  = ins.strategy ? 'flex' : 'none';
+    els.strategyContent.textContent = ins.strategy || '';
+
+    const makePoints = (arr, icon) => arr.length
+      ? arr.map(s => `<div class="point"><div class="point-icon">${icon}</div><div>${escHtml(s)}</div></div>`).join('')
+      : '<div class="empty-state" style="padding:10px;">—</div>';
+
+    els.whyOpportunity.innerHTML = makePoints(ins.strengths || [], '✅');
+    els.whyRisk.innerHTML        = makePoints(ins.weaknesses || [], '⚠️');
+    els.firstActions.innerHTML   = makePoints(ins.actions || [], '→');
+    els.aiCachedTag.style.display = result.cached ? 'inline-block' : 'none';
+  } catch (err) {
+    if (reqId !== _aiInsightReqId) return;
+    els.aiDecision.textContent = 'Hata';
+    if (handleApiError(err)) {
+      els.aiSummary.textContent = err?.body?.message || err?.message || 'Plan / kota hatası.';
+    } else {
+      els.aiSummary.textContent = 'AI brief alınamadı: ' + (err?.message || 'bilinmeyen hata') + '. Tekrar dene.';
+    }
+    els.whyOpportunity.innerHTML = '<div class="empty-state" style="padding:10px;">—</div>';
+    els.whyRisk.innerHTML        = '<div class="empty-state" style="padding:10px;">—</div>';
+    els.firstActions.innerHTML   = '<div class="empty-state" style="padding:10px;">—</div>';
+  }
+}
+
+async function loadGapRadar() {
+  state.loading = true;
+  state.error = null;
+  state.items = [];
+  state.selectedId = null;
+  state.snapshot = null;
+  resetAiPanel();
+  updateKpis([]);
+  renderList();
+
+  try {
+    const resp = await getGapRadar(state.categoryId);
+    const snapshot = resp?.snapshot;
+    if (!snapshot) throw new Error('Snapshot boş döndü');
+    state.snapshot = snapshot;
+    state.items = (snapshot.items || []).map((it, idx) => ({ ...it, _uid: itemUid(it, idx) }));
+  } catch (err) {
+    if (handleApiError(err)) {
+      state.error = err?.body?.message || err?.message || 'Plan gerektiren özellik.';
+    } else {
+      state.error = 'Gap Radar verisi alınamadı: ' + (err?.message || 'bilinmeyen hata');
+    }
+  } finally {
+    state.loading = false;
+    updateKpis(applyFilters(state.items));
+    renderList();
+  }
+}
+
+// ── Event handlers ──
+populateCategorySelect();
+resetAiPanel();
+updateKpis([]);
+
+els.categoryFilter.addEventListener('change', () => {
+  state.categoryId = els.categoryFilter.value;
+  loadGapRadar();
+});
+els.sortFilter.addEventListener('change', renderList);
+els.minScoreFilter.addEventListener('change', () => {
+  updateKpis(applyFilters(state.items));
+  renderList();
+});
+els.resetBtn.addEventListener('click', () => {
+  els.sortFilter.value = 'score-desc';
+  els.minScoreFilter.value = '0';
+  updateKpis(applyFilters(state.items));
+  renderList();
+});
+els.showBestBtn.addEventListener('click', () => {
+  els.sortFilter.value = 'score-desc';
+  els.minScoreFilter.value = '70';
+  updateKpis(applyFilters(state.items));
+  renderList();
+  showToast('Yüksek fırsat filtresi uygulandı');
+});
+els.refreshBtn.addEventListener('click', () => loadGapRadar());
+
+// ── Initial load ──
+loadGapRadar();
 </script>
 </body>
 </html>

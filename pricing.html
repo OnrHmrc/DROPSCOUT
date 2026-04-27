@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DropScout TR — Plan ve Fiyatlar</title>
+<meta name="description" content="DropScout TR plan seçenekleri: Start, Pro, Business. Mağaza analizinden Gap Radar'a kadar tüm araçlar.">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script>
+  (function(){
+    var p=localStorage.getItem('dropscout-theme-preference')||'system';
+    var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
+    document.documentElement.setAttribute('data-theme',t);
+  })();
+</script>
+<link rel="stylesheet" href="/src/css/main.css">
+<script type="module" src="/src/js/main.js"></script>
+<style>
+.pricing-hero{
+  background:linear-gradient(135deg,var(--purple-dim),var(--blue-dim));
+  border:1px solid rgba(99,102,241,0.16);
+  border-radius:18px;padding:24px 28px;margin-bottom:22px;
+  display:grid;grid-template-columns:1.4fr auto;gap:22px;align-items:center;
+}
+.pricing-hero-title{font-family:'Poppins',sans-serif;font-size:24px;font-weight:800;margin-bottom:6px}
+.pricing-hero-sub{font-size:13px;color:var(--muted);line-height:1.55;max-width:62ch}
+.pricing-hero-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;
+  padding:6px 12px;border-radius:999px;
+  background:var(--surface);border:1px solid var(--border);color:var(--blue);
+  margin-bottom:10px;
+}
+.pricing-hero-actions{display:flex;flex-direction:column;gap:10px;align-items:flex-end}
+.cycle-toggle{
+  display:inline-flex;background:var(--surface);border:1px solid var(--border);
+  border-radius:999px;padding:4px;gap:2px;
+}
+.cycle-btn{
+  padding:8px 16px;font-size:11px;font-weight:700;font-family:'Geist Mono',monospace;
+  border-radius:999px;cursor:pointer;color:var(--muted);
+  border:none;background:transparent;transition:all .15s;
+}
+.cycle-btn.active{background:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(99,102,241,.25)}
+.cycle-discount{font-size:9px;background:var(--green-dim);color:var(--green);padding:2px 6px;border-radius:6px;margin-left:6px}
+.your-plan-info{
+  font-size:11px;color:var(--muted);font-family:'Geist Mono',monospace;
+  text-align:right;
+}
+
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px}
+@media (max-width: 980px){ .plan-grid{grid-template-columns:1fr} }
+
+.plan-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:18px;
+  padding:24px;display:flex;flex-direction:column;gap:14px;position:relative;
+  box-shadow:var(--key-shadow);transition:all .2s;
+}
+.plan-card:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,.08)}
+.plan-card.popular{border:2px solid var(--blue);box-shadow:0 8px 24px rgba(99,102,241,.18)}
+.plan-card.current{border:2px solid var(--green);box-shadow:0 8px 24px rgba(34,197,94,.15)}
+.plan-card.popular::before{
+  content:'EN POPÜLER';position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--blue);color:#fff;font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:1.2px;padding:4px 12px;border-radius:999px;
+}
+.plan-card.current::before{
+  content:'AKTİF PLAN';position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--green);color:#fff;font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;
+  letter-spacing:1.2px;padding:4px 12px;border-radius:999px;
+}
+
+.plan-name{font-family:'Poppins',sans-serif;font-size:22px;font-weight:800}
+.plan-target{font-size:11px;color:var(--muted);min-height:32px;line-height:1.4}
+.plan-price{display:flex;align-items:baseline;gap:6px;margin-top:4px}
+.plan-price-amount{font-family:'Poppins',sans-serif;font-size:38px;font-weight:800;color:var(--text)}
+.plan-price-currency{font-size:14px;font-weight:600;color:var(--muted)}
+.plan-price-period{font-size:12px;color:var(--muted)}
+.plan-price-usd{font-size:10px;font-family:'Geist Mono',monospace;color:var(--muted);margin-top:2px}
+.plan-price-yearly{
+  font-size:10px;font-family:'Geist Mono',monospace;color:var(--green);
+  background:var(--green-dim);padding:3px 8px;border-radius:6px;display:inline-block;margin-top:8px;
+}
+
+.plan-cta{
+  margin-top:8px;padding:13px 18px;border-radius:12px;border:none;cursor:pointer;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:700;
+  transition:all .15s;text-align:center;text-decoration:none;display:block;
+}
+.plan-cta.primary{background:var(--blue);color:#fff}
+.plan-cta.primary:hover{background:#4f46e5;transform:translateY(-1px)}
+.plan-cta.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.plan-cta.secondary:hover{background:var(--panel-highlight)}
+.plan-cta.disabled{background:var(--surface2);color:var(--muted);cursor:not-allowed;opacity:.7}
+.plan-cta.success{background:var(--green-dim);color:var(--green);border:1px solid var(--green);cursor:default}
+
+.plan-features{list-style:none;padding:0;margin:6px 0 0 0;display:flex;flex-direction:column;gap:9px}
+.plan-features li{font-size:12px;color:var(--text);display:flex;gap:9px;line-height:1.45}
+.plan-features li::before{content:'✓';color:var(--green);font-weight:800;flex-shrink:0;margin-top:0}
+.plan-features li.no::before{content:'✕';color:var(--muted)}
+.plan-features li.no{color:var(--muted)}
+.plan-features li strong{font-weight:700;color:var(--text)}
+
+.plan-section-title{
+  font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;letter-spacing:1px;
+  color:var(--muted);text-transform:uppercase;margin-top:6px;
+}
+
+.compare-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:24px;box-shadow:var(--key-shadow);overflow:hidden;
+}
+.compare-title{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;margin-bottom:14px}
+.compare-table{width:100%;border-collapse:collapse;font-size:12px}
+.compare-table th, .compare-table td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.compare-table th{font-family:'Geist Mono',monospace;font-size:10px;font-weight:700;letter-spacing:.6px;color:var(--muted);text-transform:uppercase}
+.compare-table th.col-plan{text-align:center}
+.compare-table td.col-plan{text-align:center;font-weight:600}
+.compare-table tr.section-row td{background:var(--surface2);font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.8px;color:var(--muted);text-transform:uppercase;padding:8px 12px}
+.compare-yes{color:var(--green);font-weight:800}
+.compare-no{color:var(--muted)}
+.compare-table tr:hover td:not([colspan]){background:var(--panel-highlight)}
+
+.faq-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;
+  padding:22px 24px;box-shadow:var(--key-shadow);margin-top:16px;
+}
+.faq-item{border-bottom:1px solid var(--border);padding:14px 0}
+.faq-item:last-child{border-bottom:none}
+.faq-q{font-size:13px;font-weight:700;margin-bottom:6px}
+.faq-a{font-size:12px;color:var(--muted);line-height:1.55}
+
+.note-banner{
+  background:var(--blue-dim);border:1px solid rgba(99,102,241,.2);border-radius:12px;
+  padding:14px 18px;font-size:12px;color:var(--text);line-height:1.55;margin-top:16px;
+}
+.note-banner strong{color:var(--blue);font-weight:700}
+</style>
+</head>
+<body>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<aside class="sidebar">
+  <div class="logo"><a class="logo-link" href="./dropscout.html"><div class="logo-icon">🎯</div><div class="logo-text">Drop<span>Scout</span></div></a></div>
+  <div class="nav-group"><div class="nav-label">Keşif</div><a class="nav-item" href="./trend-radar.html"><span class="nav-icon">📡</span>Trend Radar</a><a class="nav-item" href="./gap-radar.html"><span class="nav-icon">🌍</span>Gap Radar</a><a class="nav-item" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi</a><a class="nav-item" href="./rakip-analizi.html"><span class="nav-icon">🔬</span>Rakip Analizi</a></div>
+  <div class="nav-group"><div class="nav-label">Araçlar</div><a class="nav-item" href="./net-kar.html"><span class="nav-icon">💰</span>Net Kâr Hesabı</a><a class="nav-item" href="./takip-listem.html"><span class="nav-icon">⭐</span>Takip Listem</a><a class="nav-item" href="./yasal-kontrol.html"><span class="nav-icon">⚖️</span>Yasal Kontrol</a><a class="nav-item" href="./tedarikci-bul.html"><span class="nav-icon">🔗</span>Tedarikçi Bul</a><a class="nav-item" href="./raporlar.html"><span class="nav-icon">📊</span>Raporlar</a></div>
+  <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
+  <div class="sidebar-bottom">
+    <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="topbar fade1">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+      <div><div class="page-title">💎 Plan ve Fiyatlar</div><div class="page-meta">// İHTİYACINIZA UYGUN PLANI SEÇİN — 7 GÜNLÜK ÜCRETSİZ DENEME</div></div>
+    </div>
+    <div class="topbar-right">
+      <button class="top-profile-btn" id="topProfileBtn" type="button" aria-label="Hesap ve ayarlar">
+        <span class="top-profile-avatar" id="topProfileAvatar">?</span>
+        <span class="top-profile-copy">
+          <span class="top-profile-name" id="topProfileName">Kullanıcı</span>
+          <span class="top-profile-sub">Hesap &amp; Ayarlar</span>
+        </span>
+        <span class="top-profile-caret">▾</span>
+      </button>
+    </div>
+  </div>
+
+  <section class="pricing-hero fade1">
+    <div>
+      <span class="pricing-hero-badge">🎯 ŞEFFAF FİYATLANDIRMA</span>
+      <div class="pricing-hero-title">İhtiyacınıza uygun planı seçin</div>
+      <div class="pricing-hero-sub">
+        Yeni başlayanlar için <strong>Start</strong>, aktif satıcılar için <strong>Pro</strong>,
+        ölçekli işletmeler için <strong>Business</strong>. Tüm planlarda 7 günlük Pro deneme dahil —
+        kart bilgisi gerekmez.
+      </div>
+    </div>
+    <div class="pricing-hero-actions">
+      <div class="cycle-toggle" role="tablist">
+        <button class="cycle-btn active" data-cycle="monthly" role="tab" aria-selected="true">AYLIK</button>
+        <button class="cycle-btn" data-cycle="yearly" role="tab" aria-selected="false">YILLIK<span class="cycle-discount">%20 ↓</span></button>
+      </div>
+      <div class="your-plan-info" id="yourPlanInfo">// PLAN BİLGİSİ YÜKLENİYOR…</div>
+    </div>
+  </section>
+
+  <section class="plan-grid fade1" id="planGrid">
+    <!-- START -->
+    <div class="plan-card" data-plan="start">
+      <div>
+        <div class="plan-name">Start</div>
+        <div class="plan-target">Yeni başlayan, tek mağazasını yöneten satıcı</div>
+      </div>
+      <div>
+        <div class="plan-price">
+          <span class="plan-price-amount" data-price-monthly="299" data-price-yearly="239">299</span>
+          <span class="plan-price-currency">₺</span>
+          <span class="plan-price-period">/ ay</span>
+        </div>
+        <div class="plan-price-usd">≈ $7,5 USD endeksli</div>
+        <div class="plan-price-yearly" data-yearly-text>Yıllık ödemede ₺2.870 (2 ay ücretsiz)</div>
+      </div>
+      <button class="plan-cta secondary" data-plan-cta="start" type="button">7 Gün Ücretsiz Dene</button>
+      <div class="plan-section-title">DAHİL OLAN ÖZELLİKLER</div>
+      <ul class="plan-features">
+        <li><strong>1 mağaza</strong> API bağlantısı (zorunlu)</li>
+        <li>4 saatte 1 otomatik mağaza senkronu</li>
+        <li>Mağaza ürünü AI analizi: <strong>3/gün, 90/ay</strong></li>
+        <li>Net Kâr Hesaplayıcı, Rakip Analizi (kendi ürünleri)</li>
+        <li>Yasal Kontrol: 10/ay</li>
+        <li>Trend Radar — <strong>3 günde 1 yenileme</strong></li>
+        <li>Takip Listem: <strong>25 ürün</strong></li>
+        <li>CSV raporlama</li>
+        <li>E-posta destek (48 saat)</li>
+        <li class="no">Link Analizi (manuel URL)</li>
+        <li class="no">Gap Radar</li>
+        <li class="no">Tedarikçi Bul</li>
+      </ul>
+    </div>
+
+    <!-- PRO -->
+    <div class="plan-card popular" data-plan="pro">
+      <div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-target">Aktif satıcı, çok kategori, keşif araçları kullanıcısı</div>
+      </div>
+      <div>
+        <div class="plan-price">
+          <span class="plan-price-amount" data-price-monthly="699" data-price-yearly="559">699</span>
+          <span class="plan-price-currency">₺</span>
+          <span class="plan-price-period">/ ay</span>
+        </div>
+        <div class="plan-price-usd">≈ $17,5 USD endeksli</div>
+        <div class="plan-price-yearly" data-yearly-text>Yıllık ödemede ₺6.710 (2 ay ücretsiz)</div>
+      </div>
+      <button class="plan-cta primary" data-plan-cta="pro" type="button">7 Gün Ücretsiz Dene</button>
+      <div class="plan-section-title">START + EK OLARAK</div>
+      <ul class="plan-features">
+        <li><strong>3 mağaza</strong> API bağlantısı</li>
+        <li>Link Analizi: <strong>5/gün, 150/ay</strong></li>
+        <li>Mağaza ürünü AI analizi: <strong>300/ay</strong> (esnek günlük)</li>
+        <li>Yasal Kontrol: 75/ay</li>
+        <li>Tedarikçi Bul: 30/ay</li>
+        <li>Trend Radar — <strong>günlük yenileme</strong></li>
+        <li>Takip Listem: <strong>150 ürün</strong></li>
+        <li>CSV + PDF raporlama</li>
+        <li>E-posta destek (24 saat)</li>
+        <li class="no">Gap Radar</li>
+      </ul>
+    </div>
+
+    <!-- BUSINESS -->
+    <div class="plan-card" data-plan="business">
+      <div>
+        <div class="plan-name">Business</div>
+        <div class="plan-target">Ajans, multi-store satıcı, ölçekli operasyon</div>
+      </div>
+      <div>
+        <div class="plan-price">
+          <span class="plan-price-amount" data-price-monthly="1499" data-price-yearly="1199">1.499</span>
+          <span class="plan-price-currency">₺</span>
+          <span class="plan-price-period">/ ay</span>
+        </div>
+        <div class="plan-price-usd">≈ $37,5 USD endeksli</div>
+        <div class="plan-price-yearly" data-yearly-text>Yıllık ödemede ₺14.390 (2 ay ücretsiz)</div>
+      </div>
+      <button class="plan-cta primary" data-plan-cta="business" type="button">Erken Erişim — İletişim Kur</button>
+      <div class="plan-section-title">PRO + EK OLARAK</div>
+      <ul class="plan-features">
+        <li><strong>Sınırsız mağaza</strong> API bağlantısı</li>
+        <li>Link Analizi: <strong>20/gün, 600/ay</strong></li>
+        <li>Mağaza ürünü AI analizi: <strong>50/gün, sınırsız ay</strong></li>
+        <li>Yasal Kontrol: <strong>sınırsız</strong></li>
+        <li>Tedarikçi Bul: <strong>sınırsız</strong></li>
+        <li>Trend Radar — <strong>6 saatte 1 yenileme</strong> + e-posta alert</li>
+        <li><strong>Gap Radar — tam erişim</strong></li>
+        <li>Takip Listem: <strong>sınırsız</strong></li>
+        <li>Otomatik haftalık PDF rapor</li>
+        <li>Öncelikli destek (4 saat)</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="note-banner fade1">
+    <strong>Erken Erişim Dönemi:</strong> Otomatik ödeme entegrasyonu yakında. Şimdilik plan yükseltme talepleri için
+    <a href="mailto:onrhmrc1913@gmail.com?subject=DropScout%20Plan%20Y%C3%BCkseltme" style="color:var(--blue);font-weight:600;">onrhmrc1913@gmail.com</a>
+    adresine e-posta gönderin — 24 saat içinde havale bilgileri ile dönüş yapıyoruz.
+  </section>
+
+  <section class="compare-card fade1" style="margin-top:18px;">
+    <div class="compare-title">📋 Detaylı karşılaştırma</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Özellik</th>
+          <th class="col-plan">Start</th>
+          <th class="col-plan">Pro</th>
+          <th class="col-plan">Business</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="section-row"><td colspan="4">Fiyatlandırma</td></tr>
+        <tr><td>Aylık fiyat</td><td class="col-plan">₺299</td><td class="col-plan">₺699</td><td class="col-plan">₺1.499</td></tr>
+        <tr><td>Yıllık fiyat (%20 indirim)</td><td class="col-plan">₺2.870</td><td class="col-plan">₺6.710</td><td class="col-plan">₺14.390</td></tr>
+        <tr><td>USD referans</td><td class="col-plan">~$7,5</td><td class="col-plan">~$17,5</td><td class="col-plan">~$37,5</td></tr>
+        <tr><td>7 günlük Pro deneme</td><td class="col-plan compare-yes">✓</td><td class="col-plan compare-yes">✓</td><td class="col-plan compare-no">—</td></tr>
+
+        <tr class="section-row"><td colspan="4">AI Analiz Kotaları</td></tr>
+        <tr><td>Link Analizi (manuel URL)</td><td class="col-plan compare-no">—</td><td class="col-plan">5/gün · 150/ay</td><td class="col-plan">20/gün · 600/ay</td></tr>
+        <tr><td>Mağaza ürünü AI analizi</td><td class="col-plan">3/gün · 90/ay</td><td class="col-plan">300/ay</td><td class="col-plan">50/gün · sınırsız</td></tr>
+        <tr><td>Yasal Kontrol</td><td class="col-plan">10/ay</td><td class="col-plan">75/ay</td><td class="col-plan compare-yes">Sınırsız</td></tr>
+
+        <tr class="section-row"><td colspan="4">Mağaza Entegrasyonu</td></tr>
+        <tr><td>Mağaza API bağlantısı</td><td class="col-plan">1</td><td class="col-plan">3</td><td class="col-plan compare-yes">Sınırsız</td></tr>
+        <tr><td>Otomatik sync</td><td class="col-plan">4 sa.</td><td class="col-plan">4 sa.</td><td class="col-plan">4 sa.</td></tr>
+
+        <tr class="section-row"><td colspan="4">Keşif Araçları</td></tr>
+        <tr><td>Trend Radar yenileme</td><td class="col-plan">3 günde 1</td><td class="col-plan">Günlük</td><td class="col-plan compare-yes">6 saatte 1</td></tr>
+        <tr><td>Gap Radar</td><td class="col-plan compare-no">—</td><td class="col-plan compare-no">—</td><td class="col-plan compare-yes">✓ Tam erişim</td></tr>
+        <tr><td>Tedarikçi Bul</td><td class="col-plan compare-no">—</td><td class="col-plan">30/ay</td><td class="col-plan compare-yes">Sınırsız</td></tr>
+        <tr><td>Rakip Analizi (kendi ürünleri)</td><td class="col-plan compare-yes">✓</td><td class="col-plan compare-yes">✓</td><td class="col-plan compare-yes">✓</td></tr>
+        <tr><td>Net Kâr Hesaplayıcı</td><td class="col-plan compare-yes">✓</td><td class="col-plan compare-yes">✓</td><td class="col-plan compare-yes">✓</td></tr>
+
+        <tr class="section-row"><td colspan="4">Veri & Raporlama</td></tr>
+        <tr><td>Takip Listem</td><td class="col-plan">25</td><td class="col-plan">150</td><td class="col-plan compare-yes">Sınırsız</td></tr>
+        <tr><td>Raporlar</td><td class="col-plan">CSV</td><td class="col-plan">CSV + PDF</td><td class="col-plan">CSV + PDF + haftalık otomatik</td></tr>
+
+        <tr class="section-row"><td colspan="4">Destek</td></tr>
+        <tr><td>Yanıt SLA</td><td class="col-plan">48 sa</td><td class="col-plan">24 sa</td><td class="col-plan compare-yes">4 sa (öncelikli)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="faq-card fade1">
+    <div class="compare-title">❓ Sıkça sorulan sorular</div>
+
+    <div class="faq-item">
+      <div class="faq-q">Plan değişikliği ne zaman yürürlüğe girer?</div>
+      <div class="faq-a">Üst plana yükseltme <strong>anında</strong> aktif olur, kalan günler için orantısal ücret hesaplanır. Alt plana geçiş ise <strong>mevcut dönem sonunda</strong> yürürlüğe girer — bitene kadar mevcut planınızın hakları geçerli kalır.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Kotalar ne zaman sıfırlanır?</div>
+      <div class="faq-a">Günlük kotalar her gece <strong>00:00 Türkiye saati</strong>, aylık kotalar her ayın <strong>1'i 00:00</strong> sıfırlanır. Saat dilimi sabit Europe/Istanbul.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Mağaza API bilgilerim güvende mi?</div>
+      <div class="faq-a">Evet. API kimlik bilgileriniz <strong>AES-256-GCM</strong> ile şifrelenip Firestore'a yazılır. Şifre çözme yalnızca sunucu tarafından, her senkron işlemi sırasında yapılır. Frontend'e asla dönmez.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">7 günlük deneme nasıl çalışır?</div>
+      <div class="faq-a">Yeni hesap açtığınızda otomatik olarak <strong>7 gün boyunca Pro plan haklarına</strong> sahip olursunuz. Kart bilgisi vermeniz gerekmez. Süre sonunda otomatik olarak Start planına düşersiniz, üst plana geçmek isterseniz iletişime geçebilirsiniz.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">Fiyatlar neden USD endeksli?</div>
+      <div class="faq-a">DropScout TR'nin altyapı giderleri (Claude AI, Apify, SerpAPI, Firebase) USD bazlıdır. Kur oynaklığı %15'ten fazla olursa fiyat ayarlaması yapılabilir; <strong>mevcut abonelere her zaman 30 gün önceden bildirim</strong> yapılır.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q">İptal etmek istersem?</div>
+      <div class="faq-a">Aboneliğinizi istediğiniz an iptal edebilirsiniz. İptal sonrası <strong>mevcut dönem sonuna kadar</strong> hizmet aktif kalır, ardından Start planına geçersiniz. Verileriniz silinmez.</div>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import { onAuthChange } from '/src/js/auth.js';
+import { getPlan } from '/src/js/plan.js';
+
+const PLAN_ORDER = ['start', 'pro', 'business'];
+const MAILTO_BASE = 'mailto:onrhmrc1913@gmail.com';
+
+function fmtTl(amount){
+  return new Intl.NumberFormat('tr-TR').format(amount);
+}
+
+function setCycle(cycle){
+  document.querySelectorAll('.cycle-btn').forEach(b => {
+    const active = b.dataset.cycle === cycle;
+    b.classList.toggle('active', active);
+    b.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  document.querySelectorAll('.plan-price-amount').forEach(el => {
+    const monthly = Number(el.dataset.priceMonthly);
+    const yearly  = Number(el.dataset.priceYearly);
+    el.textContent = fmtTl(cycle === 'yearly' ? yearly : monthly);
+  });
+  document.querySelectorAll('[data-yearly-text]').forEach(el => {
+    el.style.display = cycle === 'yearly' ? 'inline-block' : 'inline-block';
+  });
+  document.querySelectorAll('.plan-price-period').forEach(el => {
+    el.textContent = cycle === 'yearly' ? '/ ay (yıllık)' : '/ ay';
+  });
+}
+
+document.querySelectorAll('.cycle-btn').forEach(b => {
+  b.addEventListener('click', () => setCycle(b.dataset.cycle));
+});
+
+function applyCurrentPlan(currentPlan){
+  document.querySelectorAll('.plan-card[data-plan]').forEach(card => {
+    const cardPlan = card.dataset.plan;
+    const cta = card.querySelector('[data-plan-cta]');
+    if (!cta) return;
+
+    card.classList.remove('current');
+
+    if (cardPlan === currentPlan) {
+      card.classList.add('current');
+      card.classList.remove('popular'); // current overrides popular
+      cta.className = 'plan-cta success';
+      cta.textContent = '✓ Aktif Plan';
+      cta.disabled = true;
+      cta.removeAttribute('href');
+    } else {
+      const cardIdx = PLAN_ORDER.indexOf(cardPlan);
+      const curIdx  = PLAN_ORDER.indexOf(currentPlan);
+      if (cardIdx > curIdx) {
+        // upgrade
+        cta.className = cardPlan === 'pro' ? 'plan-cta primary' : 'plan-cta primary';
+        cta.textContent = `${cardPlan === 'business' ? 'Business' : 'Pro'}'a Yükselt — İletişim`;
+        cta.disabled = false;
+        cta.onclick = () => {
+          const subject = encodeURIComponent(`DropScout Plan Yükseltme: ${cardPlan.toUpperCase()}`);
+          window.location.href = `${MAILTO_BASE}?subject=${subject}`;
+        };
+      } else {
+        // downgrade
+        cta.className = 'plan-cta secondary';
+        cta.textContent = `${cardPlan === 'start' ? 'Start' : 'Pro'}'a Geç — İletişim`;
+        cta.disabled = false;
+        cta.onclick = () => {
+          const subject = encodeURIComponent(`DropScout Plan Düşürme: ${cardPlan.toUpperCase()}`);
+          window.location.href = `${MAILTO_BASE}?subject=${subject}`;
+        };
+      }
+    }
+  });
+}
+
+function setNoSession(){
+  document.getElementById('yourPlanInfo').textContent = '// HESAP YOK — KAYIT SONRASI 7 GÜN PRO DENEYİN';
+  document.querySelectorAll('[data-plan-cta]').forEach(cta => {
+    cta.onclick = () => {
+      window.location.href = './login.html?redirect=' + encodeURIComponent('/pricing.html');
+    };
+  });
+}
+
+async function loadPlan(){
+  try {
+    const data = await getPlan();
+    const planUpper = (data.plan || 'start').toUpperCase();
+    const status = data.status || 'active';
+    let info = `// AKTİF PLAN: ${planUpper}`;
+    if (status === 'trialing' && data.trialEndsAt) {
+      const days = Math.max(0, Math.ceil((data.trialEndsAt - Date.now()) / (24*60*60*1000)));
+      info = `// PRO DENEME: ${days} GÜN KALDI`;
+    } else if (status === 'expired') {
+      info = `// PLAN SÜRESİ DOLDU — START SEVİYESİNDESİNİZ`;
+    }
+    document.getElementById('yourPlanInfo').textContent = info;
+    applyCurrentPlan(data.plan);
+  } catch (err) {
+    console.warn('Plan okunamadı:', err);
+    setNoSession();
+  }
+}
+
+onAuthChange(user => {
+  if (!user) {
+    setNoSession();
+  } else {
+    loadPlan();
+  }
+});
+</script>
+</body>
+</html>

@@ -115,7 +115,6 @@
   <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
   <div class="sidebar-bottom">
     <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
-    <div class="plan-card"><div class="plan-tier">Pro Plan</div><div class="plan-name">Tedarikçi Radar Aktif ✓</div><div class="plan-meta"><span>₺499/ay · Sınırsız arama</span><div class="upgrade-btn">Yönet</div></div></div>
   </div>
 </aside>
 
@@ -160,7 +159,7 @@
           <option>Fiyat ↑</option><option>Güvenilirlik ↓</option><option>Kargo Hızı ↑</option><option>Sipariş ↓</option>
         </select>
       </div>
-      <button class="sm-btn" onclick="renderAll()">🔍 Tedarikçi Ara</button>
+      <button class="sm-btn" id="searchBtn" type="button">🔍 Tedarikçi Ara</button>
     </div>
   </div>
 
@@ -193,55 +192,63 @@
   </section>
 </main>
 
-<script>
-const suppliers = [
-  { id:1, name:'Shenzhen GreenHome Co.', source:'AliExpress', emoji:'🏭', type:'ali',
-    price:3.20, moq:10, shipping:14, rating:4.8, orders:8420, trust:'high', trustLabel:'YÜKSEK',
-    tags:['ÜCRETSİZ KARGO','HIZLI SEVK','VİDEOLU'],
-    advice:'<strong>En iyi fiyat/kalite oranı.</strong> Yüksek satış hacmi ve güçlü puan. ePacket ile 14 günde teslimat yapılıyor. İlk deneme siparişi verilebilir.',
-    actions:['Fiyat teklifi iste','Örnek sipariş ver','Mağaza iletişim bilgilerini al','Alternatif ürün listesini gör'] },
-  { id:2, name:'CJ Soap Dispenser Line', source:'CJ Dropshipping', emoji:'📦', type:'cj',
-    price:3.85, moq:1, shipping:8, rating:4.9, orders:3210, trust:'high', trustLabel:'YÜKSEK',
-    tags:['MOQ YOK','TR DEPO','HIZLI SEVK','BRANDED'],
-    advice:'<strong>Türkiye deposu avantajı!</strong> MOQ olmadan tek parça sipariş verilebilir. Branding hizmeti mevcut. Kargo süresi sadece 8 gün.',
-    actions:['CJ hesabıyla bağlan','Branding seçeneklerini gör','Depo stok durumunu kontrol et','Otomatik sipariş kur'] },
-  { id:3, name:'Yiwu MinimalLife Trading', source:'Alibaba', emoji:'🏪', type:'baba',
-    price:2.80, moq:100, shipping:18, rating:4.6, orders:15800, trust:'med', trustLabel:'ORTA',
-    tags:['EN UCUZ','TOPTAN','ÖZELLEŞTİRME'],
-    advice:'En düşük birim fiyat ama yüksek MOQ. Toptan alım yapılacaksa ideal. Özelleştirme (logo, renk) imkânı var ama ilk sipariş riskli.',
-    actions:['Toptan fiyat teklifi al','Özelleştirme detaylarını sor','Gold Supplier doğrulaması yap','Kargo maliyetini hesapla'] },
-  { id:4, name:'Guangzhou Dispenser Factory', source:'AliExpress', emoji:'🔧', type:'ali',
-    price:3.50, moq:5, shipping:12, rating:4.7, orders:5640, trust:'high', trustLabel:'YÜKSEK',
-    tags:['HIZLI SEVK','GARANTİLİ','VİDEOLU'],
-    advice:'Güvenilir üretici. Fabrika doğrudan satış yapıyor. Kalite kontrol raporları mevcut. Orta ölçek siparişler için uygun.',
-    actions:['Fabrika sertifikasını incele','Kalite kontrol raporunu iste','Fiyat kırılımlarını gör','Karşılaştırmalı analiz yap'] },
-  { id:5, name:'HomeStyle Direct Co.', source:'AliExpress', emoji:'🏠', type:'ali',
-    price:4.20, moq:3, shipping:10, rating:4.5, orders:2180, trust:'med', trustLabel:'ORTA',
-    tags:['PREMİUM','HIZLI KARGO','KUTULU'],
-    advice:'Premium sunum ve ambalaj. Fiyat biraz yüksek ama kutulu teslimat ve profesyonel paketleme avantajı var. Yüksek segment hedefler için düşünülebilir.',
-    actions:['Ambalaj örneklerini iste','Premium set teklifini al','Teslimat sürelerini karşılaştır'] },
-  { id:6, name:'CJ Home Solutions', source:'CJ Dropshipping', emoji:'🎯', type:'cj',
-    price:4.10, moq:1, shipping:7, rating:4.8, orders:1890, trust:'high', trustLabel:'YÜKSEK',
-    tags:['MOQ YOK','EN HIZLI','AUTO FULFILL'],
-    advice:'<strong>En hızlı kargo!</strong> 7 gün teslimat ile müşteri memnuniyeti yüksek olur. Otomatik sipariş yönetimi entegrasyonu mevcut.',
-    actions:['Otomatik sipariş kurulumunu yap','Hız karşılaştırması gör','API entegrasyonu incele','Stok alarmı kur'] },
-  { id:7, name:'Ningbo EcoDispensers', source:'Alibaba', emoji:'🌿', type:'baba',
-    price:2.95, moq:50, shipping:20, rating:4.4, orders:9200, trust:'low', trustLabel:'DÜŞÜK',
-    tags:['EKO','TOPTAN','UZUN KARGO'],
-    advice:'Fiyat avantajı var ama teslimat süresi uzun ve güvenilirlik skoru düşük. Trade Assurance ile korumalı sipariş önerilir.',
-    actions:['Trade Assurance detaylarını gör','Kargo alternatifleri ara','Referans müşterileri sor','Çin depo testi yap'] }
-];
+<script type="module">
+import { searchSuppliers } from '/src/js/api.js';
+import { handleApiError, ensureQuota } from '/src/js/plan.js';
 
-let selectedId = 1;
+let suppliers = [];
+let selectedId = null;
+
+function mapApiItem(it, i) {
+  const platform = (it.platform || 'other').toLowerCase();
+  const emoji = platform === '1688' ? '🏭' : platform === 'alibaba' ? '🏪' : platform === 'aliexpress' ? '🛒' : '📦';
+  const type  = platform === 'aliexpress' ? 'ali' : platform === '1688' || platform === 'alibaba' ? 'baba' : 'cj';
+  const rating = Number(it.rating) || 0;
+  const trust  = rating >= 4.5 ? 'high' : rating >= 4.0 ? 'med' : 'low';
+  const trustLabel = trust === 'high' ? 'YÜKSEK' : trust === 'med' ? 'ORTA' : 'DÜŞÜK';
+  const tags = [];
+  if (it.source === 'placeholder') tags.push('ÖRNEK VERİ');
+  if (it.moq <= 5) tags.push('DÜŞÜK MOQ');
+  if (it.shippingDays <= 10) tags.push('HIZLI SEVK');
+  const url = it.url && it.url !== '#' ? it.url : null;
+  return {
+    id: i + 1,
+    name: it.supplierName || it.title || `Tedarikçi ${i + 1}`,
+    source: platform.toUpperCase(),
+    emoji,
+    type,
+    price: Number(it.priceUsd) || 0,
+    moq: Number(it.moq) || 1,
+    shipping: Number(it.shippingDays) || 0,
+    rating,
+    orders: Number(it.orders) || 0,
+    trust,
+    trustLabel,
+    tags,
+    advice: url
+      ? `${it.title || it.supplierName || '—'}<br><a href="${url}" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:underline;">Tedarikçi sayfasını aç →</a>`
+      : (it.title || 'Detay sayfası sağlanmadı.'),
+    actions: [
+      url ? 'Ürün linkini aç' : null,
+      'Fiyat teklifi iste',
+      'Kargo alternatifi sor'
+    ].filter(Boolean)
+  };
+}
 
 function renderSupList(){
-  document.getElementById('supList').innerHTML = suppliers.map(s => `
-    <div class="sup-card${s.id===selectedId?' selected':''}" onclick="selectSup(${s.id})">
+  const list = document.getElementById('supList');
+  if (!suppliers.length) {
+    list.innerHTML = '<div style="padding:40px;text-align:center;color:var(--muted);">Henüz arama yapılmadı veya sonuç bulunamadı. Üstten bir ürün adı girip "Tedarikçi Ara" butonuna tıklayın.</div>';
+    return;
+  }
+  list.innerHTML = suppliers.map(s => `
+    <div class="sup-card${s.id===selectedId?' selected':''}" data-supplier-id="${s.id}">
       <div class="sc-top">
         <div class="sc-avatar ${s.type}">${s.emoji}</div>
         <div class="sc-info">
           <div class="sc-name">${s.name}</div>
-          <div class="sc-source">${s.source} · ⭐ ${s.rating} · ${s.orders.toLocaleString()} sipariş</div>
+          <div class="sc-source">${s.source} · ⭐ ${s.rating}${s.orders ? ` · ${s.orders.toLocaleString()} sipariş` : ''}</div>
         </div>
         <div class="sc-trust trust-${s.trust}">${s.trustLabel}</div>
       </div>
@@ -254,13 +261,22 @@ function renderSupList(){
       <div class="sc-tags">${s.tags.map(t => `<span class="sc-tag">${t}</span>`).join('')}</div>
     </div>
   `).join('');
+  list.querySelectorAll('[data-supplier-id]').forEach(el => {
+    el.addEventListener('click', () => selectSup(Number(el.dataset.supplierId)));
+  });
 }
 
 function selectSup(id){ selectedId=id; renderSupList(); renderDetail(); }
 
 function renderDetail(){
   const s = suppliers.find(x=>x.id===selectedId);
-  if(!s) return;
+  if(!s) {
+    document.getElementById('priceCompare').innerHTML = '<div style="padding:20px;color:var(--muted);text-align:center;">Bir tedarikçi seçilince detay görünecek.</div>';
+    document.getElementById('relGrid').innerHTML = '';
+    document.getElementById('adviceText').innerHTML = '';
+    document.getElementById('adviceActions').innerHTML = '';
+    return;
+  }
 
   const cheapest = Math.min(...suppliers.map(x=>x.price));
   const avgPrice = (suppliers.reduce((a,b)=>a+b.price,0)/suppliers.length).toFixed(2);
@@ -294,19 +310,83 @@ function renderDetail(){
 }
 
 function updateKPIs(){
+  if (!suppliers.length) {
+    document.getElementById('kpiMatch').textContent = '0';
+    document.getElementById('kpiCheap').textContent = '—';
+    document.getElementById('kpiShip').textContent = '—';
+    document.getElementById('kpiTrust').textContent = '—';
+    document.getElementById('listCount').textContent = '0 TEDARİKÇİ';
+    return;
+  }
   const cheapest = Math.min(...suppliers.map(x=>x.price));
   const avgShip = Math.round(suppliers.reduce((a,b)=>a+b.shipping,0)/suppliers.length);
   const bestRating = Math.max(...suppliers.map(x=>x.rating));
   document.getElementById('kpiMatch').textContent = suppliers.length;
   document.getElementById('kpiCheap').textContent = '$'+cheapest.toFixed(2);
   document.getElementById('kpiShip').textContent = avgShip+' gün';
-  document.getElementById('kpiTrust').textContent = bestRating+' ⭐';
+  document.getElementById('kpiTrust').textContent = bestRating.toFixed(1)+' ⭐';
   document.getElementById('listCount').textContent = suppliers.length+' TEDARİKÇİ';
 }
 
 function renderAll(){ updateKPIs(); renderSupList(); renderDetail(); }
+
+async function runSearch() {
+  const input = document.getElementById('searchInput');
+  const btn = document.getElementById('searchBtn');
+  const query = (input?.value || '').trim();
+  if (!query) { input?.focus(); return; }
+
+  // UI ongorusu: kota var mi? (backend yine kontrol eder)
+  const canQuota = await ensureQuota('supplier');
+  if (!canQuota) return;
+
+  const originalLabel = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Aranıyor…';
+  document.getElementById('listCount').textContent = 'ARANIYOR…';
+
+  try {
+    const resp = await searchSuppliers({ query, maxItems: 20 });
+    const items = Array.isArray(resp?.items) ? resp.items : [];
+    suppliers = items.map(mapApiItem);
+    selectedId = suppliers.length ? suppliers[0].id : null;
+    renderAll();
+    if (resp?.cached) {
+      document.getElementById('listCount').textContent = `${suppliers.length} TEDARİKÇİ · CACHE`;
+    }
+  } catch (err) {
+    // plan/quota hatalari toast ile yakalanir
+    if (!handleApiError(err)) {
+      alert('Tedarikçi araması başarısız: ' + (err?.message || err));
+    }
+    suppliers = [];
+    renderAll();
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalLabel;
+  }
+}
+
+document.getElementById('searchBtn')?.addEventListener('click', runSearch);
+document.getElementById('searchInput')?.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); runSearch(); }
+});
+
+// Ilk render — henuz arama yapilmamis durumu
 renderAll();
 
+// ─── Trend Radar / diğer sayfalardan gelen query string: ?q=
+(function applyIncomingParams(){
+  const params = new URLSearchParams(window.location.search);
+  const q = params.get('q');
+  if (!q) return;
+  const inp = document.getElementById('searchInput');
+  if (inp) {
+    inp.value = q;
+    // Otomatik arama tetikle (kullanıcı zaten ürün adıyla geldi)
+    runSearch();
+  }
+})();
 </script>
 </body>
 </html>

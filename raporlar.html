@@ -104,7 +104,6 @@
   <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
   <div class="sidebar-bottom">
     <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
-    <div class="plan-card"><div class="plan-tier">Pro Plan</div><div class="plan-name">Raporlar Aktif ✓</div><div class="plan-meta"><span>₺499/ay · Sınırsız rapor</span><div class="upgrade-btn">Yönet</div></div></div>
   </div>
 </aside>
 
@@ -118,16 +117,16 @@
       </div>
     </div>
     <div class="topbar-right">
-      <button class="icon-btn">↻ Güncelle</button>
-      <button class="icon-btn primary">+ Yeni Rapor Oluştur</button>
+      <button class="icon-btn" onclick="location.reload()">↻ Güncelle</button>
+      <a class="icon-btn primary" href="./dropscout.html">+ Ürün Analizi</a>
     </div>
   </div>
 
   <div class="stat-strip fade2">
-    <div class="stat-box b"><div class="sb-label">Toplam Rapor</div><div class="sb-value b">12</div><div class="sb-sub">Son 30 gün</div></div>
-    <div class="stat-box g"><div class="sb-label">Hazır</div><div class="sb-value g">8</div><div class="sb-sub">İndirilebilir</div></div>
-    <div class="stat-box y"><div class="sb-label">Zamanlanmış</div><div class="sb-value y">3</div><div class="sb-sub">Otomatik rapor</div></div>
-    <div class="stat-box p"><div class="sb-label">AI İçgörü</div><div class="sb-value p">24</div><div class="sb-sub">Aksiyon önerisi</div></div>
+    <div class="stat-box b"><div class="sb-label">Toplam Rapor</div><div class="sb-value b" id="kpiTotal">0</div><div class="sb-sub" id="kpiTotalSub">Veri bekleniyor</div></div>
+    <div class="stat-box g"><div class="sb-label">Hazır</div><div class="sb-value g" id="kpiReady">0</div><div class="sb-sub">İndirilebilir</div></div>
+    <div class="stat-box y"><div class="sb-label">Analiz Edilen Ürün</div><div class="sb-value y" id="kpiProducts">0</div><div class="sb-sub" id="kpiProductsSub">Toplam kayıt</div></div>
+    <div class="stat-box p"><div class="sb-label">AI İçgörü</div><div class="sb-value p" id="kpiInsights">0</div><div class="sb-sub">Aksiyon önerisi</div></div>
   </div>
 
   <div class="filter-row fade3" id="filterRow"></div>
@@ -140,96 +139,372 @@
   </div>
 </main>
 
-<script>
-const reports = [
-  { id:1, type:'trend', title:'Haftalık Trend Özeti', desc:'Son 7 günün trend verilerini, yükselen kategorileri ve patlama potansiyeli olan ürünleri özetler.',
-    icon:'📈', status:'ready', statusLabel:'HAZIR', date:'12 Nis 2026', format:'PDF', pages:8, insights:5,
-    chart:[45,52,58,61,67,72,78] },
-  { id:2, type:'profit', title:'Aylık Kârlılık Raporu', desc:'Takip edilen ürünlerin net kâr marjı, maliyet dağılımı ve komisyon analizini içerir.',
-    icon:'💰', status:'ready', statusLabel:'HAZIR', date:'10 Nis 2026', format:'PDF + CSV', pages:12, insights:8,
-    chart:[32,38,35,42,45,48,52] },
-  { id:3, type:'competitor', title:'Rakip Benchmarking Raporu', desc:'İzlenen rakiplerin fiyat, yorum ve görsel performans karşılaştırmasını sunar.',
-    icon:'🔬', status:'ready', statusLabel:'HAZIR', date:'09 Nis 2026', format:'PDF', pages:15, insights:6,
-    chart:[60,58,62,65,63,68,71] },
-  { id:4, type:'performance', title:'Ürün Performans Kartı', desc:'Takip listesindeki ürünlerin AI skor değişimi, fiyat hareketleri ve rekabet durumu.',
-    icon:'⚡', status:'ready', statusLabel:'HAZIR', date:'08 Nis 2026', format:'PDF', pages:6, insights:4,
-    chart:[78,80,82,79,85,87,91] },
-  { id:5, type:'legal', title:'Yasal Uygunluk Özeti', desc:'Sorgulanmış ürünlerin TİTCK, CE ve ithalat durumlarının genel değerlendirmesi.',
-    icon:'⚖️', status:'generating', statusLabel:'HAZIRLANIYOR', date:'Bugün', format:'PDF', pages:'—', insights:'—',
-    chart:[20,25,30,28,35,40,42] },
-  { id:6, type:'supplier', title:'Tedarikçi Analiz Raporu', desc:'En uygun tedarikçilerin fiyat, güvenilirlik ve kargo karşılaştırması.',
-    icon:'🔗', status:'ready', statusLabel:'HAZIR', date:'07 Nis 2026', format:'PDF + CSV', pages:10, insights:3,
-    chart:[55,52,58,62,60,65,68] },
-  { id:7, type:'trend', title:'Gap Radar Fırsat Raporu', desc:'Global ile TR pazarı arasında tespit edilen boşluklar ve büyüme fırsatları.',
-    icon:'🌍', status:'ready', statusLabel:'HAZIR', date:'06 Nis 2026', format:'PDF', pages:9, insights:7,
-    chart:[40,45,48,55,60,58,65] },
-  { id:8, type:'profit', title:'Haftalık Maliyet Takibi', desc:'Kargo, komisyon ve vergi bazlı maliyet değişimlerinin haftalık izlemesi.',
-    icon:'📉', status:'ready', statusLabel:'HAZIR', date:'05 Nis 2026', format:'CSV', pages:4, insights:2,
-    chart:[88,85,82,80,78,76,74] }
+<script type="module">
+import { getUserProducts, getWatchlist } from '/src/js/store.js';
+import { auth } from '/src/js/firebase-config.js';
+import { onAuthStateChanged } from 'firebase/auth';
+
+const PLATFORM_LABEL = {
+  trendyol: 'Trendyol', hepsiburada: 'Hepsiburada', 'amazon-tr': 'Amazon TR', amazon: 'Amazon TR', n11: 'N11'
+};
+const CATEGORY_LABEL = {
+  elektronik: 'Elektronik', moda: 'Moda & Giyim', kozmetik: 'Kozmetik',
+  'ev-yasam': 'Ev & Yaşam', ev: 'Ev & Yaşam', 'anne-bebek': 'Anne & Bebek',
+  spor: 'Spor & Outdoor', kirtasiye: 'Kırtasiye', supermarket: 'Süpermarket',
+  otomotiv: 'Otomotiv', mutfak: 'Mutfak', pet: 'Pet Ürünleri', ofis: 'Ofis & Kırtasiye',
+  diger: 'Diğer'
+};
+const LEGAL_WARN_CATS = new Set(['kozmetik','anne-bebek']);
+
+let products = [];
+let watchlist = [];
+let reports = [];
+let activeFilter = 'all';
+
+const filters = [
+  { key:'all', label:'Tümü' },
+  { key:'profit', label:'Kârlılık' },
+  { key:'performance', label:'Performans' },
+  { key:'competitor', label:'Rekabet' },
+  { key:'legal', label:'Yasal' },
+  { key:'platform', label:'Platform' },
+  { key:'trend', label:'Trend' }
 ];
 
 const schedules = [
-  { name:'Haftalık Trend Özeti', icon:'📈', freq:'Her Pazartesi', bg:'var(--green-dim)', active:true },
+  { name:'Haftalık Performans Özeti', icon:'⚡', freq:'Her Pazartesi', bg:'var(--green-dim)', active:true },
   { name:'Aylık Kârlılık Raporu', icon:'💰', freq:'Her ayın 1\'i', bg:'var(--yellow-dim)', active:true },
   { name:'Rakip Değişim Raporu', icon:'🔬', freq:'Her 15 günde', bg:'var(--purple-dim)', active:false }
 ];
 
-let activeFilter = 'all';
-const filters = [
-  { key:'all', label:'Tümü' },
-  { key:'trend', label:'Trend' },
-  { key:'profit', label:'Kârlılık' },
-  { key:'competitor', label:'Rekabet' },
-  { key:'performance', label:'Performans' },
-  { key:'legal', label:'Yasal' },
-  { key:'supplier', label:'Tedarik' }
-];
+function fmtTL(v){ return '₺' + Math.round(Number(v)||0).toLocaleString('tr-TR'); }
+function fmtPct(v){ return '%' + (Math.round((Number(v)||0)*10)/10).toLocaleString('tr-TR'); }
+function fmtDate(d){
+  const t = d instanceof Date ? d : (d?.toDate ? d.toDate() : new Date());
+  return t.toLocaleDateString('tr-TR', { day:'2-digit', month:'short', year:'numeric' });
+}
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function buildReports() {
+  reports = [];
+  if (products.length === 0 && watchlist.length === 0) return;
+
+  const all = [...products, ...watchlist];
+  const totalNet = all.reduce((s,p) => s + (Number(p.netProfit)||0), 0);
+  const avgMargin = all.length ? all.reduce((s,p) => s + (Number(p.marginPct)||0), 0) / all.length : 0;
+  const avgScore = products.length ? products.reduce((s,p) => s + (Number(p.dropScore)||0), 0) / products.length : 0;
+  const today = fmtDate(new Date());
+
+  // ── Kârlılık Raporu ─────────────────────
+  if (all.length > 0) {
+    const profitChart = all.slice(-7).map(p => Math.max(0, Math.min(100, Math.round((Number(p.marginPct)||0) * 2.5))));
+    while (profitChart.length < 7) profitChart.unshift(0);
+    reports.push({
+      id: 'profit',
+      type: 'profit',
+      title: 'Kârlılık Raporu',
+      desc: `${all.length} ürün üzerinden net kâr ve marj dağılımı. Toplam net: ${fmtTL(totalNet)}, ortalama marj: ${fmtPct(avgMargin)}.`,
+      icon: '💰',
+      status: 'ready', statusLabel: 'HAZIR',
+      date: today, format: 'CSV',
+      pages: all.length, insights: avgMargin >= 20 ? 5 : 3,
+      chart: profitChart
+    });
+  }
+
+  // ── Performans Raporu ───────────────────
+  if (products.length > 0) {
+    const perfChart = products.slice(-7).map(p => Math.round(Number(p.dropScore)||0));
+    while (perfChart.length < 7) perfChart.unshift(0);
+    const topScore = Math.max(...products.map(p => Number(p.dropScore)||0));
+    reports.push({
+      id: 'performance',
+      type: 'performance',
+      title: 'Ürün Performans Kartı',
+      desc: `Analiz edilen ${products.length} ürünün DropScore dağılımı. En yüksek skor: ${topScore}, ortalama: ${Math.round(avgScore)}.`,
+      icon: '⚡',
+      status: 'ready', statusLabel: 'HAZIR',
+      date: today, format: 'CSV',
+      pages: products.length, insights: products.filter(p => (p.dropScore||0) >= 70).length,
+      chart: perfChart
+    });
+  }
+
+  // ── Rekabet Raporu ──────────────────────
+  if (products.length > 0) {
+    const totalCompetitors = products.reduce((s,p) => s + (Number(p.competitorCount)||0), 0);
+    const avgCompetitors = Math.round(totalCompetitors / products.length);
+    const compChart = products.slice(-7).map(p => Math.max(0, Math.min(100, Math.round((Number(p.competitorCount)||0) * 2))));
+    while (compChart.length < 7) compChart.unshift(0);
+    const highRisk = products.filter(p => (p.competitorCount||0) >= 30).length;
+    reports.push({
+      id: 'competitor',
+      type: 'competitor',
+      title: 'Rakip Benchmarking',
+      desc: `Ürün başına ortalama ${avgCompetitors} rakip tespit edildi. Yüksek rekabet (30+): ${highRisk} ürün.`,
+      icon: '🔬',
+      status: 'ready', statusLabel: 'HAZIR',
+      date: today, format: 'CSV',
+      pages: products.length, insights: highRisk > 0 ? highRisk : 1,
+      chart: compChart
+    });
+  }
+
+  // ── Yasal Uyarı Raporu ──────────────────
+  if (all.length > 0) {
+    const warnList = all.filter(p => LEGAL_WARN_CATS.has(p.category));
+    const warnChart = [0,0,0,0,0,0,0].map((_, i) => Math.min(100, warnList.length * 10 + i * 5));
+    reports.push({
+      id: 'legal',
+      type: 'legal',
+      title: 'Yasal Uygunluk Özeti',
+      desc: warnList.length > 0
+        ? `${warnList.length} ürün belge gerektiren kategoride (kozmetik, anne-bebek). Detaylı kontrol önerilir.`
+        : `Tüm ${all.length} ürün serbest satılabilir kategorilerde. Yasal risk tespit edilmedi.`,
+      icon: '⚖️',
+      status: 'ready', statusLabel: 'HAZIR',
+      date: today, format: 'CSV',
+      pages: all.length, insights: warnList.length || 1,
+      chart: warnChart
+    });
+  }
+
+  // ── Platform Dağılım Raporu ─────────────
+  if (all.length > 0) {
+    const platformCounts = {};
+    all.forEach(p => {
+      const key = p.platform || 'diger';
+      platformCounts[key] = (platformCounts[key] || 0) + 1;
+    });
+    const topPlatform = Object.entries(platformCounts).sort((a,b) => b[1]-a[1])[0];
+    const topName = PLATFORM_LABEL[topPlatform[0]] || topPlatform[0];
+    const platChart = Object.values(platformCounts).slice(0, 7).map(v => Math.min(100, v * 20));
+    while (platChart.length < 7) platChart.push(0);
+    reports.push({
+      id: 'platform',
+      type: 'platform',
+      title: 'Platform Dağılım Raporu',
+      desc: `${Object.keys(platformCounts).length} platform üzerinden ${all.length} kayıt. En çok ürün: ${topName} (${topPlatform[1]} ürün).`,
+      icon: '🛍️',
+      status: 'ready', statusLabel: 'HAZIR',
+      date: today, format: 'CSV',
+      pages: Object.keys(platformCounts).length, insights: Object.keys(platformCounts).length,
+      chart: platChart
+    });
+  }
+
+  // ── Trend Raporu (kullanıcının ürünlerindeki trend alanından) ─
+  const trendProducts = products.filter(p => p.trend);
+  if (trendProducts.length > 0) {
+    const upCount = trendProducts.filter(p => p.trend === 'up').length;
+    const trendChart = [40,45,52,58,63,68,Math.min(100, 50 + upCount * 5)];
+    reports.push({
+      id: 'trend',
+      type: 'trend',
+      title: 'Trend Yönü Özeti',
+      desc: `${trendProducts.length} ürünün trend göstergesi. Yükselen: ${upCount}, durağan/düşüş: ${trendProducts.length - upCount}.`,
+      icon: '📈',
+      status: 'ready', statusLabel: 'HAZIR',
+      date: today, format: 'CSV',
+      pages: trendProducts.length, insights: upCount,
+      chart: trendChart
+    });
+  }
+}
+
+function updateKPIs() {
+  const ready = reports.filter(r => r.status === 'ready').length;
+  const insights = reports.reduce((s,r) => s + (Number(r.insights)||0), 0);
+
+  document.getElementById('kpiTotal').textContent = reports.length;
+  document.getElementById('kpiTotalSub').textContent = reports.length ? 'Otomatik üretildi' : 'Veri bekleniyor';
+  document.getElementById('kpiReady').textContent = ready;
+  document.getElementById('kpiProducts').textContent = products.length + watchlist.length;
+  document.getElementById('kpiProductsSub').textContent = `${products.length} analiz · ${watchlist.length} takipte`;
+  document.getElementById('kpiInsights').textContent = insights;
+}
 
 function getFiltered(){
-  if(activeFilter==='all') return reports;
-  return reports.filter(r=>r.type===activeFilter);
+  if (activeFilter === 'all') return reports;
+  return reports.filter(r => r.type === activeFilter);
 }
 
 function renderFilterRow(){
   document.getElementById('filterRow').innerHTML = filters.map(f => {
-    const count = f.key==='all' ? reports.length : reports.filter(r=>r.type===f.key).length;
-    if(f.key!=='all' && count===0) return '';
-    return `<button class="fpill${f.key===activeFilter?' active':''}" onclick="setFilter('${f.key}')">${f.label} <span class="fpill-count">${count}</span></button>`;
+    const count = f.key === 'all' ? reports.length : reports.filter(r => r.type === f.key).length;
+    if (f.key !== 'all' && count === 0) return '';
+    return `<button class="fpill${f.key===activeFilter?' active':''}" onclick="window.setFilter('${f.key}')">${f.label} <span class="fpill-count">${count}</span></button>`;
   }).join('');
 }
 
-function setFilter(f){ activeFilter=f; renderFilterRow(); renderReports(); }
+window.setFilter = function(f){ activeFilter = f; renderFilterRow(); renderReports(); };
 
 function chartColor(val, max){ const p = val/max; return p>=.7?'var(--green)':p>=.5?'var(--yellow)':'var(--orange)'; }
 
 function renderReports(){
   const list = getFiltered();
-  document.getElementById('reportsGrid').innerHTML = list.map(r => {
-    const maxH = Math.max(...r.chart);
-    const bars = r.chart.map(v => `<div class="mc-bar" style="height:${(v/maxH*100)}%;background:${chartColor(v,100)}"></div>`).join('');
+  const grid = document.getElementById('reportsGrid');
+
+  if (reports.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;padding:48px 20px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:16px;">
+        <div style="font-size:42px;margin-bottom:12px;">📊</div>
+        <div style="font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;margin-bottom:6px;">Henüz rapor üretilmedi</div>
+        <div style="font-size:12px;color:var(--muted);max-width:420px;margin:0 auto 18px;line-height:1.6;">
+          Raporlar, analiz ettiğin ürünlerden ve takip listenden otomatik üretilir. Önce birkaç ürün analizi yap.
+        </div>
+        <a href="./dropscout.html" class="rc-btn primary" style="display:inline-block;text-decoration:none;">🔗 Link Analizine Git</a>
+      </div>`;
+    return;
+  }
+
+  if (list.length === 0) {
+    grid.innerHTML = `<div style="grid-column:1/-1;padding:24px;text-align:center;color:var(--muted);font-size:12px;">Bu filtre için rapor bulunamadı.</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(r => {
+    const maxH = Math.max(...r.chart, 1);
+    const bars = r.chart.map(v => `<div class="mc-bar" style="height:${Math.max(2,(v/maxH*100))}%;background:${chartColor(v,100)}"></div>`).join('');
     return `
     <div class="report-card ${r.type}">
       <div class="rc-top">
         <div class="rc-icon ${r.type}">${r.icon}</div>
-        <div class="rc-status ${r.status==='ready'?'rs-ready':r.status==='generating'?'rs-generating':'rs-scheduled'}">${r.statusLabel}</div>
+        <div class="rc-status rs-ready">${r.statusLabel}</div>
       </div>
-      <div class="rc-title">${r.title}</div>
-      <div class="rc-desc">${r.desc}</div>
+      <div class="rc-title">${escapeHtml(r.title)}</div>
+      <div class="rc-desc">${escapeHtml(r.desc)}</div>
       <div class="mini-chart">${bars}</div>
       <div class="rc-meta">
         <div class="rcm"><div class="rcm-label">Format</div><div class="rcm-value b">${r.format}</div></div>
-        <div class="rcm"><div class="rcm-label">Sayfa</div><div class="rcm-value p">${r.pages}</div></div>
+        <div class="rcm"><div class="rcm-label">Kayıt</div><div class="rcm-value p">${r.pages}</div></div>
         <div class="rcm"><div class="rcm-label">İçgörü</div><div class="rcm-value g">${r.insights}</div></div>
       </div>
       <div class="rc-footer">
         <div class="rc-date">${r.date}</div>
         <div class="rc-actions">
-          ${r.status==='ready'?'<button class="rc-btn">👁️ Önizle</button><button class="rc-btn primary">📥 İndir</button>':'<button class="rc-btn">⏳ Bekliyor...</button>'}
+          <button class="rc-btn primary" onclick="window.downloadReport('${r.id}')">📥 CSV İndir</button>
         </div>
       </div>
     </div>`;
   }).join('');
 }
+
+// ── CSV indirme ─────────────────────────────
+function toCsvCell(v) {
+  if (v === null || v === undefined) return '';
+  const s = String(v).replace(/"/g, '""');
+  return /[",;\n\r]/.test(s) ? `"${s}"` : s;
+}
+
+function downloadCsv(filename, rows) {
+  const csv = rows.map(r => r.map(toCsvCell).join(';')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+window.downloadReport = function(id) {
+  const all = [...products, ...watchlist];
+  const stamp = new Date().toISOString().slice(0,10);
+
+  if (id === 'profit') {
+    const rows = [['Platform','Kategori','Satis Fiyati','Maliyet','Net Kar','Marj %','URL']];
+    all.forEach(p => rows.push([
+      PLATFORM_LABEL[p.platform] || p.platform || '',
+      CATEGORY_LABEL[p.category] || p.category || '',
+      p.salePrice ?? '', p.cost ?? '',
+      Math.round(Number(p.netProfit)||0),
+      (Math.round((Number(p.marginPct)||0)*10)/10),
+      p.url || ''
+    ]));
+    downloadCsv(`karlilik-raporu-${stamp}.csv`, rows);
+    return;
+  }
+
+  if (id === 'performance') {
+    const rows = [['Platform','Kategori','DropScore','Aylik Satis','Rakip Sayisi','Trend','URL']];
+    products.forEach(p => rows.push([
+      PLATFORM_LABEL[p.platform] || p.platform || '',
+      CATEGORY_LABEL[p.category] || p.category || '',
+      Math.round(Number(p.dropScore)||0),
+      p.monthlySales ?? '',
+      p.competitorCount ?? '',
+      p.trend || '',
+      p.url || ''
+    ]));
+    downloadCsv(`performans-raporu-${stamp}.csv`, rows);
+    return;
+  }
+
+  if (id === 'competitor') {
+    const rows = [['Platform','Kategori','Rakip Sayisi','DropScore','Aylik Satis','Risk','URL']];
+    products.forEach(p => {
+      const c = Number(p.competitorCount)||0;
+      const risk = c >= 30 ? 'Yuksek' : c >= 20 ? 'Orta' : 'Dusuk';
+      rows.push([
+        PLATFORM_LABEL[p.platform] || p.platform || '',
+        CATEGORY_LABEL[p.category] || p.category || '',
+        c, Math.round(Number(p.dropScore)||0),
+        p.monthlySales ?? '', risk, p.url || ''
+      ]);
+    });
+    downloadCsv(`rekabet-raporu-${stamp}.csv`, rows);
+    return;
+  }
+
+  if (id === 'legal') {
+    const rows = [['Platform','Kategori','Yasal Durum','Aciklama','URL']];
+    all.forEach(p => {
+      const warn = LEGAL_WARN_CATS.has(p.category);
+      rows.push([
+        PLATFORM_LABEL[p.platform] || p.platform || '',
+        CATEGORY_LABEL[p.category] || p.category || '',
+        warn ? 'BELGE GEREKLI' : 'SERBEST',
+        warn ? 'Bu kategori icin TITCK/CE/uretici belgesi gerekebilir' : 'Ek belge gerekmez',
+        p.url || ''
+      ]);
+    });
+    downloadCsv(`yasal-rapor-${stamp}.csv`, rows);
+    return;
+  }
+
+  if (id === 'platform') {
+    const counts = {};
+    const totals = {};
+    all.forEach(p => {
+      const key = p.platform || 'diger';
+      counts[key] = (counts[key]||0) + 1;
+      totals[key] = (totals[key]||0) + (Number(p.netProfit)||0);
+    });
+    const rows = [['Platform','Urun Sayisi','Toplam Net Kar']];
+    Object.keys(counts).forEach(k => rows.push([
+      PLATFORM_LABEL[k] || k, counts[k], Math.round(totals[k])
+    ]));
+    downloadCsv(`platform-dagilim-${stamp}.csv`, rows);
+    return;
+  }
+
+  if (id === 'trend') {
+    const rows = [['Platform','Kategori','Trend','DropScore','Aylik Satis','URL']];
+    products.filter(p => p.trend).forEach(p => rows.push([
+      PLATFORM_LABEL[p.platform] || p.platform || '',
+      CATEGORY_LABEL[p.category] || p.category || '',
+      p.trend,
+      Math.round(Number(p.dropScore)||0),
+      p.monthlySales ?? '',
+      p.url || ''
+    ]));
+    downloadCsv(`trend-raporu-${stamp}.csv`, rows);
+    return;
+  }
+};
 
 function renderSchedules(){
   document.getElementById('scheduleGrid').innerHTML = schedules.map((s,i) => `
@@ -237,14 +512,14 @@ function renderSchedules(){
       <div class="sched-left">
         <div class="sched-icon" style="background:${s.bg}">${s.icon}</div>
         <div class="sched-info">
-          <div class="sched-name">${s.name}</div>
+          <div class="sched-name">${escapeHtml(s.name)}</div>
           <div class="sched-meta">${s.active?'Aktif · Otomatik gönderim':'Pasif · Duraklatıldı'}</div>
         </div>
       </div>
       <div class="sched-right">
-        <div class="sched-freq">${s.freq}</div>
+        <div class="sched-freq">${escapeHtml(s.freq)}</div>
         <label class="sched-toggle">
-          <input type="checkbox" ${s.active?'checked':''} onchange="toggleSchedule(${i})">
+          <input type="checkbox" ${s.active?'checked':''} onchange="window.toggleSchedule(${i})">
           <div class="sched-track"></div>
           <div class="sched-knob"></div>
         </label>
@@ -253,13 +528,41 @@ function renderSchedules(){
   `).join('');
 }
 
-function toggleSchedule(i){
+window.toggleSchedule = function(i){
   schedules[i].active = !schedules[i].active;
   renderSchedules();
+};
+
+async function loadData() {
+  if (!auth.currentUser) return;
+  try {
+    const [prods, wl] = await Promise.all([
+      getUserProducts(auth.currentUser.uid),
+      getWatchlist(auth.currentUser.uid)
+    ]);
+    products = prods || [];
+    watchlist = wl || [];
+    buildReports();
+    updateKPIs();
+    renderFilterRow();
+    renderReports();
+  } catch (err) {
+    console.warn('Rapor verisi yüklenemedi:', err);
+    products = []; watchlist = []; reports = [];
+    updateKPIs(); renderFilterRow(); renderReports();
+  }
 }
 
-renderFilterRow(); renderReports(); renderSchedules();
+renderSchedules();
+renderFilterRow();
+renderReports();
+updateKPIs();
 
+if (auth.currentUser) {
+  loadData();
+} else {
+  onAuthStateChanged(auth, user => { if (user) loadData(); });
+}
 </script>
 </body>
 </html>

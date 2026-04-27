@@ -1,0 +1,111 @@
+rules_version = '2';
+
+// ═══════════════════════════════════════════════════════════
+// DropScout TR — Firestore Guvenlik Kurallari
+// ─ Kullanici verileri: yalniz sahibi okur; plan alanlari
+//   (plan, planExpiresAt, trialEndsAt, billingCycle vb.)
+//   yalnizca Admin SDK ile yazilabilir. Client self-upgrade
+//   yapamaz.
+// ─ usageDaily / usageMonthly: client read-only, Cloud
+//   Functions transaction'lari ile yazilir.
+// ─ platforms / products / watchlist: owner read+write.
+// ─ cache/*: auth'lu kullanici okur, yazma yalniz Admin SDK.
+// ═══════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Plan / faturalandirma alanlari — sadece Admin SDK yazabilir
+    function hasProtectedPlanKeys(data) {
+      return data.keys().hasAny([
+        'plan',
+        'planStatus',
+        'planStartedAt',
+        'planExpiresAt',
+        'trialPlan',
+        'trialEndsAt',
+        'billingCycle',
+        'paymentCustomerId',
+        'paymentSubscriptionId'
+      ]);
+    }
+
+    // ─── Kullanici profili ───
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+
+      // Create: plan alanlari olmadan profil olusturulabilir.
+      // Backend ilk istekte plan='start' atar.
+      allow create: if isOwner(uid)
+        && !hasProtectedPlanKeys(request.resource.data);
+
+      // Update: sadece profil alanlari. Plan alanlarina dokunma engellenir.
+      // Onaylanan alanlar disinda hic bir alan degismemeli.
+      allow update: if isOwner(uid)
+        && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly([
+              'displayName',
+              'email',
+              'phone',
+              'avatarUrl',
+              'onboardingCompleted',
+              'preferences',
+              'updatedAt'
+            ]);
+
+      allow delete: if false;
+
+      // ─── Platform baglantilari ───
+      match /platforms/{platformId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // ─── Urunler ───
+      match /products/{productId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // ─── Takip listesi ───
+      match /watchlist/{productId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      // ─── Kota sayaclari (gunluk) — client read-only ───
+      match /usageDaily/{date} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
+
+      // ─── Kota sayaclari (aylik) — client read-only ───
+      match /usageMonthly/{month} {
+        allow read: if isOwner(uid);
+        allow write: if false;
+      }
+
+      // Diger alt koleksiyonlar reddedilir (ileride ekleme lazim olursa
+      // burada acikca tanimlanmali)
+      match /{otherSub}/{docId} {
+        allow read, write: if false;
+      }
+    }
+
+    // ─── Cache koleksiyonu (paylasimli, sadece okunur) ───
+    match /cache/{document=**} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // ─── Beklenmedik yol — reddet ───
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

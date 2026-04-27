@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DropScout TR — Profil Ayarları</title>
-<meta name="description" content="Hesap bilgilerinizi ve profil ayarlarınızı yönetin.">
+<title>DropScout TR — Profil & Hesap</title>
+<meta name="description" content="Hesap bilgilerinizi, plan ayarlarınızı, güvenlik ve bildirim tercihlerinizi yönetin.">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <script>
   (function(){
@@ -16,65 +16,291 @@
 <link rel="stylesheet" href="/src/css/main.css">
 <script type="module" src="/src/js/main.js"></script>
 <style>
-/* PROFILE PAGE */
-.profile-grid{display:grid;grid-template-columns:1fr 340px;gap:14px;align-items:start}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--key-shadow);overflow:hidden}
-.card-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);gap:10px}
-.card-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700}
-.ct-tag{font-family:'Geist Mono',monospace;font-size:8px;padding:3px 8px;border-radius:999px;font-weight:700}
-.tag-blue{background:var(--blue-dim);color:var(--blue)}
-.tag-green{background:var(--green-dim);color:var(--green)}
-.tag-purple{background:var(--purple-dim);color:var(--purple)}
+/* ── Topbar right: hesap butonu ── */
+.top-profile-btn{
+  display:flex;align-items:center;gap:10px;
+  padding:6px 12px 6px 6px;border-radius:14px;
+  background:var(--surface);border:1px solid var(--border);
+  box-shadow:var(--key-shadow);cursor:pointer;
+  transition:all .15s;color:var(--text);
+}
+.top-profile-btn:hover{border-color:var(--focus-blue-border);background:var(--surface2)}
+.top-profile-avatar{
+  width:32px;height:32px;border-radius:50%;
+  background:linear-gradient(135deg,var(--orange),#ff8a00);
+  color:#fff;font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(255,106,0,0.2);
+}
+.top-profile-copy{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+.top-profile-name{font-size:12px;font-weight:700;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top-profile-sub{font-family:'Geist Mono',monospace;font-size:8.5px;color:var(--muted);letter-spacing:.4px}
+.top-profile-caret{font-size:10px;color:var(--muted);margin-left:2px}
 
-.card-body{padding:18px}
+/* ── Section layout ── */
+.module-section{margin-bottom:22px}
+.section-block{display:block}
+.profile-layout{display:block}
+.profile-stack{display:flex;flex-direction:column;gap:16px}
 
-.pf-group{margin-bottom:18px}
-.pf-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
-.pf-input{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;font-family:'Inter',sans-serif}
-.pf-input:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
-.pf-input::placeholder{color:var(--muted2);font-size:12px}
-.pf-input:disabled{opacity:.6;cursor:not-allowed}
+/* ── Cards ── */
+.profile-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;box-shadow:var(--key-shadow);
+  padding:20px;position:relative;overflow:hidden;
+}
+.profile-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1.5px;
+  background:linear-gradient(90deg,var(--blue),var(--purple),transparent);
+}
+.profile-card-head{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;margin-bottom:16px;
+}
+.profile-card-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700}
+.profile-card-tag{
+  font-family:'Geist Mono',monospace;font-size:8px;font-weight:700;
+  padding:3px 8px;border-radius:999px;letter-spacing:.6px;
+  background:var(--blue-dim);color:var(--blue);
+}
 
-.pf-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+/* ── Hero (avatar + name + chips + actions) ── */
+.profile-hero{
+  display:grid;grid-template-columns:auto 1fr auto;gap:18px;
+  align-items:center;padding:14px;border-radius:14px;
+  background:linear-gradient(135deg,var(--purple-dim),var(--blue-dim));
+  border:1px solid rgba(99,102,241,0.16);
+  margin-bottom:18px;
+}
+.profile-avatar{
+  width:68px;height:68px;border-radius:50%;
+  background:linear-gradient(135deg,var(--orange),#ff8a00);
+  color:#fff;font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(255,106,0,0.28);
+}
+.profile-name{font-family:'Poppins',sans-serif;font-size:17px;font-weight:700;margin-bottom:4px}
+.profile-sub{font-size:11.5px;color:var(--muted);line-height:1.7}
+.profile-chip-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.profile-chip{
+  font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;
+  padding:4px 10px;border-radius:999px;letter-spacing:.5px;
+  background:var(--surface2);color:var(--muted);border:1px solid var(--border);
+}
+.profile-chip.blue{background:var(--blue-dim);color:var(--blue);border-color:transparent}
+.profile-chip.green{background:var(--green-dim);color:var(--green);border-color:transparent}
+.profile-actions{display:flex;flex-direction:column;gap:8px}
 
-.pf-btn{padding:11px 24px;border-radius:10px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Geist Mono',monospace;border:none;transition:all .2s;letter-spacing:.3px}
-.pf-btn.primary{background:linear-gradient(135deg,var(--orange),#ff8a00);color:#fff;box-shadow:0 2px 10px rgba(255,106,0,0.3)}
-.pf-btn.primary:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(255,106,0,0.4)}
-.pf-btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
-.pf-btn.ghost{background:transparent;border:1px solid var(--border2);color:var(--text)}
-.pf-btn.ghost:hover{border-color:var(--focus-blue-border)}
+/* ── Buttons ── */
+.profile-btn{
+  padding:10px 18px;border-radius:10px;font-size:11px;font-weight:700;
+  cursor:pointer;font-family:'Geist Mono',monospace;letter-spacing:.3px;
+  border:1px solid transparent;transition:all .18s;white-space:nowrap;
+}
+.profile-btn.primary{
+  background:linear-gradient(135deg,var(--blue),var(--purple));
+  color:#fff;box-shadow:var(--button-shadow);
+}
+.profile-btn.primary:hover{transform:translateY(-1px);opacity:.95}
+.profile-btn.ghost{background:var(--surface2);border-color:var(--border);color:var(--text)}
+.profile-btn.ghost:hover{border-color:var(--focus-blue-border);background:var(--surface)}
+.profile-btn.danger{background:var(--red-dim);color:var(--red);border-color:transparent}
+.profile-btn.danger:hover{background:var(--red);color:#fff}
+.profile-btn:disabled{opacity:.5;cursor:not-allowed;transform:none!important}
 
-.pf-msg{font-size:11px;padding:10px 14px;border-radius:10px;font-weight:600;margin-bottom:14px;display:none}
-.pf-msg.success{display:block;background:var(--green-dim);color:var(--green)}
-.pf-msg.error{display:block;background:var(--orange-dim);color:var(--orange)}
+/* ── Stat grid ── */
+.profile-stat-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin-bottom:18px;
+}
+.profile-stat{
+  padding:14px;border-radius:12px;background:var(--surface2);
+  border:1px solid var(--border);
+}
+.profile-stat-label{
+  font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;
+}
+.profile-stat-value{
+  font-family:'Poppins',sans-serif;font-size:18px;font-weight:800;margin-bottom:4px;
+}
+.profile-stat-sub{font-size:11px;color:var(--muted);line-height:1.55}
 
-/* PLAN INFO */
-.plan-info{padding:18px}
-.pi-current{display:flex;align-items:center;gap:12px;padding:16px;border-radius:12px;background:linear-gradient(135deg,var(--purple-dim),var(--blue-dim));border:1px solid rgba(99,102,241,0.16);margin-bottom:16px}
-.pi-icon{font-size:28px}
-.pi-name{font-size:15px;font-weight:700;margin-bottom:2px}
-.pi-price{font-size:11px;color:var(--muted);font-family:'Geist Mono',monospace}
-.pi-features{display:flex;flex-direction:column;gap:8px}
-.pi-feat{font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:6px}
-.pi-feat::before{content:'✓';color:var(--green);font-weight:700;font-size:10px}
+/* ── Note ── */
+.profile-note{
+  font-size:11.5px;line-height:1.65;color:var(--muted);
+  padding:12px 14px;border-radius:12px;
+  background:var(--surface2);border:1px dashed var(--border2);
+  margin-bottom:18px;
+}
+.profile-note strong{color:var(--text)}
 
-/* ACCOUNT ACTIONS */
-.account-actions{padding:18px;display:flex;flex-direction:column;gap:10px}
-.aa-item{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;color:var(--text)}
-.aa-item:hover{border-color:var(--focus-blue-border);background:var(--surface)}
-.aa-item.danger{color:var(--red)}
-.aa-item.danger:hover{border-color:var(--red);background:rgba(239,68,68,0.06)}
-.aa-icon{font-size:16px;width:24px;text-align:center}
+/* ── Account form grid ── */
+.account-form-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:14px;
+  margin-bottom:14px;
+}
+.account-field{display:flex;flex-direction:column;gap:6px}
+.account-field:nth-child(8){grid-column:1 / -1}
+.account-label-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.account-label{
+  font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);
+  letter-spacing:1px;text-transform:uppercase;
+}
+.account-badge{
+  font-family:'Geist Mono',monospace;font-size:8px;font-weight:700;
+  padding:2px 7px;border-radius:999px;
+  background:var(--yellow-dim);color:var(--yellow);letter-spacing:.4px;
+}
+.account-input,.account-textarea{
+  width:100%;background:var(--surface2);border:1px solid var(--border2);
+  border-radius:10px;padding:11px 14px;font-size:13px;color:var(--text);
+  outline:none;font-family:'Inter',sans-serif;
+  transition:border-color .2s,box-shadow .2s;
+}
+.account-textarea{resize:vertical;min-height:72px;line-height:1.55}
+.account-input:focus,.account-textarea:focus{
+  border-color:var(--focus-blue-border);
+  box-shadow:0 0 0 3px var(--blue-dim);
+}
+.account-input:disabled,.account-textarea:disabled{opacity:.65;cursor:not-allowed}
+.account-tiny-note{font-size:10.5px;color:var(--muted2);line-height:1.5}
 
-/* AVATAR DISPLAY */
-.profile-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--orange),#ff8a00);color:#fff;font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;box-shadow:0 4px 16px rgba(255,106,0,0.25)}
+.account-action-row{
+  display:flex;gap:10px;justify-content:flex-end;margin-bottom:10px;flex-wrap:wrap;
+}
+.account-lock-note{
+  font-size:10.5px;color:var(--muted2);line-height:1.6;
+  border-top:1px dashed var(--border);padding-top:12px;
+}
 
+/* ── Security list ── */
+.security-list,.settings-list{display:flex;flex-direction:column;gap:10px}
+.security-row,.setting-row{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:14px;border-radius:12px;background:var(--surface2);
+  border:1px solid var(--border);
+}
+.security-title,.setting-title{font-size:13px;font-weight:700;margin-bottom:3px}
+.security-sub,.setting-sub{font-size:11px;color:var(--muted);line-height:1.55;max-width:540px}
+
+/* ── Switch toggle ── */
+.switch-stack{display:flex;align-items:center;gap:10px}
+.switch-label{
+  font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;
+  color:var(--muted);letter-spacing:.6px;min-width:40px;text-align:right;
+}
+.setting-toggle{
+  position:relative;width:44px;height:24px;border-radius:999px;
+  background:var(--surface3);border:1px solid var(--border2);
+  cursor:pointer;transition:background .2s,border-color .2s;flex-shrink:0;
+}
+.setting-toggle::after{
+  content:'';position:absolute;top:2px;left:2px;
+  width:18px;height:18px;border-radius:50%;
+  background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.2);
+  transition:transform .22s ease;
+}
+.setting-toggle.on{background:linear-gradient(135deg,var(--blue),var(--purple));border-color:transparent}
+.setting-toggle.on::after{transform:translateX(20px)}
+
+/* ── Segmented control ── */
+.segmented{
+  display:inline-flex;padding:3px;gap:3px;
+  background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+}
+.seg-btn{
+  padding:7px 14px;border-radius:7px;
+  font-family:'Geist Mono',monospace;font-size:9.5px;font-weight:700;
+  letter-spacing:.6px;color:var(--muted);cursor:pointer;
+  background:transparent;border:none;transition:all .15s;
+}
+.seg-btn:hover{color:var(--text)}
+.seg-btn.active{
+  background:var(--surface);color:var(--blue);
+  box-shadow:var(--key-shadow);
+}
+
+/* ── Usage card ── */
+.usage-summary-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+  margin-bottom:18px;
+}
+.usage-summary-stat{
+  padding:14px;border-radius:12px;background:var(--surface2);
+  border:1px solid var(--border);
+}
+.usage-summary-label{
+  font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;
+}
+.usage-summary-value{
+  font-family:'Poppins',sans-serif;font-size:22px;font-weight:800;
+  margin-bottom:4px;color:var(--blue);line-height:1.1;
+}
+.usage-summary-sub{font-size:11px;color:var(--muted);line-height:1.55}
+
+.usage-quota-list{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.usage-quota-row{
+  padding:12px 14px;border-radius:12px;background:var(--surface2);
+  border:1px solid var(--border);
+}
+.usage-quota-head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:8px;gap:10px;flex-wrap:wrap;
+}
+.usage-quota-name{font-size:12.5px;font-weight:700}
+.usage-quota-counts{
+  font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--muted);
+  letter-spacing:.4px;
+}
+.usage-quota-bar{
+  height:6px;border-radius:999px;background:var(--surface3);overflow:hidden;
+}
+.usage-quota-bar-fill{
+  height:100%;border-radius:999px;
+  background:linear-gradient(90deg,var(--blue),var(--purple));
+  transition:width .3s;
+}
+.usage-quota-bar-fill.warn{background:linear-gradient(90deg,#f59e0b,#ef4444)}
+.usage-quota-bar-fill.danger{background:#ef4444}
+.usage-quota-row[data-locked="true"]{opacity:.6}
+.usage-quota-row[data-locked="true"] .usage-quota-bar-fill{background:var(--surface3)}
+
+.usage-history-title{
+  font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;
+}
+.usage-history-rows{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.usage-history-row{
+  display:grid;grid-template-columns:auto 1fr auto;gap:14px;
+  align-items:center;padding:10px 14px;border-radius:10px;
+  background:var(--surface2);border:1px solid var(--border);
+  font-size:12px;
+}
+.usage-history-row .uh-month{
+  font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--muted);
+  letter-spacing:.4px;
+}
+.usage-history-row .uh-calls{color:var(--text)}
+.usage-history-row .uh-cost{
+  font-family:'Geist Mono',monospace;font-weight:700;color:var(--blue);
+}
+
+/* ── Responsive ── */
 @media(max-width:900px){
-  .profile-grid{grid-template-columns:1fr}
   .mobile-menu-btn{display:flex}
   .sidebar{transform:translateX(-110%);transition:transform .24s;will-change:transform;width:min(82vw,300px);height:100dvh;overflow-y:auto}
   .sidebar.open{transform:translateX(0)}
   .main{margin-left:0;padding:18px 16px 26px}
+  .profile-hero{grid-template-columns:1fr;text-align:left}
+  .profile-actions{flex-direction:row;flex-wrap:wrap}
+  .profile-stat-grid{grid-template-columns:1fr}
+  .account-form-grid{grid-template-columns:1fr}
+  .security-row,.setting-row{flex-direction:column;align-items:stretch}
+  .switch-stack{justify-content:space-between}
+  .top-profile-copy{display:none}
+  .usage-summary-grid{grid-template-columns:1fr}
 }
 </style>
 </head>
@@ -87,7 +313,6 @@
   <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
   <div class="sidebar-bottom">
     <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
-    <div class="plan-card"><div class="plan-tier">Pro Plan</div><div class="plan-name">Profil Ayarları</div><div class="plan-meta"><span>Hesap yönetimi</span><div class="upgrade-btn">Yönet</div></div></div>
   </div>
 </aside>
 
@@ -95,224 +320,775 @@
   <div class="topbar fade1">
     <div class="topbar-left">
       <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-      <div><div class="page-title">👤 Profil Ayarları</div><div class="page-meta">// HESAP BİLGİLERİ VE TERCİHLER</div></div>
+      <div><div class="page-title">👤 Profil & Hesap</div><div class="page-meta">// HESAP, PLAN, GÜVENLİK, BİLDİRİM VE TASARIM TERCİHLERİ</div></div>
     </div>
     <div class="topbar-right">
-      <button class="icon-btn" id="saveTopBtn">💾 Kaydet</button>
+      <button class="top-profile-btn" id="topProfileBtn" type="button" aria-label="Hesap ve ayarlar">
+        <span class="top-profile-avatar" id="topProfileAvatar">?</span>
+        <span class="top-profile-copy">
+          <span class="top-profile-name" id="topProfileName">Kullanıcı</span>
+          <span class="top-profile-sub">Hesap &amp; Ayarlar</span>
+        </span>
+        <span class="top-profile-caret">▾</span>
+      </button>
     </div>
   </div>
 
-  <div class="profile-grid">
-    <!-- LEFT: Profile Form -->
-    <div class="card">
-      <div class="card-head">
-        <div class="card-title">Hesap Bilgileri</div>
-        <div class="ct-tag tag-blue">DÜZENLE</div>
-      </div>
-      <div class="card-body">
-        <div id="profileMsg" class="pf-msg"></div>
+  <section class="module-section section-block" id="section-profil">
+    <div class="profile-layout">
+      <div class="profile-stack">
 
-        <div class="profile-avatar" id="profileAvatar">?</div>
+        <!-- 1) HESAP -->
+        <div class="profile-card profile-section-anchor" id="accountCard">
+          <div class="profile-card-head">
+            <div class="profile-card-title">Hesap</div>
+            <div class="profile-card-tag">ACCOUNT</div>
+          </div>
 
-        <div class="pf-row">
-          <div class="pf-group">
-            <div class="pf-label">Ad Soyad</div>
-            <input class="pf-input" id="pfName" type="text" placeholder="Ad Soyad">
-          </div>
-          <div class="pf-group">
-            <div class="pf-label">E-posta Adresi</div>
-            <input class="pf-input" id="pfEmail" type="email" placeholder="ornek@firma.com" disabled>
-          </div>
-        </div>
+          <div class="profile-hero">
+            <div class="profile-avatar" id="summaryProfileAvatar">?</div>
 
-        <div class="pf-row">
-          <div class="pf-group">
-            <div class="pf-label">Telefon Numarası</div>
-            <input class="pf-input" id="pfPhone" type="tel" placeholder="05XX XXX XX XX">
-          </div>
-          <div class="pf-group">
-            <div class="pf-label">Mağaza Adı</div>
-            <input class="pf-input" id="pfStore" type="text" placeholder="örn. TechMart Mağazası">
-          </div>
-        </div>
-
-        <div class="pf-row">
-          <div class="pf-group">
-            <div class="pf-label">KDV Durumu</div>
-            <input class="pf-input" id="pfVat" type="text" placeholder="Tam mükellef / Basit usul" disabled>
-          </div>
-          <div class="pf-group">
-            <div class="pf-label">Kayıt Tarihi</div>
-            <input class="pf-input" id="pfCreated" type="text" disabled>
-          </div>
-        </div>
-
-        <div style="display:flex;gap:10px;margin-top:8px">
-          <button class="pf-btn primary" id="saveBtn">Değişiklikleri Kaydet</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT: Plan + Actions -->
-    <div style="display:flex;flex-direction:column;gap:14px">
-      <!-- Plan -->
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title">Plan Bilgisi</div>
-          <div class="ct-tag tag-purple" id="planTag">FREE</div>
-        </div>
-        <div class="plan-info">
-          <div class="pi-current">
-            <div class="pi-icon" id="planIcon">🎁</div>
             <div>
-              <div class="pi-name" id="planName">Ücretsiz Plan</div>
-              <div class="pi-price" id="planPrice">₺0/ay</div>
+              <div class="profile-name" id="summaryProfileName">Kullanıcı</div>
+              <div class="profile-sub">
+                <span id="summaryProfileRole">Satıcı hesabı yöneticisi</span> ·
+                <span id="summaryProfileEmail">—</span><br>
+                <span id="summaryProfilePhone">—</span> ·
+                <span id="summaryProfileCompany">—</span> ·
+                <span id="summaryProfileTimezone">Europe/Istanbul</span>
+              </div>
+
+              <div class="profile-chip-row">
+                <span class="profile-chip blue" id="summaryPlanChip">FREE</span>
+                <span class="profile-chip green" id="summaryQuotaChip">20 / 20 HAK KALDI</span>
+                <span class="profile-chip" id="summaryProfileStatus">HESAP GÜNCEL</span>
+              </div>
+            </div>
+
+            <div class="profile-actions">
+              <button class="profile-btn primary" id="focusAccountBtn" type="button">Bilgileri Düzenle</button>
+              <button class="profile-btn ghost" id="billingFocusBtn" type="button">Fatura Bilgileri</button>
             </div>
           </div>
-          <div class="pi-features" id="planFeatures">
-            <div class="pi-feat">Temel özellikler</div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Account Actions -->
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title">Hesap İşlemleri</div>
-        </div>
-        <div class="account-actions">
-          <div class="aa-item" id="changePassBtn">
-            <span class="aa-icon">🔑</span> Şifre Değiştir
+          <div class="profile-stat-grid">
+            <div class="profile-stat">
+              <div class="profile-stat-label">Kullanılan Plan</div>
+              <div class="profile-stat-value" id="summaryPlanValue" style="color:var(--blue);">Ücretsiz</div>
+              <div class="profile-stat-sub" id="summaryPlanDesc">Temel analiz ve takip özellikleri aktif.</div>
+            </div>
+
+            <div class="profile-stat">
+              <div class="profile-stat-label">Kalan Haklar</div>
+              <div class="profile-stat-value" id="summaryQuotaValue" style="color:var(--green);">20 / 20</div>
+              <div class="profile-stat-sub">Bugün için kullanılabilir analiz hakkı.</div>
+            </div>
+
+            <div class="profile-stat">
+              <div class="profile-stat-label">Paket Yükseltme</div>
+              <div class="profile-stat-value" id="summaryNextPlan" style="color:var(--purple);">—</div>
+              <div class="profile-stat-sub" id="summaryNextPlanDesc">Daha yüksek limit ve ek özellikler için üst pakete geç.</div>
+            </div>
           </div>
-          <div class="aa-item" id="logoutBtn">
-            <span class="aa-icon">🚪</span> Çıkış Yap
+
+          <div class="profile-note">
+            <strong>Not:</strong> Hesap, plan ve fatura bilgileri bu bölümde birlikte yönetilir.
+            Bu alanda yaptığın güncellemeler sağ üstteki hesap butonuna da yansır.
+          </div>
+
+          <div class="account-form-grid">
+            <div class="account-field">
+              <label class="account-label" for="accountNameInput">Ad Soyad</label>
+              <input class="account-input" id="accountNameInput" type="text" value="" disabled>
+            </div>
+
+            <div class="account-field">
+              <label class="account-label" for="accountRoleInput">Rol / Ünvan</label>
+              <input class="account-input" id="accountRoleInput" type="text" value="Satıcı hesabı yöneticisi" disabled>
+            </div>
+
+            <div class="account-field">
+              <label class="account-label" for="accountEmailInput">E-posta</label>
+              <input class="account-input" id="accountEmailInput" type="email" value="" disabled>
+            </div>
+
+            <div class="account-field">
+              <label class="account-label" for="accountPhoneInput">Telefon Numarası</label>
+              <input class="account-input" id="accountPhoneInput" type="tel" value="" disabled>
+            </div>
+
+            <div class="account-field">
+              <label class="account-label" for="accountCompanyInput">Şirket/Firma</label>
+              <input class="account-input" id="accountCompanyInput" type="text" value="" disabled>
+            </div>
+
+            <div class="account-field">
+              <label class="account-label" for="accountCompanyTypeInput">Şirket Türü</label>
+              <select class="account-input" id="accountCompanyTypeInput" disabled>
+                <option value="sahis">Şahıs Şirketi</option>
+                <option value="ltd">Ltd. Şti.</option>
+                <option value="as">AŞ</option>
+              </select>
+              <div class="account-tiny-note">Net Kâr Hesabı, vergi/komisyon hesaplamasında bu bilgiyi otomatik kullanır.</div>
+            </div>
+
+            <div class="account-field">
+              <div class="account-label-row">
+                <label class="account-label" for="accountTaxInput">Vergi Numarası</label>
+                <span class="account-badge">OPSİYONEL</span>
+              </div>
+              <input class="account-input" id="accountTaxInput" type="text" value="" placeholder="İsteğe bağlı" disabled>
+              <div class="account-tiny-note">Bu bilgi yalnızca fatura düzenleme sürecinde gerekli olabilir.</div>
+            </div>
+
+            <div class="account-field">
+              <label class="account-label" for="accountTimezoneInput">Zaman Dilimi</label>
+              <input class="account-input" id="accountTimezoneInput" type="text" value="Europe/Istanbul" disabled>
+            </div>
+
+            <div class="account-field">
+              <label class="account-label" for="accountAddressInput">Adres / Not</label>
+              <textarea class="account-textarea" id="accountAddressInput" disabled>Fatura ve iletişim bilgileri bu hesap üzerinden yönetilir.</textarea>
+            </div>
+          </div>
+
+          <div class="account-action-row">
+            <button class="profile-btn ghost" id="accountCancelBtn" type="button" style="display:none;">İptal</button>
+            <button class="profile-btn ghost" id="accountEditBtn" type="button">Bilgileri Düzenle</button>
+            <button class="profile-btn primary" id="accountSaveBtn" type="button" style="display:none;">Güncelleştirmeleri Kaydet</button>
+          </div>
+
+          <div class="account-lock-note">
+            Bu alandaki bilgiler profil kartı ve sağ üst hesap butonu ile senkron çalışır.
+            Kaydedilen değerler Firestore hesabınıza bağlıdır.
           </div>
         </div>
+
+        <!-- 1.5) KULLANIM ÖZETİ -->
+        <div class="profile-card" id="usageCard">
+          <div class="profile-card-head">
+            <div class="profile-card-title">Kullanım Özeti</div>
+            <div class="profile-card-tag">USAGE</div>
+          </div>
+
+          <div class="usage-summary-grid">
+            <div class="usage-summary-stat">
+              <div class="usage-summary-label">Bu Ay AI Analiz</div>
+              <div class="usage-summary-value" id="usageMonthCalls">—</div>
+              <div class="usage-summary-sub" id="usageMonthCost">—</div>
+            </div>
+            <div class="usage-summary-stat">
+              <div class="usage-summary-label">Son 3 Ay Toplam</div>
+              <div class="usage-summary-value" id="usageTotalCalls" style="color:var(--purple);">—</div>
+              <div class="usage-summary-sub" id="usageTotalCost">—</div>
+            </div>
+            <div class="usage-summary-stat">
+              <div class="usage-summary-label">Cache Verimi</div>
+              <div class="usage-summary-value" id="usageCacheRate" style="color:var(--green);">—</div>
+              <div class="usage-summary-sub">Ücretsiz tekrar oranı</div>
+            </div>
+          </div>
+
+          <div class="usage-quota-list" id="usageQuotaList">
+            <div class="usage-quota-row">
+              <div class="usage-quota-head">
+                <div class="usage-quota-name">Yükleniyor…</div>
+                <div class="usage-quota-counts">—</div>
+              </div>
+              <div class="usage-quota-bar"><div class="usage-quota-bar-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+
+          <div class="usage-history-title">Aylık Geçmiş</div>
+          <div class="usage-history-rows" id="usageHistoryRows">
+            <div class="usage-history-row"><span class="uh-month">—</span><span class="uh-calls">—</span><span class="uh-cost">—</span></div>
+          </div>
+
+          <div class="profile-note" style="margin-top:14px;margin-bottom:0;">
+            <strong>Maliyet hesaplaması:</strong> Claude Haiku 4.5 token fiyatlarına göre otomatik (input $1/M · output $5/M · cache read $0.10/M · cache write $1.25/M). Cache hit'li analizler input fiyatının %10'una düşer.
+          </div>
+        </div>
+
+        <!-- 2) HESAP GÜVENLİĞİ -->
+        <div class="profile-card">
+          <div class="profile-card-head">
+            <div class="profile-card-title">Hesap Güvenliği</div>
+            <div class="profile-card-tag">SECURITY</div>
+          </div>
+
+          <div class="security-list">
+            <div class="security-row">
+              <div>
+                <div class="security-title">Şifre &amp; 2FA</div>
+                <div class="security-sub">Şifre değiştir, yedek kodları indir ve iki adımlı doğrulamayı yönet.</div>
+              </div>
+              <button class="profile-btn ghost" id="openSecurityBtn" type="button">Şifre Sıfırla</button>
+            </div>
+
+            <div class="security-row">
+              <div>
+                <div class="security-title">Oturum Yönetimi</div>
+                <div class="security-sub">Bu cihaz: Windows · Chrome · Frankfurt oturumu açık. Diğer cihazları kapatabilirsin.</div>
+              </div>
+              <button class="profile-btn ghost" type="button">Oturumları Gör</button>
+            </div>
+
+            <div class="security-row">
+              <div>
+                <div class="security-title">Yeni Giriş Bildirimi</div>
+                <div class="security-sub">Farklı bir cihazdan giriş yapıldığında e-posta ile bilgilendirme al.</div>
+              </div>
+              <div class="switch-stack">
+                <span class="switch-label" id="loginAlertLabel">AÇIK</span>
+                <button class="setting-toggle on" id="loginAlertToggle" type="button"></button>
+              </div>
+            </div>
+
+            <div class="security-row">
+              <div>
+                <div class="security-title">Hesaptan Çıkış</div>
+                <div class="security-sub">Mevcut oturumu güvenli şekilde sonlandır.</div>
+              </div>
+              <button class="profile-btn danger" id="accountLogoutBtn" type="button">Çıkış Yap</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3) BİLDİRİM TERCİHLERİ -->
+        <div class="profile-card">
+          <div class="profile-card-head">
+            <div class="profile-card-title">Bildirim Tercihleri</div>
+            <div class="profile-card-tag">NOTIFICATIONS</div>
+          </div>
+
+          <div class="settings-list">
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">E-posta Özetleri</div>
+                <div class="setting-sub">Günlük fırsat özeti ve haftalık performans raporu e-posta ile gelsin.</div>
+              </div>
+              <div class="switch-stack">
+                <span class="switch-label" id="emailSummaryLabel">AÇIK</span>
+                <button class="setting-toggle on" id="emailSummaryToggle" type="button"></button>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Canlı Uyarılar</div>
+                <div class="setting-sub">Skor eşiği geçen ürünlerde ve fiyat sapmalarında anlık bildirim göster.</div>
+              </div>
+              <div class="switch-stack">
+                <span class="switch-label" id="liveAlertLabel">AÇIK</span>
+                <button class="setting-toggle on" id="liveAlertToggle" type="button"></button>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Fatura &amp; Yenileme Bildirimi</div>
+                <div class="setting-sub">Plan yenileme, ödeme hatası ve fatura oluştuğunda haber ver.</div>
+              </div>
+              <div class="switch-stack">
+                <span class="switch-label" id="billingNoticeLabel">AÇIK</span>
+                <button class="setting-toggle on" id="billingNoticeToggle" type="button"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4) TASARIM AYARLARI -->
+        <div class="profile-card">
+          <div class="profile-card-head">
+            <div class="profile-card-title">Tasarım Ayarları</div>
+            <div class="profile-card-tag">UI PREFERENCES</div>
+          </div>
+
+          <div class="settings-list">
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Tema Modu</div>
+                <div class="setting-sub">Sistem, açık veya koyu mod arasında geçiş yap.</div>
+              </div>
+              <div class="segmented" id="themeSegmented">
+                <button class="seg-btn" type="button" data-theme-preference="system">SYSTEM</button>
+                <button class="seg-btn" type="button" data-theme-preference="light">LIGHT</button>
+                <button class="seg-btn" type="button" data-theme-preference="dark">DARK</button>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Vurgu Rengi</div>
+                <div class="setting-sub">Aktif alanların ve butonların vurgu rengini değiştir.</div>
+              </div>
+              <div class="segmented" id="accentSegmented">
+                <button class="seg-btn" type="button" data-accent-value="classic">CLASSIC</button>
+                <button class="seg-btn" type="button" data-accent-value="emerald">EMERALD</button>
+                <button class="seg-btn" type="button" data-accent-value="violet">VIOLET</button>
+              </div>
+            </div>
+
+            <div class="setting-row">
+              <div>
+                <div class="setting-title">Kart Yoğunluğu</div>
+                <div class="setting-sub">Daha sıkışık görünüm için kompakt modu aç.</div>
+              </div>
+              <div class="switch-stack">
+                <span class="switch-label" id="densityStatusLabel">RAHAT</span>
+                <button class="setting-toggle" id="densityToggle" type="button"></button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
-  </div>
+  </section>
 </main>
 
 <script type="module">
 import { onAuthChange, logout, resetPassword } from '/src/js/auth.js';
 import { getUserProfile, updateUserProfile } from '/src/js/store.js';
+import { getInitials, paintAvatar } from '/src/js/profile-bar.js';
+import { getMyPlan, getMyUsage } from '/src/js/api.js';
+
+const PLAN_COPY = {
+  start:    { chip: 'START',    label: 'Start',    desc: 'Link Analizi (1/gün), 1 mağaza, temel özellikler.' },
+  pro:      { chip: 'PRO',      label: 'Pro',      desc: 'Link Analizi (5/gün), 3 mağaza, Trend Radar günlük.' },
+  business: { chip: 'BUSINESS', label: 'Business', desc: 'Sınırsız mağaza, Gap Radar, 6 saatlik trend, haftalık otomatik rapor.' }
+};
+
+const NEXT_PLAN = {
+  start:    { id: 'pro',      label: 'Pro',      desc: 'Daha fazla analiz, 3 mağaza ve günlük Trend Radar.' },
+  pro:      { id: 'business', label: 'Business', desc: 'Sınırsız limit, Gap Radar ve haftalık otomatik rapor.' },
+  business: { id: null,       label: 'En üst plan', desc: 'Tüm özellikler aktif — teşekkürler!' }
+};
+
+const METER_LABELS = {
+  linkAnalysis:         'Link Analizi',
+  storeProductAnalysis: 'Mağaza Ürün Analizi',
+  legalCheck:           'Yasal Kontrol',
+  supplier:             'Tedarikçi Bul'
+};
+
+const TOGGLE_KEYS = {
+  loginAlertToggle:   'dropscout-login-alert',
+  emailSummaryToggle: 'dropscout-email-summary',
+  liveAlertToggle:    'dropscout-live-alerts',
+  billingNoticeToggle:'dropscout-billing-notice'
+};
+const DENSITY_KEY = 'dropscout-density';
+const ACCENT_KEY  = 'dropscout-accent';
+const THEME_KEY   = 'dropscout-theme-preference';
+
+const $ = (id) => document.getElementById(id);
 
 let currentUser = null;
+let originalValues = {};
 
-onAuthChange(async (user) => {
-  if (!user) return;
-  currentUser = user;
+function setDisplay(profile, user) {
+  const name    = profile?.displayName || user.displayName || 'Kullanıcı';
+  const email   = profile?.email || user.email || '';
+  const phone   = profile?.phone || '';
+  const company = profile?.storeName || profile?.company || 'DropScout TR';
+  const role    = profile?.role || 'Satıcı hesabı yöneticisi';
+  const tz      = profile?.timezone || 'Europe/Istanbul';
+  const taxNo   = profile?.taxNumber || '';
+  const address = profile?.address || 'Fatura ve iletişim bilgileri bu hesap üzerinden yönetilir.';
+  const inits   = getInitials(name);
+  const seed    = name || email || user.uid;
 
-  // Profil verilerini yukle
+  // Topbar
+  $('topProfileAvatar').textContent = inits;
+  $('topProfileName').textContent = name;
+  paintAvatar($('topProfileAvatar'), seed);
+
+  // Hero (plan chip/value/desc → renderPlan dolduracak)
+  $('summaryProfileAvatar').textContent = inits;
+  $('summaryProfileName').textContent = name;
+  paintAvatar($('summaryProfileAvatar'), seed);
+  $('summaryProfileRole').textContent = role;
+  $('summaryProfileEmail').textContent = email || '—';
+  $('summaryProfilePhone').textContent = phone || '—';
+  $('summaryProfileCompany').textContent = company;
+  $('summaryProfileTimezone').textContent = tz;
+
+  // Form
+  $('accountNameInput').value = name;
+  $('accountRoleInput').value = role;
+  $('accountEmailInput').value = email;
+  $('accountPhoneInput').value = phone;
+  $('accountCompanyInput').value = company;
+  $('accountCompanyTypeInput').value = profile?.companyType || 'sahis';
+  $('accountTaxInput').value = taxNo;
+  $('accountTimezoneInput').value = tz;
+  $('accountAddressInput').value = address;
+
+  snapshotForm();
+}
+
+// ── Plan + Usage (backend) ──────────────────────────
+async function loadPlanAndUsage() {
   try {
-    const profile = await getUserProfile(user.uid);
-    if (profile) {
-      document.getElementById('pfName').value = profile.displayName || '';
-      document.getElementById('pfEmail').value = profile.email || user.email || '';
-      document.getElementById('pfPhone').value = profile.phone || '';
-      document.getElementById('pfStore').value = profile.storeName || '';
-      document.getElementById('pfVat').value = profile.vatStatus || 'Belirtilmedi';
-
-      if (profile.createdAt) {
-        const d = profile.createdAt.toDate ? profile.createdAt.toDate() : new Date(profile.createdAt);
-        document.getElementById('pfCreated').value = d.toLocaleDateString('tr-TR', { year:'numeric', month:'long', day:'numeric' });
-      }
-
-      // Plan
-      const plan = profile.plan || 'free';
-      const planTag = document.getElementById('planTag');
-      const planName = document.getElementById('planName');
-      const planPrice = document.getElementById('planPrice');
-      const planIcon = document.getElementById('planIcon');
-      const planFeatures = document.getElementById('planFeatures');
-
-      if (plan === 'pro') {
-        planTag.textContent = 'PRO';
-        planName.textContent = 'Pro Plan';
-        planPrice.textContent = '₺499/ay';
-        planIcon.textContent = '🚀';
-        planFeatures.innerHTML = `
-          <div class="pi-feat">Link Analiz (Sınırsız)</div>
-          <div class="pi-feat">Trend Radar</div>
-          <div class="pi-feat">Tüm Platformlar</div>
-          <div class="pi-feat">Gap Radar</div>
-          <div class="pi-feat">AI Skor</div>
-          <div class="pi-feat">Öncelikli destek</div>
-        `;
-      } else if (plan === 'starter') {
-        planTag.textContent = 'STARTER';
-        planName.textContent = 'Starter Plan';
-        planPrice.textContent = '₺299/ay';
-        planIcon.textContent = '⭐';
-        planFeatures.innerHTML = `
-          <div class="pi-feat">Link Analiz (50/ay)</div>
-          <div class="pi-feat">Trend Radar</div>
-          <div class="pi-feat">1 Platform</div>
-          <div class="pi-feat">E-posta desteği</div>
-        `;
-      }
-
-      // Avatar bas harfleri
-      const name = profile.displayName || user.email || '';
-      const parts = name.trim().split(/\s+/);
-      const initials = parts.length >= 2
-        ? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
-        : name.substring(0, 2).toUpperCase();
-      document.getElementById('profileAvatar').textContent = initials;
-    }
-  } catch (e) {
-    console.warn('Profil yüklenemedi:', e);
-    document.getElementById('pfEmail').value = user.email || '';
+    const [planData, usageData] = await Promise.all([
+      getMyPlan(),
+      getMyUsage(3)
+    ]);
+    renderPlan(planData);
+    renderQuotaList(planData);
+    renderUsage(usageData);
+  } catch (err) {
+    console.warn('[profil] plan/usage yüklenemedi:', err);
+    // Fallback: plan kartını start olarak göster, kota listesini gizleme
+    const fallback = PLAN_COPY.start;
+    $('summaryPlanChip').textContent = fallback.chip;
+    $('summaryPlanValue').textContent = fallback.label;
+    $('summaryPlanDesc').textContent = fallback.desc;
+    $('summaryQuotaChip').textContent = 'Kota bilgisi alınamadı';
+    $('summaryQuotaValue').textContent = '—';
+    $('usageQuotaList').innerHTML = '<div class="profile-note" style="margin:0;">Kullanım verisi yüklenemedi. Sayfayı yenilemeyi deneyin.</div>';
   }
-});
+}
 
-// Kaydet
-async function saveProfile() {
+function renderPlan(planData) {
+  const copy = PLAN_COPY[planData.plan] || PLAN_COPY.start;
+  $('summaryPlanChip').textContent = copy.chip;
+  $('summaryPlanValue').textContent = copy.label;
+  $('summaryPlanDesc').textContent = copy.desc;
+
+  // Status chip (hero)
+  const statusEl = $('summaryProfileStatus');
+  if (planData.status === 'trialing' && planData.trialEndsAt) {
+    const daysLeft = Math.max(0, Math.ceil((planData.trialEndsAt - Date.now()) / 86400000));
+    statusEl.textContent = `PRO TRIAL · ${daysLeft} GÜN KALDI`;
+    statusEl.classList.add('green');
+  } else if (planData.status === 'expired') {
+    statusEl.textContent = 'PLAN SÜRESİ DOLDU';
+  } else if (planData.status === 'active') {
+    statusEl.textContent = 'PLAN AKTİF';
+    statusEl.classList.add('green');
+  }
+
+  // Kalan haklar (primary meter: linkAnalysis)
+  const linkQ = planData.quotas?.linkAnalysis;
+  if (linkQ) {
+    const remDaily   = linkQ.remainingDaily;
+    const remMonthly = linkQ.remainingMonthly;
+    const limDaily   = linkQ.limitDaily;
+    const limMonthly = linkQ.limitMonthly;
+    let chipText, valueText;
+    if (limDaily !== null) {
+      chipText = `${remDaily ?? 0} / ${limDaily} HAK KALDI (BUGÜN)`;
+      valueText = `${remDaily ?? 0} / ${limDaily}`;
+    } else if (limMonthly !== null) {
+      chipText = `${remMonthly ?? 0} / ${limMonthly} HAK KALDI (AY)`;
+      valueText = `${remMonthly ?? 0} / ${limMonthly}`;
+    } else {
+      chipText = 'SINIRSIZ';
+      valueText = '∞';
+    }
+    $('summaryQuotaChip').textContent = chipText;
+    $('summaryQuotaValue').textContent = valueText;
+  }
+
+  // Sonraki plan kartı
+  const next = NEXT_PLAN[planData.plan] || NEXT_PLAN.start;
+  $('summaryNextPlan').textContent = next.label;
+  $('summaryNextPlanDesc').textContent = next.desc;
+}
+
+function renderQuotaList(planData) {
+  const list = $('usageQuotaList');
+  if (!list) return;
+  const entries = Object.entries(planData.quotas || {});
+  if (!entries.length) {
+    list.innerHTML = '<div class="profile-note" style="margin:0;">Kota bilgisi yok.</div>';
+    return;
+  }
+  list.innerHTML = entries.map(([meter, q]) => {
+    const name        = METER_LABELS[meter] || meter;
+    const limMonthly  = q.limitMonthly;
+    const usedMonthly = q.usedMonthly ?? 0;
+    const limDaily    = q.limitDaily;
+    const usedDaily   = q.usedDaily ?? 0;
+
+    const locked    = limMonthly === 0;
+    const unlimited = limMonthly === null && limDaily === null;
+    let counts = '', pct = 0;
+
+    if (locked) {
+      counts = 'Plana dahil değil';
+    } else if (unlimited) {
+      counts = `Bu ay ${usedMonthly} analiz · sınırsız`;
+    } else if (limDaily !== null) {
+      counts = `Bugün ${usedDaily} / ${limDaily}` + (limMonthly !== null ? ` · Ay ${usedMonthly} / ${limMonthly}` : '');
+      pct = Math.min(100, Math.round((usedDaily / limDaily) * 100));
+    } else {
+      counts = `Bu ay ${usedMonthly} / ${limMonthly}`;
+      pct = Math.min(100, Math.round((usedMonthly / limMonthly) * 100));
+    }
+
+    const fillClass = pct >= 100 ? 'danger' : (pct >= 80 ? 'warn' : '');
+    return `
+      <div class="usage-quota-row" data-locked="${locked}">
+        <div class="usage-quota-head">
+          <div class="usage-quota-name">${name}</div>
+          <div class="usage-quota-counts">${counts}</div>
+        </div>
+        <div class="usage-quota-bar"><div class="usage-quota-bar-fill ${fillClass}" style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderUsage(usageData) {
+  const current = usageData.months?.[0] || { tokens: { calls: 0 }, costUsd: 0 };
+  $('usageMonthCalls').textContent = String(current.tokens?.calls ?? 0);
+  $('usageMonthCost').textContent  = formatUsd(current.costUsd);
+
+  const total = usageData.totalUsage || { input:0, output:0, cacheRead:0, cacheCreation:0, calls:0 };
+  $('usageTotalCalls').textContent = String(total.calls ?? 0);
+  $('usageTotalCost').textContent  = formatUsd(usageData.totalCostUsd || 0);
+
+  // Cache hit rate: cacheRead / (input + cacheRead + cacheCreation)
+  const totalIn = (total.input || 0) + (total.cacheRead || 0) + (total.cacheCreation || 0);
+  const cachePct = totalIn > 0 ? Math.round((total.cacheRead / totalIn) * 100) : 0;
+  $('usageCacheRate').textContent = totalIn > 0 ? `${cachePct}%` : '—';
+
+  // Cache sayesinde tasarruf: cache read normalde input fiyatından okurdu
+  // saved = cacheRead × (input_price - cacheRead_price) / 1M
+  const pp = usageData.pricingPerMillion || { input: 1.0, cacheRead: 0.1 };
+  const cacheSavedUsd = ((total.cacheRead || 0) * Math.max(0, pp.input - pp.cacheRead)) / 1_000_000;
+  const subEl = document.querySelector('#usageCacheRate + .usage-summary-sub');
+  if (subEl) {
+    subEl.textContent = cacheSavedUsd > 0
+      ? `${formatUsd(cacheSavedUsd)} tasarruf`
+      : 'Ücretsiz tekrar oranı';
+  }
+
+  // Aylık geçmiş — Türkçe ay etiketi
+  const rows = (usageData.months || []).map(m => `
+    <div class="usage-history-row">
+      <span class="uh-month">${formatMonthTr(m.month)}</span>
+      <span class="uh-calls">${m.tokens?.calls ?? 0} analiz</span>
+      <span class="uh-cost">${formatUsd(m.costUsd)}</span>
+    </div>
+  `).join('');
+  $('usageHistoryRows').innerHTML = rows || '<div class="usage-history-row"><span class="uh-month">Veri yok</span><span class="uh-calls">—</span><span class="uh-cost">—</span></div>';
+}
+
+// "2026-04" → "Nisan 2026"
+const TR_MONTHS = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+function formatMonthTr(ymKey) {
+  if (!ymKey || typeof ymKey !== 'string') return ymKey || '—';
+  const [y, m] = ymKey.split('-');
+  const idx = parseInt(m, 10) - 1;
+  if (Number.isNaN(idx) || idx < 0 || idx > 11) return ymKey;
+  return `${TR_MONTHS[idx]} ${y}`;
+}
+
+function formatUsd(v) {
+  if (v === null || v === undefined || Number.isNaN(v)) return '—';
+  if (v === 0) return '$0.00';
+  if (v < 0.01) return '< $0.01';
+  return `$${v.toFixed(2)}`;
+}
+
+function snapshotForm() {
+  originalValues = {
+    name:        $('accountNameInput').value,
+    role:        $('accountRoleInput').value,
+    phone:       $('accountPhoneInput').value,
+    company:     $('accountCompanyInput').value,
+    companyType: $('accountCompanyTypeInput').value,
+    tax:         $('accountTaxInput').value,
+    tz:          $('accountTimezoneInput').value,
+    address:     $('accountAddressInput').value
+  };
+}
+
+function restoreForm() {
+  $('accountNameInput').value        = originalValues.name;
+  $('accountRoleInput').value        = originalValues.role;
+  $('accountPhoneInput').value       = originalValues.phone;
+  $('accountCompanyInput').value     = originalValues.company;
+  $('accountCompanyTypeInput').value = originalValues.companyType;
+  $('accountTaxInput').value         = originalValues.tax;
+  $('accountTimezoneInput').value    = originalValues.tz;
+  $('accountAddressInput').value     = originalValues.address;
+}
+
+function setEditMode(on) {
+  const editableIds = [
+    'accountNameInput','accountRoleInput','accountPhoneInput',
+    'accountCompanyInput','accountCompanyTypeInput','accountTaxInput','accountTimezoneInput','accountAddressInput'
+  ];
+  editableIds.forEach(id => { $(id).disabled = !on; });
+  $('accountEditBtn').style.display   = on ? 'none' : '';
+  $('accountSaveBtn').style.display   = on ? '' : 'none';
+  $('accountCancelBtn').style.display = on ? '' : 'none';
+  if (on) $('accountNameInput').focus();
+}
+
+async function saveAccount() {
   if (!currentUser) return;
-  const btn = document.getElementById('saveBtn');
-  const msg = document.getElementById('profileMsg');
-  btn.disabled = true;
-  btn.textContent = 'Kaydediliyor...';
+  const saveBtn = $('accountSaveBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Kaydediliyor…';
 
   try {
     await updateUserProfile(currentUser.uid, {
-      displayName: document.getElementById('pfName').value.trim(),
-      phone: document.getElementById('pfPhone').value.trim(),
-      storeName: document.getElementById('pfStore').value.trim()
+      displayName: $('accountNameInput').value.trim(),
+      role:        $('accountRoleInput').value.trim(),
+      phone:       $('accountPhoneInput').value.trim(),
+      storeName:   $('accountCompanyInput').value.trim(),
+      companyType: $('accountCompanyTypeInput').value,
+      taxNumber:   $('accountTaxInput').value.trim(),
+      timezone:    $('accountTimezoneInput').value.trim(),
+      address:     $('accountAddressInput').value.trim()
     });
-    msg.textContent = 'Profil bilgileri başarıyla güncellendi.';
-    msg.className = 'pf-msg success';
-  } catch (e) {
-    msg.textContent = 'Güncelleme başarısız: ' + (e.message || e);
-    msg.className = 'pf-msg error';
-  }
 
-  btn.disabled = false;
-  btn.textContent = 'Değişiklikleri Kaydet';
-  setTimeout(() => { msg.className = 'pf-msg'; }, 4000);
+    // Refresh display with saved values
+    const profile = await getUserProfile(currentUser.uid);
+    setDisplay(profile || {}, currentUser);
+    setEditMode(false);
+  } catch (e) {
+    alert('Güncelleme başarısız: ' + (e.message || e));
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Güncelleştirmeleri Kaydet';
+  }
 }
 
-document.getElementById('saveBtn').addEventListener('click', saveProfile);
-document.getElementById('saveTopBtn').addEventListener('click', saveProfile);
+// ── Theme segmented (senkron: theme.js ile aynı localStorage anahtarını kullanır) ──
+function applyThemePreference(pref) {
+  localStorage.setItem(THEME_KEY, pref);
+  const theme = (pref === 'system')
+    ? (window.matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light')
+    : pref;
+  document.documentElement.setAttribute('data-theme', theme);
 
-// Sifre degistir
-document.getElementById('changePassBtn').addEventListener('click', async () => {
-  if (!currentUser || !currentUser.email) return;
+  // Sidebar switch ve badge senkronu
+  const sidebarToggle = $('themeToggle');
+  if (sidebarToggle) sidebarToggle.checked = (theme === 'dark');
+  const badge = $('themeModeBadge');
+  if (badge) badge.textContent = pref === 'system'
+    ? `SYSTEM · ${theme.toUpperCase()}`
+    : `MANUAL · ${theme.toUpperCase()}`;
+
+  document.querySelectorAll('#themeSegmented .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.themePreference === pref);
+  });
+}
+
+function applyAccent(val) {
+  localStorage.setItem(ACCENT_KEY, val);
+  document.querySelectorAll('#accentSegmented .seg-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.accentValue === val);
+  });
+}
+
+function applyDensity(compact) {
+  localStorage.setItem(DENSITY_KEY, compact ? 'compact' : 'comfort');
+  document.documentElement.classList.toggle('density-compact', compact);
+  $('densityToggle').classList.toggle('on', compact);
+  $('densityStatusLabel').textContent = compact ? 'KOMPAKT' : 'RAHAT';
+}
+
+function bindToggle(btnId, labelId, storageKey, defaultOn = true) {
+  const btn = $(btnId);
+  const label = $(labelId);
+  const saved = localStorage.getItem(storageKey);
+  const on = saved === null ? defaultOn : saved === 'true';
+  btn.classList.toggle('on', on);
+  label.textContent = on ? 'AÇIK' : 'KAPALI';
+  btn.addEventListener('click', () => {
+    const next = !btn.classList.contains('on');
+    btn.classList.toggle('on', next);
+    label.textContent = next ? 'AÇIK' : 'KAPALI';
+    localStorage.setItem(storageKey, String(next));
+  });
+}
+
+// ── Init ──
+onAuthChange(async (user) => {
+  if (!user) return;
+  currentUser = user;
+  try {
+    const profile = await getUserProfile(user.uid);
+    setDisplay(profile || {}, user);
+  } catch (e) {
+    console.warn('Profil yüklenemedi:', e);
+    setDisplay({}, user);
+  }
+  // Plan + usage paralel çek — profil render'ından bağımsız
+  loadPlanAndUsage();
+});
+
+// Edit / Save / Cancel
+$('accountEditBtn').addEventListener('click', () => setEditMode(true));
+$('focusAccountBtn').addEventListener('click', () => {
+  setEditMode(true);
+  $('accountCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+$('accountCancelBtn').addEventListener('click', () => {
+  restoreForm();
+  setEditMode(false);
+});
+$('accountSaveBtn').addEventListener('click', saveAccount);
+
+$('billingFocusBtn').addEventListener('click', () => {
+  $('accountTaxInput').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setEditMode(true);
+  $('accountTaxInput').focus();
+});
+
+// Topbar profile button → bilgiler kartına scroll
+$('topProfileBtn').addEventListener('click', () => {
+  $('accountCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// Logout
+$('accountLogoutBtn').addEventListener('click', async () => {
+  await logout();
+  window.location.href = './login.html';
+});
+
+// Şifre sıfırlama
+$('openSecurityBtn').addEventListener('click', async () => {
+  if (!currentUser?.email) return;
   try {
     await resetPassword(currentUser.email);
-    const msg = document.getElementById('profileMsg');
-    msg.textContent = 'Şifre sıfırlama linki e-posta adresinize gönderildi.';
-    msg.className = 'pf-msg success';
-    setTimeout(() => { msg.className = 'pf-msg'; }, 4000);
+    alert('Şifre sıfırlama linki e-posta adresinize gönderildi.');
   } catch (e) {
-    alert('Hata: ' + e.message);
+    alert('Hata: ' + (e.message || e));
   }
 });
 
-// Cikis yap
-document.getElementById('logoutBtn').addEventListener('click', async () => {
-  await logout();
-  window.location.href = './login.html';
+// Toggles
+bindToggle('loginAlertToggle',   'loginAlertLabel',   TOGGLE_KEYS.loginAlertToggle,   true);
+bindToggle('emailSummaryToggle', 'emailSummaryLabel', TOGGLE_KEYS.emailSummaryToggle, true);
+bindToggle('liveAlertToggle',    'liveAlertLabel',    TOGGLE_KEYS.liveAlertToggle,    true);
+bindToggle('billingNoticeToggle','billingNoticeLabel',TOGGLE_KEYS.billingNoticeToggle,true);
+
+// Tema segmented — ilk durum
+applyThemePreference(localStorage.getItem(THEME_KEY) || 'system');
+document.querySelectorAll('#themeSegmented .seg-btn').forEach(b => {
+  b.addEventListener('click', () => applyThemePreference(b.dataset.themePreference));
+});
+
+// Vurgu rengi
+applyAccent(localStorage.getItem(ACCENT_KEY) || 'classic');
+document.querySelectorAll('#accentSegmented .seg-btn').forEach(b => {
+  b.addEventListener('click', () => applyAccent(b.dataset.accentValue));
+});
+
+// Yoğunluk
+const densityInit = localStorage.getItem(DENSITY_KEY) === 'compact';
+applyDensity(densityInit);
+$('densityToggle').addEventListener('click', () => {
+  applyDensity(!$('densityToggle').classList.contains('on'));
 });
 </script>
 </body>

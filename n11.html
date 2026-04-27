@@ -98,7 +98,6 @@
   <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item active" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
   <div class="sidebar-bottom">
     <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
-    <div class="plan-card"><div class="plan-tier">Pro Plan</div><div class="plan-name">Platform Entegrasyonu Aktif ✓</div><div class="plan-meta"><span>₺499/ay · 4 platform</span><div class="upgrade-btn">Yönet</div></div></div>
   </div>
 </aside>
 
@@ -214,42 +213,227 @@
 
 <script type="module">
 import { onAuthChange } from '/src/js/auth.js';
-import { savePlatformConnection, getPlatformConnection, deletePlatformConnection } from '/src/js/store.js';
-const PLATFORM = 'n11';
-let currentUid = null;
-onAuthChange((user) => { if (user) { currentUid = user.uid; loadSavedState(); } });
-const state = { connected: false, store: null, credentials: null, syncHistory: [] };
+import { connectPlatform, syncPlatform, getPlatformStatus, disconnectPlatform, ApiError } from '/src/js/api.js';
+import { handleApiError } from '/src/js/plan.js';
 
-const mockStoreData = {
-  name: '', sellerCode: '', totalProducts: 189, activeProducts: 171, rating: 4.5, joinDate: '2023-03-10',
-  categories: [
-    { name: 'Elektronik', commission: 11.0, kdv: 20, products: 52, buybox: '₺79 - ₺2.800' },
-    { name: 'Ev & Yaşam', commission: 14.0, kdv: 20, products: 48, buybox: '₺25 - ₺750' },
-    { name: 'Giyim & Aksesuar', commission: 20.0, kdv: 10, products: 36, buybox: '₺35 - ₺480' },
-    { name: 'Anne & Bebek', commission: 12.0, kdv: 10, products: 28, buybox: '₺19 - ₺390' },
-    { name: 'Kırtasiye & Ofis', commission: 15.0, kdv: 20, products: 25, buybox: '₺10 - ₺320' }
-  ],
-  avgCommission: 14.4, lastSync: null
+const PLATFORM = 'n11';
+
+const state = {
+  connected: false,
+  storeName: '',
+  store: null,
+  syncHistory: []
 };
 
-async function loadSavedState(){if(!currentUid)return;try{const data=await getPlatformConnection(currentUid,PLATFORM);if(data&&data.connected){state.connected=true;state.credentials=data.credentials||null;state.syncHistory=data.syncHistory||[];if(state.credentials){mockStoreData.name=state.credentials.storeName||'Mağaza';mockStoreData.sellerCode=state.credentials.sellerCode||'';state.store=mockStoreData}}}catch(e){console.warn('Platform verisi yüklenemedi:',e)}renderAll()}
-async function saveState(){if(!currentUid)return;try{await savePlatformConnection(currentUid,PLATFORM,{storeName:state.credentials?.storeName||'',credentials:state.credentials||{},syncHistory:state.syncHistory.slice(-10)})}catch(e){console.warn('Platform verisi kaydedilemedi:',e)}}
-function addSyncLog(t){const now=new Date();state.syncHistory.unshift({time:now.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'}),text:t,date:now.toISOString()});if(state.syncHistory.length>10)state.syncHistory.pop();saveState()}
+onAuthChange(async (user) => {
+  if (!user) return;
+  try {
+    const status = await getPlatformStatus(PLATFORM);
+    state.connected = !!status.connected;
+    state.storeName = status.storeName || '';
+    state.store = status.store || null;
+    state.syncHistory = status.syncHistory || [];
+  } catch (e) {
+    console.warn('Platform durumu yüklenemedi:', e);
+  }
+  renderAll();
+});
 
-function renderKPIs(){
-  const el=(id)=>document.getElementById(id);
-  if(state.connected&&state.store){el('kpiStatus').textContent='Aktif';el('kpiStatusSub').textContent='Bağlantı kuruldu';el('kpiProducts').textContent=state.store.totalProducts.toLocaleString('tr-TR');el('kpiCommission').textContent='%'+state.store.avgCommission.toFixed(1);if(state.syncHistory.length>0){const l=new Date(state.syncHistory[0].date);el('kpiSync').textContent=l.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});el('kpiSyncSub').textContent=l.toLocaleDateString('tr-TR')}}
-  else{el('kpiStatus').textContent='--';el('kpiStatusSub').textContent='Henüz bağlanmadı';el('kpiProducts').textContent='--';el('kpiSync').textContent='--';el('kpiSyncSub').textContent='Henüz senkronize edilmedi';el('kpiCommission').textContent='--'}
+function renderKPIs() {
+  const el = (id) => document.getElementById(id);
+  if (state.connected && state.store) {
+    el('kpiStatus').textContent = 'Aktif';
+    el('kpiStatusSub').textContent = 'Bağlantı kuruldu';
+    el('kpiProducts').textContent = Number(state.store.totalProducts || 0).toLocaleString('tr-TR');
+    el('kpiCommission').textContent = '%' + Number(state.store.avgCommission || 0).toFixed(1);
+    if (state.syncHistory.length > 0) {
+      const l = new Date(state.syncHistory[0].date);
+      el('kpiSync').textContent = l.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
+      el('kpiSyncSub').textContent = l.toLocaleDateString('tr-TR');
+    } else {
+      el('kpiSync').textContent = '--';
+      el('kpiSyncSub').textContent = 'Senkron kaydı yok';
+    }
+  } else {
+    el('kpiStatus').textContent = '--';
+    el('kpiStatusSub').textContent = 'Henüz bağlanmadı';
+    el('kpiProducts').textContent = '--';
+    el('kpiSync').textContent = '--';
+    el('kpiSyncSub').textContent = 'Henüz senkronize edilmedi';
+    el('kpiCommission').textContent = '--';
+  }
 }
-function renderConnectionStatus(){const el=document.getElementById('connStatus'),txt=document.getElementById('connStatusText');if(state.connected){el.className='cm-status connected';txt.textContent='BAĞLI';document.getElementById('disconnectBtn').style.display='';document.getElementById('connectBtn').textContent='Bağlantıyı Güncelle';if(state.credentials){document.getElementById('inputApiKey').value=state.credentials.apiKey?'••••••••••••':'';document.getElementById('inputApiSecret').value=state.credentials.apiSecret?'••••••••••••':'';document.getElementById('inputStoreName').value=state.credentials.storeName||'';document.getElementById('inputSellerCode').value=state.credentials.sellerCode||''}}else{el.className='cm-status disconnected';txt.textContent='BAĞLI DEĞİL';document.getElementById('disconnectBtn').style.display='none';document.getElementById('connectBtn').textContent='Bağlantıyı Test Et ve Kaydet'}}
-function renderStoreInfo(){const c=document.getElementById('storeContent'),t=document.getElementById('storeTag');if(!state.connected||!state.store){t.textContent='BAĞLANTI BEKLENİYOR';t.className='ct-tag tag-purple';c.innerHTML='<div class="empty-state"><div class="empty-icon">🔌</div><div class="empty-title">Mağaza henüz bağlanmadı</div><div class="empty-desc">API bilgilerinizi girerek N11 mağazanızı bağlayın.</div></div>';return}t.textContent='AKTİF';t.className='ct-tag tag-green';const s=state.store;c.innerHTML=`<div class="store-info"><div class="si-row"><span class="si-label">Mağaza Adı</span><span class="si-value">${s.name||'Belirtilmedi'}</span></div><div class="si-row"><span class="si-label">Satıcı Kodu</span><span class="si-value b">${s.sellerCode||'Belirtilmedi'}</span></div><div class="si-row"><span class="si-label">Toplam Ürün</span><span class="si-value o">${s.totalProducts}</span></div><div class="si-row"><span class="si-label">Aktif Ürün</span><span class="si-value g">${s.activeProducts}</span></div><div class="si-row"><span class="si-label">Mağaza Puanı</span><span class="si-value y">${s.rating} / 5</span></div><div class="si-row"><span class="si-label">Kayıt Tarihi</span><span class="si-value">${new Date(s.joinDate).toLocaleDateString('tr-TR')}</span></div></div>`}
-function renderParams(){const c=document.getElementById('paramsContent');if(!state.connected||!state.store){c.innerHTML='<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Veri yok</div><div class="empty-desc">Mağaza bağlandıktan sonra komisyon oranları burada görünecektir.</div></div>';return}let h='<div class="params-grid">';state.store.categories.forEach(cat=>{h+=`<div class="param-box"><div class="pb-label">${cat.name}</div><div class="pb-value" style="color:var(--purple)">%${cat.commission.toFixed(1)}</div><div class="pb-sub">KDV: %${cat.kdv} · ${cat.products} ürün · BuyBox: ${cat.buybox}</div></div>`});h+=`<div class="param-box" style="border-color:var(--focus-blue-border);background:color-mix(in srgb,var(--blue-dim) 30%,var(--surface2))"><div class="pb-label">Ortalama Komisyon</div><div class="pb-value" style="color:var(--blue)">%${state.store.avgCommission.toFixed(1)}</div><div class="pb-sub">Tüm kategoriler ortalaması</div></div></div>`;c.innerHTML=h}
-function renderSyncLog(){const el=document.getElementById('syncLog');if(state.syncHistory.length===0){el.innerHTML='<div class="sl-entry"><span class="sl-time">--:--</span><span class="sl-text">Henüz senkronizasyon yapılmadı.</span></div>';return}el.innerHTML=state.syncHistory.map(s=>`<div class="sl-entry"><span class="sl-time">${s.time}</span><span class="sl-text">${s.text}</span></div>`).join('')}
-function renderAll(){renderKPIs();renderConnectionStatus();renderStoreInfo();renderParams();renderSyncLog()}
 
-document.getElementById('connectBtn').addEventListener('click',async()=>{const key=document.getElementById('inputApiKey').value.trim();const secret=document.getElementById('inputApiSecret').value.trim();const name=document.getElementById('inputStoreName').value.trim();const code=document.getElementById('inputSellerCode').value.trim();const msg=document.getElementById('formMsg');const btn=document.getElementById('connectBtn');if(!key||!secret){msg.textContent='API Key ve API Secret zorunludur.';msg.className='af-msg error';return}btn.disabled=true;btn.textContent='Test ediliyor...';msg.textContent='N11 API bağlantısı kontrol ediliyor...';msg.className='af-msg';await new Promise(r=>setTimeout(r,1600));state.connected=true;state.credentials={apiKey:key,apiSecret:secret,storeName:name,sellerCode:code};mockStoreData.name=name||'N11 Mağaza';mockStoreData.sellerCode=code;state.store=mockStoreData;addSyncLog('<strong>Bağlantı kuruldu.</strong> N11 API doğrulandı. '+mockStoreData.totalProducts+' ürün senkronize edildi.');btn.disabled=false;msg.textContent='Bağlantı başarılı!';msg.className='af-msg success';saveState();renderAll()});
-document.getElementById('disconnectBtn').addEventListener('click',async()=>{state.connected=false;state.store=null;state.credentials=null;document.getElementById('inputApiKey').value='';document.getElementById('inputApiSecret').value='';document.getElementById('inputStoreName').value='';document.getElementById('inputSellerCode').value='';document.getElementById('formMsg').textContent='';if(currentUid){try{await deletePlatformConnection(currentUid,PLATFORM)}catch(e){}}state.syncHistory=[];renderAll()});
-document.getElementById('syncBtn').addEventListener('click',async()=>{if(!state.connected)return;const btn=document.getElementById('syncBtn');btn.textContent='↻ Senkronize ediliyor...';btn.disabled=true;await new Promise(r=>setTimeout(r,1500));addSyncLog('<strong>Senkronizasyon tamamlandı.</strong> '+mockStoreData.totalProducts+' ürün, '+mockStoreData.categories.length+' kategori güncellendi.');btn.textContent='↻ Senkronize Et';btn.disabled=false;renderAll()});
+function renderConnectionStatus() {
+  const el = document.getElementById('connStatus');
+  const txt = document.getElementById('connStatusText');
+  if (state.connected) {
+    el.className = 'cm-status connected';
+    txt.textContent = 'BAĞLI';
+    document.getElementById('disconnectBtn').style.display = '';
+    document.getElementById('connectBtn').textContent = 'Bağlantıyı Güncelle';
+    document.getElementById('inputApiKey').value = '';
+    document.getElementById('inputApiSecret').value = '';
+    document.getElementById('inputStoreName').value = state.storeName || '';
+    document.getElementById('inputSellerCode').value = state.store?.storeId || '';
+    document.getElementById('inputApiKey').placeholder = 'Güncellemek için yeniden girin';
+    document.getElementById('inputApiSecret').placeholder = 'Güncellemek için yeniden girin';
+  } else {
+    el.className = 'cm-status disconnected';
+    txt.textContent = 'BAĞLI DEĞİL';
+    document.getElementById('disconnectBtn').style.display = 'none';
+    document.getElementById('connectBtn').textContent = 'Bağlantıyı Test Et ve Kaydet';
+  }
+}
+
+function renderStoreInfo() {
+  const c = document.getElementById('storeContent');
+  const t = document.getElementById('storeTag');
+  if (!state.connected || !state.store) {
+    t.textContent = 'BAĞLANTI BEKLENİYOR';
+    t.className = 'ct-tag tag-purple';
+    c.innerHTML = '<div class="empty-state"><div class="empty-icon">🔌</div><div class="empty-title">Mağaza henüz bağlanmadı</div><div class="empty-desc">API bilgilerinizi girerek N11 mağazanızı bağlayın.</div></div>';
+    return;
+  }
+  t.textContent = 'AKTİF';
+  t.className = 'ct-tag tag-green';
+  const s = state.store;
+  const rating = typeof s.rating === 'number' ? `${s.rating.toFixed(1)} / 5` : '—';
+  const joinDate = s.joinDate ? new Date(s.joinDate).toLocaleDateString('tr-TR') : '—';
+  c.innerHTML = `<div class="store-info"><div class="si-row"><span class="si-label">Mağaza Adı</span><span class="si-value">${s.name || 'Belirtilmedi'}</span></div><div class="si-row"><span class="si-label">Satıcı Kodu</span><span class="si-value b">${s.storeId || 'Belirtilmedi'}</span></div><div class="si-row"><span class="si-label">Toplam Ürün</span><span class="si-value o">${s.totalProducts}</span></div><div class="si-row"><span class="si-label">Aktif Ürün</span><span class="si-value g">${s.activeProducts}</span></div><div class="si-row"><span class="si-label">Mağaza Puanı</span><span class="si-value y">${rating}</span></div><div class="si-row"><span class="si-label">Kayıt Tarihi</span><span class="si-value">${joinDate}</span></div></div>`;
+}
+
+function renderParams() {
+  const c = document.getElementById('paramsContent');
+  if (!state.connected || !state.store) {
+    c.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Veri yok</div><div class="empty-desc">Mağaza bağlandıktan sonra komisyon oranları burada görünecektir.</div></div>';
+    return;
+  }
+  const cats = state.store.categories || [];
+  if (cats.length === 0) {
+    c.innerHTML = '<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Kategori verisi yok</div><div class="empty-desc">Mağazada henüz ürün olmayabilir.</div></div>';
+    return;
+  }
+  let h = '<div class="params-grid">';
+  cats.forEach(cat => {
+    const buyboxText = cat.buybox ? ` · BuyBox: ${cat.buybox}` : '';
+    h += `<div class="param-box"><div class="pb-label">${cat.name}</div><div class="pb-value" style="color:var(--purple)">%${Number(cat.commission).toFixed(1)}</div><div class="pb-sub">KDV: %${cat.kdv} · ${cat.products} ürün${buyboxText}</div></div>`;
+  });
+  h += `<div class="param-box" style="border-color:var(--focus-blue-border);background:color-mix(in srgb,var(--blue-dim) 30%,var(--surface2))"><div class="pb-label">Ortalama Komisyon</div><div class="pb-value" style="color:var(--blue)">%${Number(state.store.avgCommission || 0).toFixed(1)}</div><div class="pb-sub">Tüm kategoriler ortalaması</div></div></div>`;
+  c.innerHTML = h;
+}
+
+function renderSyncLog() {
+  const el = document.getElementById('syncLog');
+  if (state.syncHistory.length === 0) {
+    el.innerHTML = '<div class="sl-entry"><span class="sl-time">--:--</span><span class="sl-text">Henüz senkronizasyon yapılmadı.</span></div>';
+    return;
+  }
+  el.innerHTML = state.syncHistory.map(s => `<div class="sl-entry"><span class="sl-time">${s.time}</span><span class="sl-text">${s.text}</span></div>`).join('');
+}
+
+function renderAll() {
+  renderKPIs();
+  renderConnectionStatus();
+  renderStoreInfo();
+  renderParams();
+  renderSyncLog();
+}
+
+function errorMessage(err) {
+  if (handleApiError(err)) {
+    return err?.body?.message || err?.message || 'Plan limiti aşıldı';
+  }
+  if (err instanceof ApiError) return err.message || 'İstek başarısız';
+  return err?.message || 'Beklenmeyen hata';
+}
+
+document.getElementById('connectBtn').addEventListener('click', async () => {
+  const apiKey = document.getElementById('inputApiKey').value.trim();
+  const apiSecret = document.getElementById('inputApiSecret').value.trim();
+  const storeName = document.getElementById('inputStoreName').value.trim();
+  const sellerCode = document.getElementById('inputSellerCode').value.trim();
+  const msg = document.getElementById('formMsg');
+  const btn = document.getElementById('connectBtn');
+
+  if (!apiKey || !apiSecret) {
+    msg.textContent = 'API Key ve API Secret zorunludur.';
+    msg.className = 'af-msg error';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Test ediliyor...';
+  msg.textContent = 'N11 API doğrulanıyor ve mağaza verisi çekiliyor...';
+  msg.className = 'af-msg';
+
+  try {
+    const credentials = { apiKey, apiSecret };
+    if (sellerCode) credentials.sellerCode = sellerCode;
+    const result = await connectPlatform(PLATFORM, credentials, storeName);
+    state.connected = true;
+    state.storeName = result.storeName || storeName;
+    state.store = result.store;
+    state.syncHistory = [result.syncEntry];
+    msg.textContent = 'Bağlantı başarılı — mağaza verisi çekildi.';
+    msg.className = 'af-msg success';
+  } catch (err) {
+    msg.textContent = errorMessage(err);
+    msg.className = 'af-msg error';
+  } finally {
+    btn.disabled = false;
+    renderAll();
+  }
+});
+
+document.getElementById('disconnectBtn').addEventListener('click', async () => {
+  const msg = document.getElementById('formMsg');
+  const btn = document.getElementById('disconnectBtn');
+  btn.disabled = true;
+  try {
+    await disconnectPlatform(PLATFORM);
+    state.connected = false;
+    state.store = null;
+    state.storeName = '';
+    state.syncHistory = [];
+    document.getElementById('inputApiKey').value = '';
+    document.getElementById('inputApiSecret').value = '';
+    document.getElementById('inputStoreName').value = '';
+    document.getElementById('inputSellerCode').value = '';
+    msg.textContent = '';
+    msg.className = 'af-msg';
+  } catch (err) {
+    msg.textContent = errorMessage(err);
+    msg.className = 'af-msg error';
+  } finally {
+    btn.disabled = false;
+    renderAll();
+  }
+});
+
+document.getElementById('syncBtn').addEventListener('click', async () => {
+  if (!state.connected) return;
+  const btn = document.getElementById('syncBtn');
+  const originalText = btn.textContent;
+  btn.textContent = '↻ Senkronize ediliyor...';
+  btn.disabled = true;
+  try {
+    const result = await syncPlatform(PLATFORM);
+    state.store = result.store;
+    state.syncHistory = [result.syncEntry, ...state.syncHistory].slice(0, 10);
+  } catch (err) {
+    const entry = {
+      time: new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
+      text: `<strong>Senkronizasyon başarısız.</strong> ${errorMessage(err)}`,
+      date: new Date().toISOString()
+    };
+    state.syncHistory = [entry, ...state.syncHistory].slice(0, 10);
+  } finally {
+    btn.textContent = originalText;
+    btn.disabled = false;
+    renderAll();
+  }
+});
 
 renderAll();
 </script>

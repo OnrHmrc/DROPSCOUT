@@ -22,14 +22,20 @@
 /* SEARCH MODULE */
 .search-module{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px;margin-bottom:18px;box-shadow:var(--key-shadow);position:relative;overflow:hidden}
 .search-module::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--purple),var(--blue),transparent)}
-.sm-row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.sm-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
 .sm-group{display:flex;flex-direction:column;gap:5px;flex:1;min-width:180px}
-.sm-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
-.sm-input{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.sm-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;height:13px;line-height:13px}
+.sm-input,.sm-select{height:42px;box-sizing:border-box}
+.sm-input{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:0 14px;font-size:13px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;width:100%;font-family:'Inter',sans-serif}
 .sm-input:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
-.sm-select{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-size:12px;color:var(--text);font-family:'Geist Mono',monospace;cursor:pointer;outline:none;appearance:none;width:100%;transition:border-color .2s}
-.sm-btn{padding:11px 20px;background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;border-radius:12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Geist Mono',monospace;border:none;white-space:nowrap;box-shadow:var(--button-shadow);transition:all .2s}
-.sm-btn:hover{transform:translateY(-1px)}
+.sm-select{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0 30px 0 14px;font-size:12px;color:var(--text);font-family:'Geist Mono',monospace;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;width:100%;transition:border-color .2s;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);background-position:calc(100% - 14px) 50%,calc(100% - 9px) 50%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+.sm-btn{height:42px;padding:0 22px;background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;border-radius:11px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Geist Mono',monospace;border:none;white-space:nowrap;box-shadow:var(--button-shadow);transition:all .2s;letter-spacing:.3px;align-self:flex-end;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.sm-btn:hover{transform:translateY(-1px);box-shadow:var(--key-shadow-strong)}
+
+/* Search hint + error — row'un dışında, full-width */
+.search-hint{font-size:10.5px;color:var(--muted);margin-top:10px;line-height:1.5;padding-left:2px}
+.search-hint b{color:var(--text)}
+.search-error{color:var(--red);font-size:11px;font-weight:600;margin-top:8px}
 
 /* CONTENT GRID */
 .content-grid{display:grid;grid-template-columns:minmax(0,1.5fr) 360px;gap:14px;align-items:start}
@@ -118,6 +124,116 @@
 @keyframes panelFade{0%{opacity:.6;transform:translateY(3px)}100%{opacity:1;transform:translateY(0)}}
 .panel-flash{animation:panelFade .25s ease forwards}
 
+/* SLIDE-DOWN result area (Link Analizi'ndeki gibi — buton tıklanmadan görünmez) */
+#resultArea{display:none}
+#resultArea.show{display:flex;flex-direction:column;gap:14px;animation:resultSlide .55s cubic-bezier(.2,.8,.25,1) both}
+@keyframes resultSlide{
+  0%{opacity:0;max-height:0;transform:translateY(-12px)}
+  100%{opacity:1;max-height:5000px;transform:translateY(0)}
+}
+
+/* RESULT HEADER — analiz edilen ürün özeti */
+.result-head{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 18px;box-shadow:var(--key-shadow);position:relative;overflow:hidden}
+.result-head::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,var(--purple),var(--blue),transparent)}
+.rh-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
+.rh-link{font-family:'Geist Mono',monospace;font-size:12px;color:var(--blue);word-break:break-all;line-height:1.5;margin-bottom:6px}
+.rh-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rh-meta-pill{font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;padding:3px 9px;border-radius:999px;letter-spacing:.4px}
+.rh-meta-pill.platform{background:var(--blue-dim);color:var(--blue)}
+.rh-meta-pill.category{background:var(--purple-dim);color:var(--purple)}
+.rh-meta-pill.market{background:color-mix(in srgb,var(--text) 6%,transparent);color:var(--muted)}
+
+/* RISK + SCORE row */
+.risk-score-row{display:grid;grid-template-columns:1.4fr 1fr;gap:14px}
+.score-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;box-shadow:var(--key-shadow);display:flex;align-items:center;gap:14px}
+.sc-num{font-family:'Poppins',sans-serif;font-size:48px;font-weight:800;line-height:1;letter-spacing:-2px}
+.sc-num.g{color:var(--green)}.sc-num.y{color:var(--yellow)}.sc-num.r{color:var(--red)}
+.sc-text{flex:1}
+.sc-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+.sc-decision{font-family:'Poppins',sans-serif;font-size:15px;font-weight:800}
+.sc-decision.g{color:var(--green)}.sc-decision.y{color:var(--yellow)}.sc-decision.r{color:var(--red)}
+.sc-sub{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.4}
+
+/* DOCUMENTS CARD */
+.docs-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:0;box-shadow:var(--key-shadow);overflow:hidden}
+.docs-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);gap:10px;flex-wrap:wrap}
+.docs-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+.docs-summary{font-family:'Geist Mono',monospace;font-size:9.5px;color:var(--muted2);letter-spacing:.5px}
+.docs-list{display:flex;flex-direction:column;gap:10px;padding:14px 18px}
+
+.doc-card{padding:14px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);transition:all .2s}
+.doc-card.required{border-left:3px solid var(--red)}
+.doc-card.recommended{border-left:3px solid var(--yellow)}
+.doc-card.optional{border-left:3px solid var(--muted2)}
+.doc-card.owned{background:color-mix(in srgb,var(--green-dim) 70%,var(--surface2));border-color:var(--focus-green-border);border-left:3px solid var(--green)}
+.dc-head{display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center;margin-bottom:10px}
+.dc-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;background:var(--surface);border:1px solid var(--border)}
+.doc-card.owned .dc-icon{background:var(--green-dim);border-color:var(--focus-green-border)}
+.dc-name-wrap{min-width:0}
+.dc-name{font-size:13px;font-weight:700;letter-spacing:-.2px;margin-bottom:3px}
+.dc-badge{display:inline-flex;align-items:center;gap:4px;font-family:'Geist Mono',monospace;font-size:8.5px;padding:3px 8px;border-radius:999px;font-weight:700;letter-spacing:.4px}
+.dc-badge.required{background:var(--red-dim);color:var(--red)}
+.dc-badge.recommended{background:var(--yellow-dim);color:var(--yellow)}
+.dc-badge.optional{background:color-mix(in srgb,var(--text) 6%,transparent);color:var(--muted2)}
+.dc-badge.owned{background:var(--green-dim);color:var(--green)}
+.dc-toggle{padding:8px 14px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.3px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.dc-toggle:hover{border-color:var(--focus-blue-border);color:var(--blue);background:var(--blue-dim)}
+.dc-toggle.owned{background:var(--green-dim);color:var(--green);border-color:var(--focus-green-border)}
+.dc-toggle.owned:hover{background:color-mix(in srgb,var(--red-dim) 60%,var(--surface));color:var(--red);border-color:color-mix(in srgb,var(--red) 28%,transparent)}
+.dc-meta{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.dc-meta-cell{padding:8px 10px;background:var(--surface);border-radius:9px;border:1px solid var(--border)}
+.doc-card.owned .dc-meta-cell{background:color-mix(in srgb,var(--surface) 70%,var(--green-dim))}
+.dc-meta-label{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+.dc-meta-value{font-size:11.5px;font-weight:600;line-height:1.4}
+.dc-meta-value.cost{font-family:'Geist Mono',monospace;color:var(--orange)}
+.doc-card.owned .dc-meta-value.cost{color:var(--muted2);text-decoration:line-through;text-decoration-thickness:1px}
+.dc-empty{padding:22px 16px;text-align:center;color:var(--muted2);font-size:12px;line-height:1.6}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:color-mix(in srgb,#000 55%,transparent);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:18px;animation:modalFadeIn .2s ease both}
+.modal-overlay.open{display:flex}
+@keyframes modalFadeIn{from{opacity:0}to{opacity:1}}
+.modal-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--key-shadow-strong);max-width:520px;width:100%;padding:22px 24px;position:relative;animation:modalSlideIn .28s cubic-bezier(.2,.8,.25,1) both;max-height:90vh;overflow-y:auto}
+@keyframes modalSlideIn{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+.modal-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.modal-icon{width:40px;height:40px;border-radius:11px;background:var(--blue-dim);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:20px;border:1px solid color-mix(in srgb,var(--blue) 22%,transparent)}
+.modal-title{font-family:'Poppins',sans-serif;font-size:16px;font-weight:800;letter-spacing:-.3px}
+.modal-doc-name{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:14px;padding:10px 12px;background:var(--blue-dim);border-radius:10px;border-left:2px solid var(--blue)}
+.modal-body{font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.modal-body strong{color:var(--text);font-weight:700}
+.modal-body .modal-warning{margin-top:10px;padding:11px 13px;background:color-mix(in srgb,var(--yellow) 6%,transparent);border-left:2px solid var(--yellow);border-radius:9px;color:var(--text);font-size:11.5px;line-height:1.6}
+.modal-agree{display:flex;align-items:flex-start;gap:9px;padding:11px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:16px;cursor:pointer;transition:border-color .15s}
+.modal-agree:hover{border-color:var(--border2)}
+.modal-agree input[type="checkbox"]{margin-top:2px;width:16px;height:16px;flex-shrink:0;cursor:pointer;accent-color:var(--blue)}
+.modal-agree-text{font-size:12px;color:var(--text);line-height:1.5;font-weight:600}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.modal-btn{padding:10px 18px;border-radius:11px;font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;border:1px solid transparent;transition:all .15s;letter-spacing:.3px}
+.modal-btn.cancel{background:var(--surface2);color:var(--muted);border-color:var(--border)}
+.modal-btn.cancel:hover{color:var(--text);border-color:var(--border2)}
+.modal-btn.confirm{background:linear-gradient(135deg,var(--purple),var(--blue));color:#fff;box-shadow:var(--button-shadow)}
+.modal-btn.confirm:hover:not(:disabled){transform:translateY(-1px);box-shadow:var(--key-shadow-strong)}
+.modal-btn.confirm:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.modal-btn.danger{background:var(--red);color:#fff}
+.modal-btn.danger:hover{background:color-mix(in srgb,var(--red) 88%,#000)}
+
+@media(max-width:700px){
+  .risk-score-row{grid-template-columns:1fr}
+  .dc-head{grid-template-columns:36px 1fr}
+  .dc-toggle{grid-column:1/-1;justify-content:center;width:100%}
+  .dc-meta{grid-template-columns:1fr}
+  .modal-actions{flex-direction:column-reverse}
+  .modal-btn{width:100%}
+}
+
+/* Hedef Pazar — disabled options muted */
+.sm-select option:disabled{color:var(--muted2);background:var(--surface)}
+.sm-select option{color:var(--text)}
+
+/* Empty state — sidebardan gelen kullanıcı linki yapıştırmadan önce */
+.empty-search-hint{padding:32px 22px;text-align:center;color:var(--muted2);font-size:12px;line-height:1.6;background:var(--surface);border:1px dashed var(--border2);border-radius:14px;margin-top:14px}
+.empty-search-hint .esh-icon{font-size:34px;margin-bottom:8px;opacity:.6}
+.empty-search-hint .esh-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px}
+
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 
@@ -184,11 +300,6 @@
         </label>
       </div>
     </div>
-    <div class="plan-card">
-      <div class="plan-tier">Pro Plan</div>
-      <div class="plan-name">Yasal Kontrol Aktif ✓</div>
-      <div class="plan-meta"><span>₺499/ay · Gelişmiş analiz</span><div class="upgrade-btn">Yönet</div></div>
-    </div>
   </div>
 </aside>
 
@@ -215,210 +326,529 @@
     <div class="stat-box p"><div class="sb-label">Toplam Sorgu</div><div class="sb-value p" id="kpiTotal">8</div><div class="sb-sub">Son 30 gün</div></div>
   </div>
 
-  <!-- SEARCH -->
+  <!-- SEARCH (link-only — ürün adı/barkod tehlikeli, link birebir ürünü tanımlar) -->
   <div class="search-module fade3">
     <div class="sm-row">
-      <div class="sm-group" style="flex:2">
-        <div class="sm-label">Ürün Adı veya Link</div>
-        <input class="sm-input" id="searchInput" value="Minimal Masaüstü Köpük Sabunluk" placeholder="Ürün adı veya link girin...">
+      <div class="sm-group" style="flex:3">
+        <div class="sm-label">Ürün Linki</div>
+        <input class="sm-input" id="searchInput" type="url" placeholder="https://www.trendyol.com/...  ·  https://www.hepsiburada.com/...  ·  https://www.amazon.com.tr/..." inputmode="url" autocomplete="url">
       </div>
       <div class="sm-group" style="flex:.7">
-        <div class="sm-label">Kategori</div>
+        <div class="sm-label">Kategori <span style="font-size:9px;color:var(--muted2);font-weight:500">· otomatik</span></div>
         <select class="sm-select" id="searchCategory">
-          <option selected>Tümü</option><option>Ev & Yaşam</option><option>Kozmetik</option><option>Elektronik</option><option>Gıda Takviye</option><option>Oyuncak</option><option>Oto Aksesuar</option>
+          <option value="" selected>Otomatik tespit</option>
+          <option value="ev-yasam">Ev & Yaşam</option>
+          <option value="kozmetik">Kozmetik</option>
+          <option value="elektronik">Elektronik</option>
+          <option value="supermarket">Gıda Takviye</option>
+          <option value="oyuncak">Oyuncak</option>
+          <option value="otomotiv">Oto Aksesuar</option>
+          <option value="moda">Moda & Giyim</option>
+          <option value="spor-outdoor">Spor & Outdoor</option>
+          <option value="evcil-hayvan">Pet</option>
+          <option value="kirtasiye">Ofis & Kırtasiye</option>
         </select>
       </div>
       <div class="sm-group" style="flex:.6">
         <div class="sm-label">Hedef Pazar</div>
         <select class="sm-select" id="searchMarket">
-          <option>Türkiye</option><option>AB</option><option>ABD</option>
+          <option value="tr" selected>Türkiye</option>
+          <option value="eu" disabled>AB · yakında</option>
+          <option value="us" disabled>ABD · yakında</option>
         </select>
       </div>
-      <button class="sm-btn" onclick="renderAll()">⚖️ Kontrol Et</button>
+      <button class="sm-btn" id="runCheckBtn" onclick="runCheck()">⚖️ Kontrol Et</button>
     </div>
+    <div id="searchHint" class="search-hint">🔒 Yasal kontrol yalnız ürün linki ile yapılır. İsim ya da barkod aynı olabilir, link her zaman birebir ürünü işaret eder.</div>
+    <div id="searchError" class="search-error" style="display:none">⚠ Geçerli bir ürün linki gir (https:// ile başlamalı).</div>
   </div>
 
-  <section class="content-grid fade4">
-    <div>
-      <div class="card">
-        <div class="card-head">
-          <div class="card-title">Yasal Durum Listesi</div>
-          <div class="ct-tag tag-purple" id="listCount">8 ÜRÜN</div>
-        </div>
-        <div class="legal-list" id="legalList"></div>
-      </div>
+  <!-- EMPTY STATE — link analizi yapılmadan göster -->
+  <div class="empty-search-hint" id="emptyHint">
+    <div class="esh-icon">⚖️</div>
+    <div class="esh-title">Ürün linkini yapıştır, analize başlayalım</div>
+    <div>Trendyol, Hepsiburada, Amazon TR veya N11 ürün linkini yukarıya yapıştır → <b>Kontrol Et</b>.<br>Yasal durum, gerekli belgeler ve AI önerisi aşağıda görünecek.</div>
+  </div>
+
+  <!-- RESULT AREA — slide-down (Trend Radar'dan veya Kontrol Et tıklayınca açılır) -->
+  <div id="resultArea">
+    <!-- Analiz edilen ürün başlığı -->
+    <div class="result-head">
+      <div class="rh-label">Analiz Edilen Ürün</div>
+      <div class="rh-link" id="resultLink"></div>
+      <div class="rh-meta-row" id="resultMeta"></div>
     </div>
 
-    <aside class="side-stack">
-      <!-- RISK STATUS -->
-      <div class="detail-card" id="riskPanel">
-        <div class="dc-head"><div class="dc-title">Risk Durumu</div><div class="dc-live"><div class="dc-dot"></div>CANLI</div></div>
-        <div id="riskHero"></div>
-        <div class="reg-grid" id="regGrid"></div>
+    <!-- Risk + AI Score -->
+    <div class="risk-score-row">
+      <div id="riskHero"></div>
+      <div class="score-card" id="scoreCard"></div>
+    </div>
+
+    <!-- Belge tablosu -->
+    <div class="docs-card">
+      <div class="docs-head">
+        <div class="docs-title">📜 Gerekli Belgeler ve Süreçler</div>
+        <div class="docs-summary" id="docsSummary"></div>
       </div>
-      <!-- REGULATION DETAIL -->
-      <div class="detail-card" id="regPanel">
-        <div class="dc-head"><div class="dc-title">Mevzuat Detayı</div><div class="ct-tag tag-yellow">DÜZENLEME</div></div>
-        <div id="regDetail"></div>
+      <div class="docs-list" id="docsList"></div>
+    </div>
+
+    <!-- AI Yasal Öneri -->
+    <div class="detail-card" id="advicePanel">
+      <div class="dc-head" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div class="dc-title" style="font-family:'Poppins',sans-serif;font-size:13px;font-weight:700">🤖 AI Yasal Öneri</div>
+        <div class="ct-tag tag-green">CANLI ANALİZ</div>
       </div>
-      <!-- AI ADVICE -->
-      <div class="detail-card" id="advicePanel">
-        <div class="dc-head"><div class="dc-title">AI Yasal Öneri</div><div class="ct-tag tag-green">TAVSİYE</div></div>
-        <div class="advice-text" id="adviceText"></div>
-        <div class="advice-actions" id="adviceActions"></div>
-      </div>
-    </aside>
-  </section>
+      <div class="advice-text" id="adviceText"></div>
+      <div class="advice-actions" id="adviceActions"></div>
+    </div>
+  </div>
 </main>
 
-<script>
-/* ── DEMO DATA ── */
-const products = [
-  { id:1, name:'Minimal Masaüstü Köpük Sabunluk', category:'Ev & Yaşam', emoji:'🧴', risk:'safe', riskLabel:'SERBEST',
-    checks:{titck:'N/A',ce:'N/A',ithalat:'SERBEST',kategori:'SERBEST'},
-    note:'Bu ürün herhangi bir yasal kısıtlamaya tabi değildir. Kozmetik içerik barındırmayan sabunluk kategorisinde serbest satılabilir.',
-    regs:[{name:'TİTCK Kaydı',status:'na',label:'GEREKMİYOR'},{name:'CE Belgesi',status:'na',label:'GEREKMİYOR'},{name:'İthalat İzni',status:'pass',label:'SERBEST'},{name:'Kategori Kısıtı',status:'pass',label:'YOK'},{name:'Gümrük Kodu',status:'pass',label:'3924.90'},{name:'KDV Oranı',status:'pass',label:'%20'}],
-    advice:'Bu ürün yasal açıdan tamamen serbest. Herhangi bir belge veya izin gerekmeksizin tüm pazaryerlerinde satılabilir. Standart gümrük işlemleri uygulanır.',
-    actions:['Gümrük kodu detayını görüntüle','KDV hesaplaması yap','Benzer ürünleri tara'] },
-  { id:2, name:'Doğal Cilt Bakım Serumu', category:'Kozmetik', emoji:'💧', risk:'warn', riskLabel:'BELGE GEREKLİ',
-    checks:{titck:'GEREKLİ',ce:'N/A',ithalat:'KOŞULLU',kategori:'DİKKAT'},
-    note:'Kozmetik ürün olarak TİTCK (Türkiye İlaç ve Tıbbi Cihaz Kurumu) bildirimi zorunludur. Üretici/ithalatçı sorumlu kişi atamalıdır.',
-    regs:[{name:'TİTCK Kaydı',status:'fail',label:'ZORUNLU'},{name:'GMP Sertifikası',status:'fail',label:'ZORUNLU'},{name:'CPNP Bildirimi',status:'check',label:'KONTROL ET'},{name:'Sorumlu Kişi Atama',status:'fail',label:'ZORUNLU'},{name:'Etiket Uygunluğu',status:'check',label:'KONTROL ET'},{name:'Güvenlik Değerlendirmesi',status:'fail',label:'ZORUNLU'}],
-    advice:'<strong>Dikkat!</strong> Bu ürün kozmetik mevzuatına tabidir. TİTCK\'ya bildirim yapmadan ve sorumlu kişi atamadan satış yapılamaz. GMP sertifikalı üretim tesisi şarttır. İhlal durumunda <strong>₺150.000\'e kadar para cezası</strong> uygulanabilir.',
-    actions:['TİTCK başvuru sürecini gör','GMP sertifika gereksinimlerini incele','Sorumlu kişi atama prosedürünü öğren','Etiket uygunluk şablonunu indir'] },
-  { id:3, name:'Kablosuz Bluetooth Kulaklık', category:'Elektronik', emoji:'🎧', risk:'warn', riskLabel:'BELGE GEREKLİ',
-    checks:{titck:'N/A',ce:'GEREKLİ',ithalat:'KOŞULLU',kategori:'DİKKAT'},
-    note:'Radyo frekansı yayan elektronik cihaz olarak CE/RED belgesi zorunludur. BTK (Bilgi Teknolojileri ve İletişim Kurumu) onayı gerekir.',
-    regs:[{name:'CE Belgesi',status:'fail',label:'ZORUNLU'},{name:'RED Direktifi',status:'fail',label:'ZORUNLU'},{name:'BTK Onayı',status:'fail',label:'ZORUNLU'},{name:'AEEE Kaydı',status:'check',label:'KONTROL ET'},{name:'Garanti Belgesi',status:'check',label:'ÖNERİLİR'},{name:'TSE Uygunluğu',status:'na',label:'İSTEĞE BAĞLI'}],
-    advice:'<strong>Bluetooth cihaz!</strong> RF yayan ürünler RED (Radio Equipment Directive) kapsamındadır. CE belgesi ve BTK tip onayı olmadan ithalat ve satış yasaktır. AEEE kaydı da zorunludur.',
-    actions:['CE belgelendirme sürecini incele','BTK tip onay başvurusunu görüntüle','AEEE kayıt prosedürünü öğren','RED uyumluluk testlerini listele'] },
-  { id:4, name:'Vakumlu Buzdolabı Düzenleyici', category:'Ev & Yaşam', emoji:'📦', risk:'safe', riskLabel:'SERBEST',
-    checks:{titck:'N/A',ce:'N/A',ithalat:'SERBEST',kategori:'SERBEST'},
-    note:'Plastik ev eşyası kategorisinde yasal kısıtlama bulunmamaktadır. Gıda temasına uygun malzeme olması önerilir.',
-    regs:[{name:'TİTCK Kaydı',status:'na',label:'GEREKMİYOR'},{name:'CE Belgesi',status:'na',label:'GEREKMİYOR'},{name:'İthalat İzni',status:'pass',label:'SERBEST'},{name:'Gıda Temas Onayı',status:'check',label:'ÖNERİLİR'},{name:'Gümrük Kodu',status:'pass',label:'3924.10'},{name:'KDV Oranı',status:'pass',label:'%20'}],
-    advice:'Yasal açıdan serbest. Ancak buzdolabı içinde gıda ile temas edeceği için BPA-Free ve FDA/gıda güvenliği sertifikası almak rekabet avantajı sağlar.',
-    actions:['Gıda temas sertifikası önerilerini gör','BPA-Free test raporlarını incele','Gümrük kodu detayını görüntüle'] },
-  { id:5, name:'Bitkisel Zayıflama Çayı', category:'Gıda Takviye', emoji:'🍵', risk:'danger', riskLabel:'YASAK / RİSKLİ',
-    checks:{titck:'GEREKLİ',ce:'N/A',ithalat:'YASAK',kategori:'YASAK'},
-    note:'⚠️ "Zayıflama" iddiası taşıyan gıda takviye ürünleri Türkiye\'de reklam yasağına tabidir. Takviye edici gıda olarak satılması için Tarım Bakanlığı onayı zorunludur.',
-    regs:[{name:'Tarım Bakanlığı İzni',status:'fail',label:'ZORUNLU'},{name:'Sağlık Beyanı Onayı',status:'fail',label:'YASAK'},{name:'TİTCK Kontrolü',status:'fail',label:'RİSKLİ'},{name:'Reklam Yasağı',status:'fail',label:'KAPSAMDA'},{name:'İthalat İzni',status:'fail',label:'ÖZEL İZİN'},{name:'Etiket Kontrolü',status:'fail',label:'ZORUNLU'}],
-    advice:'<strong>🚨 Yüksek Risk!</strong> Bu ürün birden fazla yasal kısıtlamaya tabidir. "Zayıflama" beyanı taşıyan ürünler reklam ve satış yasağı kapsamında olabilir. Pazaryerlerinde listeleme reddedilme ihtimali yüksektir. <strong>Bu ürünü satmanız önerilmez.</strong>',
-    actions:['Yasaklı beyan listesini görüntüle','Alternatif ürün önerisi al','Gıda takviye mevzuatını incele'] },
-  { id:6, name:'Katlanabilir Laptop Stand', category:'Ev & Yaşam', emoji:'💻', risk:'safe', riskLabel:'SERBEST',
-    checks:{titck:'N/A',ce:'N/A',ithalat:'SERBEST',kategori:'SERBEST'},
-    note:'Mekanik aksesuar olarak herhangi bir yasal kısıtlamaya tabi değildir. Tüm platformlarda serbest satılabilir.',
-    regs:[{name:'TİTCK Kaydı',status:'na',label:'GEREKMİYOR'},{name:'CE Belgesi',status:'na',label:'GEREKMİYOR'},{name:'İthalat İzni',status:'pass',label:'SERBEST'},{name:'Kategori Kısıtı',status:'pass',label:'YOK'},{name:'Gümrük Kodu',status:'pass',label:'7326.90'},{name:'KDV Oranı',status:'pass',label:'%20'}],
-    advice:'Tamamen serbest ürün. Yasal açıdan hiçbir engel yok. Metal yapıda olması halinde TSE kalite belgesi istenmesi müşteri güvenini artırır.',
-    actions:['Gümrük kodu detayını görüntüle','TSE belge başvurusunu incele','KDV hesaplaması yap'] },
-  { id:7, name:'USB Şarjlı Mini Fan', category:'Elektronik', emoji:'🌀', risk:'warn', riskLabel:'BELGE GEREKLİ',
-    checks:{titck:'N/A',ce:'GEREKLİ',ithalat:'KOŞULLU',kategori:'DİKKAT'},
-    note:'Elektrikli ev aleti olarak LVD (Düşük Gerilim Direktifi) kapsamında CE belgesi gereklidir. Lityum pil içeriyorsa ek taşımacılık kuralları uygulanır.',
-    regs:[{name:'CE Belgesi',status:'fail',label:'ZORUNLU'},{name:'LVD Direktifi',status:'fail',label:'ZORUNLU'},{name:'EMC Uygunluğu',status:'check',label:'KONTROL ET'},{name:'Lityum Pil Kuralları',status:'check',label:'KONTROL ET'},{name:'AEEE Kaydı',status:'check',label:'ÖNERİLİR'},{name:'Garanti Belgesi',status:'check',label:'ÖNERİLİR'}],
-    advice:'CE belgesi zorunlu. Lityum pil içermesi durumunda UN38.3 test raporu ve MSDS belgesi gerekir. Hava kargo ile gönderilecekse IATA DGR kurallarına uyum şarttır.',
-    actions:['CE belgelendirme sürecini incele','Lityum pil mevzuatını gör','UN38.3 test gereksinimlerini listele','AEEE kayıt prosedürünü öğren'] },
-  { id:8, name:'Doğal Bambu Diş Fırçası', category:'Ev & Yaşam', emoji:'🪥', risk:'safe', riskLabel:'SERBEST',
-    checks:{titck:'N/A',ce:'N/A',ithalat:'SERBEST',kategori:'SERBEST'},
-    note:'Kişisel bakım aksesuarı olarak serbest kategoridir. Tıbbi cihaz veya kozmetik olarak değerlendirilmez. Normal gümrük işlemleri uygulanır.',
-    regs:[{name:'TİTCK Kaydı',status:'na',label:'GEREKMİYOR'},{name:'CE Belgesi',status:'na',label:'GEREKMİYOR'},{name:'İthalat İzni',status:'pass',label:'SERBEST'},{name:'Kategori Kısıtı',status:'pass',label:'YOK'},{name:'Gümrük Kodu',status:'pass',label:'9603.21'},{name:'KDV Oranı',status:'pass',label:'%20'}],
-    advice:'Yasal açıdan serbest. Sürdürülebilir ürün konumlandırması ile pazarlama avantajı elde edilebilir. "Doğal" etiketini kullanmak için içerik şeffaflığı sağlanması yeterlidir.',
-    actions:['Gümrük kodu detayını görüntüle','Sürdürülebilirlik sertifikalarını incele','KDV hesaplaması yap'] }
-];
-
-let selectedId = 1;
-
-function checkIcon(status){
-  if(status==='pass') return '✅';
-  if(status==='fail') return '❌';
-  if(status==='check') return '⚠️';
-  return '—';
-}
-
-function renderLegalList(){
-  const host = document.getElementById('legalList');
-  host.innerHTML = products.map(p => `
-    <div class="legal-card${p.id === selectedId ? ' selected' : ''}" onclick="selectProduct(${p.id})">
-      <div class="lc-top">
-        <div class="lc-icon ${p.risk}">${p.emoji}</div>
-        <div class="lc-info">
-          <div class="lc-name">${p.name}</div>
-          <div class="lc-cat">${p.category}</div>
-        </div>
-        <div class="lc-risk risk-${p.risk}">${p.riskLabel}</div>
-      </div>
-      <div class="lc-checks">
-        <div class="lc-check"><div class="lcc-label">TİTCK</div><div class="lcc-val ${p.checks.titck==='N/A'?'na':p.checks.titck==='SERBEST'?'pass':'warn'}">${p.checks.titck}</div></div>
-        <div class="lc-check"><div class="lcc-label">CE</div><div class="lcc-val ${p.checks.ce==='N/A'?'na':p.checks.ce==='SERBEST'?'pass':'warn'}">${p.checks.ce}</div></div>
-        <div class="lc-check"><div class="lcc-label">İthalat</div><div class="lcc-val ${p.checks.ithalat==='SERBEST'?'pass':p.checks.ithalat==='YASAK'?'fail':'warn'}">${p.checks.ithalat}</div></div>
-        <div class="lc-check"><div class="lcc-label">Kategori</div><div class="lcc-val ${p.checks.kategori==='SERBEST'?'pass':p.checks.kategori==='YASAK'?'fail':'warn'}">${p.checks.kategori}</div></div>
-      </div>
-      <div class="lc-note">${p.note}</div>
+<!-- BEYAN ONAY MODALI -->
+<div class="modal-overlay" id="docModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div class="modal-icon" id="modalIcon">📜</div>
+      <div class="modal-title" id="modalTitle">Beyan Onayı</div>
     </div>
-  `).join('');
+    <div class="modal-doc-name" id="modalDocName"></div>
+    <div class="modal-body" id="modalBody">
+      <div id="modalBodyText"></div>
+      <div class="modal-warning">
+        Beyanınızın doğruluğundan <strong>münhasıran siz sorumlusunuz</strong>. Yanlış beyan; satış kısıtlamaları, ürün kaldırma ve ilgili kurumlarca idari yaptırımlara yol açabilir.
+      </div>
+    </div>
+    <label class="modal-agree" for="modalAgreeChk">
+      <input type="checkbox" id="modalAgreeChk">
+      <span class="modal-agree-text">Beyanımın doğruluğunu kabul ediyorum.</span>
+    </label>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="modalCancelBtn">İptal</button>
+      <button class="modal-btn confirm" id="modalConfirmBtn" disabled>Onayla ve Kaydet</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { getUserProfile, updateUserProfile } from '/src/js/store.js';
+import { onAuthChange } from '/src/js/auth.js';
+
+/* ════════════════════════════════════════════════════════════════
+   BELGE SÖZLÜĞÜ — kategori bazlı belge gereksinimleri
+   ════════════════════════════════════════════════════════════════ */
+const LEGAL_DOCUMENTS = {
+  ce:                   { name:'CE Belgesi',                          institution:'Akredite test kuruluşu',                     duration:'4–8 hafta',  cost:'₺15.000 – ₺40.000', icon:'📜', weight:12 },
+  titck:                { name:'TİTCK Bildirimi / Kaydı',              institution:'TİTCK (Sağlık Bakanlığı)',                   duration:'2–4 hafta',  cost:'₺2.000 – ₺8.000',   icon:'🏥', weight:10 },
+  btk:                  { name:'BTK Tip Onayı',                        institution:'Bilgi Teknolojileri ve İletişim Kurumu',     duration:'3–6 hafta',  cost:'₺5.000 – ₺12.000',  icon:'📡', weight:10 },
+  aeee:                 { name:'AEEE Kaydı',                           institution:'Çevre, Şehircilik ve İklim Değişikliği Bakanlığı', duration:'1–2 hafta', cost:'Ücretsiz – ₺500', icon:'♻️', weight:3 },
+  gmp:                  { name:'GMP Üretim Sertifikası',               institution:'TÜRKAK akredite kuruluş',                    duration:'8–16 hafta', cost:'₺40.000+',           icon:'🏭', weight:14 },
+  red:                  { name:'RED Direktifi Uyumluluğu',             institution:'Akredite RF test laboratuvarı',              duration:'4–8 hafta',  cost:'₺18.000 – ₺45.000', icon:'📡', weight:8 },
+  lvd:                  { name:'LVD (Düşük Gerilim) Uyumluluğu',       institution:'Akredite test laboratuvarı',                 duration:'3–6 hafta',  cost:'₺12.000 – ₺25.000', icon:'⚡', weight:6 },
+  emc:                  { name:'EMC Test Raporu',                      institution:'Akredite EMC laboratuvarı',                  duration:'2–4 hafta',  cost:'₺8.000 – ₺18.000',  icon:'📊', weight:5 },
+  un38_3:               { name:'UN38.3 Lityum Pil Test Raporu',        institution:'Akredite pil test laboratuvarı',             duration:'4–8 hafta',  cost:'₺15.000 – ₺30.000', icon:'🔋', weight:6 },
+  gida_temas:           { name:'Gıda Teması Sertifikası',              institution:'Tarım Bakanlığı / akredite kuruluş',         duration:'2–4 hafta',  cost:'₺3.000 – ₺10.000',  icon:'🍽️', weight:4 },
+  tarim_bakanligi:      { name:'Tarım Bakanlığı İzni',                 institution:'Tarım ve Orman Bakanlığı',                   duration:'4–8 hafta',  cost:'₺2.000 – ₺6.000',   icon:'🌾', weight:10 },
+  cpnp:                 { name:'CPNP Bildirimi',                       institution:'Avrupa Komisyonu CPNP portalı',              duration:'1–2 hafta',  cost:'₺3.000 – ₺7.000',   icon:'📋', weight:5 },
+  sorumlu_kisi:         { name:'Sorumlu Kişi Atama (Kozmetik)',        institution:'Yetki belgeli eczacı / kimyager',            duration:'1–2 hafta',  cost:'₺5.000 – ₺15.000/yıl', icon:'👤', weight:6 },
+  guvenlik_degerlendirme:{ name:'Kozmetik Güvenlik Değerlendirmesi',   institution:'Yetkili güvenlik değerlendiricisi',          duration:'3–6 hafta',  cost:'₺8.000 – ₺20.000',  icon:'🛡️', weight:6 },
+  garanti_belgesi:      { name:'Garanti Belgesi',                      institution:'Ticaret Bakanlığı',                          duration:'1–2 hafta',  cost:'₺500 – ₺1.500',     icon:'✅', weight:3 },
+  tse:                  { name:'TSE Uygunluk Belgesi',                 institution:'Türk Standartları Enstitüsü',                duration:'4–12 hafta', cost:'₺8.000 – ₺25.000',  icon:'🇹🇷', weight:4 },
+  saglik_beyani:        { name:'Sağlık Beyanı Onayı',                  institution:'Tarım / Sağlık Bakanlığı',                   duration:'6–12 hafta', cost:'₺5.000 – ₺15.000',  icon:'🩺', weight:8 }
+};
+
+/* Kategori → gereken belgeler (req: required | recommended | optional) */
+const CATEGORY_REQUIREMENTS = {
+  elektronik: { label:'Elektronik', docs:[
+    { key:'ce',              requirement:'required'    },
+    { key:'btk',             requirement:'required'    },
+    { key:'red',             requirement:'required'    },
+    { key:'aeee',            requirement:'required'    },
+    { key:'lvd',             requirement:'recommended' },
+    { key:'emc',             requirement:'recommended' },
+    { key:'un38_3',          requirement:'recommended' },
+    { key:'garanti_belgesi', requirement:'recommended' }
+  ]},
+  kozmetik: { label:'Kozmetik', docs:[
+    { key:'titck',                  requirement:'required'    },
+    { key:'gmp',                    requirement:'required'    },
+    { key:'sorumlu_kisi',           requirement:'required'    },
+    { key:'guvenlik_degerlendirme', requirement:'required'    },
+    { key:'cpnp',                   requirement:'recommended' }
+  ]},
+  'ev-yasam': { label:'Ev & Yaşam', docs:[
+    { key:'gida_temas', requirement:'recommended' },
+    { key:'tse',        requirement:'optional'    }
+  ]},
+  supermarket: { label:'Gıda Takviye', docs:[
+    { key:'tarim_bakanligi', requirement:'required'    },
+    { key:'saglik_beyani',   requirement:'required'    },
+    { key:'titck',           requirement:'recommended' }
+  ]},
+  oyuncak: { label:'Oyuncak', docs:[
+    { key:'ce',  requirement:'required'    },
+    { key:'tse', requirement:'recommended' }
+  ]},
+  otomotiv: { label:'Oto Aksesuar', docs:[
+    { key:'ce',  requirement:'recommended' },
+    { key:'tse', requirement:'recommended' }
+  ]},
+  moda: { label:'Moda & Giyim', docs:[
+    { key:'tse', requirement:'optional' }
+  ]},
+  'spor-outdoor': { label:'Spor & Outdoor', docs:[
+    { key:'ce',  requirement:'optional' },
+    { key:'tse', requirement:'optional' }
+  ]},
+  'evcil-hayvan': { label:'Pet', docs:[
+    { key:'gida_temas', requirement:'recommended' }
+  ]},
+  kirtasiye: { label:'Ofis & Kırtasiye', docs:[] },
+  default:   { label:'Otomatik tespit bekleniyor', docs:[] }
+};
+
+const PLATFORM_LABELS = { trendyol:'Trendyol', hepsiburada:'Hepsiburada', n11:'N11', 'amazon-tr':'Amazon TR' };
+
+/* ════════════════════════════════════════════════════════════════
+   STATE
+   ════════════════════════════════════════════════════════════════ */
+const state = {
+  currentAnalysis: null,    // { url, platform, categoryKey, categoryReq }
+  ownedDocs: new Set(),     // Firestore'dan yüklenir → kullanıcının "var" beyanları
+  pendingDoc: null,         // Modal kontekstı: { key, action }
+  user: null,
+  incomingPlatform: ''
+};
+
+/* ════════════════════════════════════════════════════════════════
+   HELPERS
+   ════════════════════════════════════════════════════════════════ */
+function isValidProductUrl(s){
+  if (!s || typeof s !== 'string') return false;
+  const trimmed = s.trim();
+  if (!/^https?:\/\//i.test(trimmed)) return false;
+  try { const u = new URL(trimmed); return Boolean(u.host) && u.host.includes('.'); }
+  catch { return false; }
+}
+const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const getCategoryReq = catKey => CATEGORY_REQUIREMENTS[catKey] || CATEGORY_REQUIREMENTS.default;
+
+/* AI puan: 100'den başla, eksik zorunlular tam ağırlık, eksik önerilenler ×0.4 ceza, sahip olunanlar ceza yok */
+function calculateScore(requirements, ownedSet){
+  let score = 100;
+  let missingReqWeight = 0;
+  for (const r of requirements){
+    if (ownedSet.has(r.key)) continue;
+    const w = LEGAL_DOCUMENTS[r.key]?.weight || 0;
+    if (r.requirement === 'required')         { score -= w;       missingReqWeight += w; }
+    else if (r.requirement === 'recommended') { score -= w * 0.4; }
+  }
+  score = Math.max(20, Math.min(100, Math.round(score)));
+  const risk = missingReqWeight === 0 ? 'safe' : missingReqWeight <= 14 ? 'warn' : 'danger';
+  return { score, risk };
 }
 
-function selectProduct(id){
-  selectedId = id;
-  renderLegalList();
-  renderDetail();
+function riskMeta(risk){
+  if (risk === 'safe') return { color:'g', shield:'🛡️', text:'SERBEST',        sub:'Bu ürün yasal açıdan engelsiz' };
+  if (risk === 'warn') return { color:'y', shield:'⚠️',  text:'BELGE GEREKLİ',  sub:'Eksik belgeler tamamlanmadan satışı önerilmez' };
+  return                     { color:'r', shield:'🚫',  text:'YÜKSEK RİSK',    sub:'Birden çok zorunlu belge eksik veya yasal kısıtlama mevcut' };
 }
 
-function renderDetail(){
-  const p = products.find(x => x.id === selectedId);
-  if(!p) return;
+function estimateTotalCost(docs){
+  let lo = 0, hi = 0;
+  docs.forEach(d => {
+    const cost = LEGAL_DOCUMENTS[d.key]?.cost || '';
+    const matches = cost.match(/\d[\d.]*/g) || [];
+    const nums = matches.map(s => parseInt(s.replace(/\./g, ''), 10)).filter(Number.isFinite);
+    if (nums.length === 1)      { lo += nums[0]; hi += nums[0]; }
+    else if (nums.length >= 2)  { lo += nums[0]; hi += nums[1]; }
+  });
+  if (lo === 0 && hi === 0) return '—';
+  const fmt = n => '₺' + Math.round(n / 1000).toLocaleString('tr-TR') + 'K';
+  return `${fmt(lo)} – ${fmt(hi)}`;
+}
 
-  const shieldEmoji = p.risk==='safe' ? '🛡️' : p.risk==='warn' ? '⚠️' : '🚫';
-  const statusText = p.risk==='safe' ? 'Güvenli' : p.risk==='warn' ? 'Dikkat Gerekli' : 'Yüksek Risk';
-  const statusColor = p.risk==='safe' ? 'g' : p.risk==='warn' ? 'y' : 'r';
+/* ════════════════════════════════════════════════════════════════
+   RENDER
+   ════════════════════════════════════════════════════════════════ */
+function renderResults(){
+  const a = state.currentAnalysis;
+  if (!a) return;
 
+  // Header
+  document.getElementById('resultLink').textContent = a.url;
+  const platformLabel = PLATFORM_LABELS[a.platform] || a.platform || '';
+  document.getElementById('resultMeta').innerHTML = `
+    ${platformLabel ? `<span class="rh-meta-pill platform">${escapeHtml(platformLabel)}</span>` : ''}
+    <span class="rh-meta-pill category">${escapeHtml(a.categoryReq.label)}</span>
+    <span class="rh-meta-pill market">Türkiye</span>
+  `;
+
+  // Risk + Score
+  const calc = calculateScore(a.categoryReq.docs, state.ownedDocs);
+  const r = riskMeta(calc.risk);
   document.getElementById('riskHero').innerHTML = `
-    <div class="risk-hero ${p.risk}">
-      <div class="rh-shield">${shieldEmoji}</div>
+    <div class="risk-hero ${calc.risk}">
+      <div class="rh-shield">${r.shield}</div>
       <div class="rh-info">
         <div class="rh-label">Yasal Risk Seviyesi</div>
-        <div class="rh-status ${statusColor}">${statusText}</div>
+        <div class="rh-status ${r.color}">${r.text}</div>
       </div>
-    </div>`;
-
-  document.getElementById('regGrid').innerHTML = p.regs.map(r => `
-    <div class="reg-row">
-      <div class="reg-name"><span class="reg-icon">${checkIcon(r.status)}</span>${r.name}</div>
-      <div class="reg-status reg-${r.status}">${r.label}</div>
     </div>
+  `;
+  document.getElementById('scoreCard').innerHTML = `
+    <div class="sc-num ${r.color}">${calc.score}</div>
+    <div class="sc-text">
+      <div class="sc-label">Yasal Uygunluk Puanı</div>
+      <div class="sc-decision ${r.color}">${r.text}</div>
+      <div class="sc-sub">${r.sub}</div>
+    </div>
+  `;
+
+  // Documents
+  const docs = a.categoryReq.docs;
+  const docsList = document.getElementById('docsList');
+  if (!docs.length){
+    docsList.innerHTML = `<div class="dc-empty">✓ Bu kategoride yasal belge gereksinimi tespit edilmedi.<br>Standart gümrük ve KDV işlemleri uygulanır.</div>`;
+    document.getElementById('docsSummary').textContent = '0 BELGE';
+  } else {
+    const ownedCount = docs.filter(d => state.ownedDocs.has(d.key)).length;
+    const requiredCount = docs.filter(d => d.requirement === 'required').length;
+    document.getElementById('docsSummary').textContent = `${ownedCount}/${docs.length} HAZIR · ${requiredCount} ZORUNLU`;
+    docsList.innerHTML = docs.map(d => {
+      const meta = LEGAL_DOCUMENTS[d.key];
+      if (!meta) return '';
+      const owned = state.ownedDocs.has(d.key);
+      const reqText  = d.requirement === 'required' ? 'ZORUNLU' : d.requirement === 'recommended' ? 'ÖNERİLİR' : 'OPSİYONEL';
+      const badgeCls = owned ? 'owned' : d.requirement;
+      const badgeText = owned ? '✓ HESABINIZDA VAR' : reqText;
+      const cardCls = owned ? 'owned' : d.requirement;
+      const toggleCls = owned ? 'owned' : '';
+      const toggleText = owned ? '↺ Beyanı kaldır' : '+ Belgem var';
+      return `
+        <div class="doc-card ${cardCls}" data-key="${d.key}">
+          <div class="dc-head">
+            <div class="dc-icon">${meta.icon}</div>
+            <div class="dc-name-wrap">
+              <div class="dc-name">${escapeHtml(meta.name)}</div>
+              <div class="dc-badge ${badgeCls}">${badgeText}</div>
+            </div>
+            <button class="dc-toggle ${toggleCls}" data-key="${d.key}" data-action="${owned ? 'remove' : 'add'}">${toggleText}</button>
+          </div>
+          <div class="dc-meta">
+            <div class="dc-meta-cell"><div class="dc-meta-label">Kurum</div><div class="dc-meta-value">${escapeHtml(meta.institution)}</div></div>
+            <div class="dc-meta-cell"><div class="dc-meta-label">Tahmini Süre</div><div class="dc-meta-value">${escapeHtml(meta.duration)}</div></div>
+            <div class="dc-meta-cell"><div class="dc-meta-label">Tahmini Maliyet</div><div class="dc-meta-value cost">${escapeHtml(meta.cost)}</div></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    docsList.querySelectorAll('.dc-toggle').forEach(btn => {
+      btn.addEventListener('click', () => openModal(btn.dataset.key, btn.dataset.action));
+    });
+  }
+
+  // AI advice
+  const missingReq = docs.filter(d => d.requirement === 'required'    && !state.ownedDocs.has(d.key));
+  const missingRec = docs.filter(d => d.requirement === 'recommended' && !state.ownedDocs.has(d.key));
+  let adviceHtml;
+  if (!docs.length){
+    adviceHtml = `Bu ürün için tespit edilen <strong>zorunlu yasal belge yok</strong>. Standart gümrük ve KDV işlemleri uygulanır. Pazaryerlerinde serbestçe satılabilir; kalite/sürdürülebilirlik sertifikaları rekabet avantajı sağlar.`;
+  } else if (!missingReq.length && !missingRec.length){
+    adviceHtml = `<strong style="color:var(--green)">✓ Tüm belgeler hesabınızda mevcut.</strong> Bu ürünü pazaryerlerinde satabilirsiniz; yasal açıdan engel görünmüyor. Beyan ettiğiniz belgelerin geçerliliğini düzenli kontrol edin.`;
+  } else if (!missingReq.length){
+    adviceHtml = `<strong style="color:var(--green)">Zorunlu belgeleriniz tamam.</strong> Önerilen <strong>${missingRec.length} belge</strong> rekabet ve müşteri güveni için tavsiye edilir. Satışa engel değil.`;
+  } else {
+    const list = missingReq.map(d => LEGAL_DOCUMENTS[d.key]?.name).filter(Boolean).join(', ');
+    adviceHtml = `<strong style="color:var(--red)">⚠ Eksik zorunlu belge:</strong> ${escapeHtml(list)}. Bu belgeler tamamlanmadan ürün ithalat ve satışı yasal açıdan riskli; pazaryerlerinde listeleme reddi ve idari yaptırım riski mevcut. Tahmini toplam belge maliyeti: <strong>${estimateTotalCost(missingReq)}</strong>.`;
+  }
+  document.getElementById('adviceText').innerHTML = adviceHtml;
+
+  // Aksiyonlar
+  const actions = [];
+  missingReq.slice(0, 3).forEach(d => actions.push(`${LEGAL_DOCUMENTS[d.key]?.name} başvuru sürecini incele`));
+  if (missingRec.length && actions.length < 4) actions.push('Önerilen belgeler için maliyet/zaman karşılaştırması yap');
+  if (!actions.length) actions.push('Belge geçerlilik tarihlerini takvime ekle', 'Pazaryeri listeleme şablonunu hazırla');
+  document.getElementById('adviceActions').innerHTML = actions.map(a => `
+    <div class="aa-item"><span>${escapeHtml(a)}</span><span class="aa-arrow">→</span></div>
   `).join('');
-
-  document.getElementById('regDetail').innerHTML = `
-    <div style="padding:12px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)">
-      <div style="font-size:14px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px">${p.emoji} ${p.name}</div>
-      <div style="font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:8px;letter-spacing:.5px">${p.category} · ${p.riskLabel}</div>
-      <div style="font-size:11px;color:var(--muted);line-height:1.7">${p.note}</div>
-    </div>`;
-
-  document.getElementById('adviceText').innerHTML = p.advice;
-  document.getElementById('adviceActions').innerHTML = p.actions.map(a => `
-    <div class="aa-item"><span>${a}</span><span class="aa-arrow">→</span></div>
-  `).join('');
-
-  document.querySelectorAll('#riskPanel,#regPanel,#advicePanel').forEach(el => {
-    el.classList.remove('panel-flash');
-    void el.offsetWidth;
-    el.classList.add('panel-flash');
-  });
 }
 
-function updateKPIs(){
-  document.getElementById('kpiSafe').textContent = products.filter(p=>p.risk==='safe').length;
-  document.getElementById('kpiWarn').textContent = products.filter(p=>p.risk==='warn').length;
-  document.getElementById('kpiDanger').textContent = products.filter(p=>p.risk==='danger').length;
-  document.getElementById('kpiTotal').textContent = products.length;
-  document.getElementById('listCount').textContent = products.length + ' ÜRÜN';
+/* ════════════════════════════════════════════════════════════════
+   MODAL — Beyan onayı
+   ════════════════════════════════════════════════════════════════ */
+function openModal(docKey, action){
+  const meta = LEGAL_DOCUMENTS[docKey];
+  if (!meta) return;
+  state.pendingDoc = { key: docKey, action };
+
+  document.getElementById('modalIcon').textContent = action === 'add' ? meta.icon : '↺';
+  document.getElementById('modalTitle').textContent = action === 'add' ? 'Beyan Onayı' : 'Beyanı Kaldır';
+  document.getElementById('modalDocName').textContent = meta.name;
+
+  const body = document.getElementById('modalBodyText');
+  if (action === 'add'){
+    body.innerHTML = `
+      <strong>${escapeHtml(meta.name)}</strong> belgesini hesabınızda <strong>mevcut</strong> olarak işaretliyorsunuz.
+      Bu beyan hesabınıza <strong>kalıcı olarak kaydedilecek</strong> ve sonraki yasal kontrollerde aynı belge gerektiren ürünlerde otomatik geçerli sayılacaktır.
+    `;
+  } else {
+    body.innerHTML = `
+      <strong>${escapeHtml(meta.name)}</strong> belgesinin hesabınızda <strong>mevcut</strong> olarak işaretli kaydını kaldırıyorsunuz.
+      Sonraki analizlerde bu belge yeniden eksik olarak görünecek ve AI puanı buna göre güncellenecek.
+    `;
+  }
+
+  const confirmBtn = document.getElementById('modalConfirmBtn');
+  confirmBtn.textContent = action === 'add' ? 'Onayla ve Kaydet' : 'Kaydı Kaldır';
+  confirmBtn.classList.toggle('danger', action === 'remove');
+  confirmBtn.classList.toggle('confirm', action === 'add');
+  confirmBtn.disabled = true;
+
+  document.getElementById('modalAgreeChk').checked = false;
+  document.getElementById('docModal').classList.add('open');
 }
 
-function renderAll(){
-  updateKPIs();
-  renderLegalList();
-  renderDetail();
+function closeModal(){
+  document.getElementById('docModal').classList.remove('open');
+  state.pendingDoc = null;
 }
-renderAll();
+
+async function confirmModal(){
+  if (!state.pendingDoc) return;
+  const { key, action } = state.pendingDoc;
+
+  if (!state.user){
+    const errMsg = document.getElementById('modalBodyText');
+    if (errMsg) errMsg.innerHTML = '<strong style="color:var(--red)">⚠ Beyan kaydetmek için giriş yapmalısın.</strong> Önce hesabına giriş yap, sonra bu belgeyi işaretle.';
+    return;
+  }
+
+  const confirmBtn = document.getElementById('modalConfirmBtn');
+  confirmBtn.disabled = true;
+  confirmBtn.textContent = 'Kaydediliyor…';
+
+  // Optimistic update
+  if (action === 'add') state.ownedDocs.add(key);
+  else                  state.ownedDocs.delete(key);
+
+  try {
+    await updateUserProfile(state.user.uid, {
+      legalDocuments: Object.fromEntries([...state.ownedDocs].map(k => [k, true]))
+    });
+    closeModal();
+    renderResults();
+  } catch (err) {
+    console.warn('Belge beyanı kaydedilemedi:', err);
+    // Revert
+    if (action === 'add') state.ownedDocs.delete(key);
+    else                  state.ownedDocs.add(key);
+    confirmBtn.disabled = false;
+    confirmBtn.textContent = 'Kaydet (tekrar dene)';
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SLIDE-DOWN
+   ════════════════════════════════════════════════════════════════ */
+function revealResults(){
+  const empty = document.getElementById('emptyHint');
+  const area  = document.getElementById('resultArea');
+  if (empty) empty.style.display = 'none';
+  if (area){
+    area.classList.remove('show');
+    void area.offsetWidth;
+    area.classList.add('show');
+    setTimeout(() => area.scrollIntoView({ behavior:'smooth', block:'start' }), 80);
+  }
+  renderResults();
+}
+
+function runCheck(){
+  const inp = document.getElementById('searchInput');
+  const err = document.getElementById('searchError');
+  const url = (inp?.value || '').trim();
+  if (!isValidProductUrl(url)){
+    if (err) err.style.display = '';
+    inp?.focus();
+    return;
+  }
+  if (err) err.style.display = 'none';
+
+  const catKey = document.getElementById('searchCategory')?.value || '';
+  state.currentAnalysis = {
+    url,
+    platform: state.incomingPlatform,
+    categoryKey: catKey,
+    categoryReq: getCategoryReq(catKey)
+  };
+  revealResults();
+}
+window.runCheck = runCheck;
+
+/* ════════════════════════════════════════════════════════════════
+   AUTH → kullanıcının saved beyanlarını yükle
+   ════════════════════════════════════════════════════════════════ */
+onAuthChange(async (user) => {
+  state.user = user;
+  if (!user){ state.ownedDocs = new Set(); return; }
+  try {
+    const profile = await getUserProfile(user.uid);
+    if (profile?.legalDocuments){
+      state.ownedDocs = new Set(
+        Object.keys(profile.legalDocuments).filter(k => profile.legalDocuments[k] === true)
+      );
+    }
+    if (state.currentAnalysis) renderResults();  // analiz açıksa beyanları yansıt
+  } catch (e){ console.warn('Yasal belge beyanları okunamadı', e); }
+});
+
+/* ════════════════════════════════════════════════════════════════
+   MODAL EVENTS
+   ════════════════════════════════════════════════════════════════ */
+document.getElementById('modalCancelBtn').addEventListener('click', closeModal);
+document.getElementById('modalConfirmBtn').addEventListener('click', confirmModal);
+document.getElementById('modalAgreeChk').addEventListener('change', (e) => {
+  document.getElementById('modalConfirmBtn').disabled = !e.target.checked;
+});
+document.getElementById('docModal').addEventListener('click', (e) => {
+  if (e.target.id === 'docModal') closeModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && document.getElementById('docModal').classList.contains('open')) closeModal();
+});
+
+/* ════════════════════════════════════════════════════════════════
+   INCOMING PARAMS — ?url=&platform=&category=
+   ════════════════════════════════════════════════════════════════ */
+(function applyIncomingParams(){
+  const params   = new URLSearchParams(window.location.search);
+  const url      = params.get('url');
+  const platform = params.get('platform');
+  const category = params.get('category');
+  if (!url) return;
+
+  const inp = document.getElementById('searchInput');
+  if (inp) inp.value = url;
+
+  if (category){
+    const sel = document.getElementById('searchCategory');
+    if (sel){
+      const valid = Array.from(sel.options).some(o => o.value === category);
+      if (valid) sel.value = category;
+    }
+  }
+  if (platform) state.incomingPlatform = platform;
+
+  const hint = document.getElementById('searchHint');
+  if (hint && isValidProductUrl(url)){
+    const platformLabel = PLATFORM_LABELS[platform] || platform || '';
+    hint.innerHTML = `📡 Trend Radar'dan link yüklendi${platformLabel ? ' — <b style="color:var(--text)">'+escapeHtml(platformLabel)+'</b>' : ''}. Otomatik analiz başlatılıyor…`;
+  }
+
+  setTimeout(() => { if (isValidProductUrl(url)) runCheck(); }, 220);
+})();
 
 </script>
 </body>

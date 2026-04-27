@@ -125,7 +125,6 @@
   <div class="nav-group"><div class="nav-label">Platform</div><a class="nav-item" href="./trendyol.html"><span class="nav-icon">🛍️</span>Trendyol</a><a class="nav-item" href="./hepsiburada.html"><span class="nav-icon">🏪</span>Hepsiburada</a><a class="nav-item" href="./amazon-tr.html"><span class="nav-icon">📦</span>Amazon TR</a><a class="nav-item" href="./n11.html"><span class="nav-icon">🔖</span>N11</a></div>
   <div class="sidebar-bottom">
     <div class="theme-toggle-wrap"><div class="theme-toggle-head"><div class="theme-toggle-copy"><div class="theme-toggle-label">Tema</div><div class="theme-toggle-sub">LIGHT / DARK MODE</div><div class="theme-mode-badge" id="themeModeBadge">SYSTEM</div></div><label class="theme-switch" aria-label="Tema değiştir"><input type="checkbox" id="themeToggle"><span class="theme-slider"><span class="theme-track-icon sun" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span><span class="theme-track-icon moon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.2 14.3A8.6 8.6 0 0 1 9.7 3.8a.6.6 0 0 0-.78-.74 9.6 9.6 0 1 0 12.02 12.02.6.6 0 0 0-.74-.78Z"/></svg></span><span class="theme-thumb" aria-hidden="true"><span class="theme-thumb-icon" id="themeThumbIcon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.25"/><path d="M12 2.75v2.1M12 19.15v2.1M21.25 12h-2.1M4.85 12h-2.1M18.54 5.46l-1.49 1.49M6.95 17.05l-1.49 1.49M18.54 18.54l-1.49-1.49M6.95 6.95 5.46 5.46"/></svg></span></span></span></label></div></div>
-    <div class="plan-card"><div class="plan-tier">Pro Plan</div><div class="plan-name">Takip Listem Aktif ✓</div><div class="plan-meta"><span>₺499/ay · 50 ürün limiti</span><div class="upgrade-btn">Yönet</div></div></div>
   </div>
 </aside>
 
@@ -136,8 +135,8 @@
       <div><div class="page-title">⭐ Takip Listem</div><div class="page-meta">// İZLEDİĞİN ÜRÜNLERİN AI SKORU + FİYAT DEĞİŞİMİ + REKABET DURUMU</div></div>
     </div>
     <div class="topbar-right">
-      <button class="icon-btn">↻ Güncelle</button>
-      <button class="icon-btn primary">+ Yeni Ürün Ekle</button>
+      <button class="icon-btn" onclick="location.reload()">↻ Güncelle</button>
+      <a class="icon-btn primary" href="./dropscout.html">+ Yeni Ürün Ekle</a>
     </div>
   </div>
 
@@ -175,17 +174,61 @@
   </section>
 </main>
 
-<script>
-const watchlist = [
-  { id:1, name:'Minimal Masaüstü Köpük Sabunluk', platform:'Trendyol', category:'Ev & Yaşam', score:91, delta:+4, margin:26.7, competitors:18, legal:'SERBEST', status:'sat', statusLabel:'SATILIR', history:[84,86,87,88,89,90,91], alarms:{priceDown:true,scoreAlert:true,newCompetitor:false}, brief:'Son 7 günde istikrarlı yükseliş. Rakip baskısı düşük, görsel kalite avantajı korunuyor. Giriş penceresi hâlâ açık.' },
-  { id:2, name:'Kablosuz Şarjlı Mini Blender', platform:'Hepsiburada', category:'Mutfak', score:86, delta:+2, margin:29.2, competitors:24, legal:'SERBEST', status:'sat', statusLabel:'SATILIR', history:[80,82,83,84,85,85,86], alarms:{priceDown:true,scoreAlert:false,newCompetitor:true}, brief:'Video içeriklerle güçlü dönüşüm potansiyeli. Rakip görselleri zayıf, öncü avantaj mevcut.' },
-  { id:3, name:'Katlanabilir Laptop Yükseltici Stand', platform:'Trendyol', category:'Ofis', score:85, delta:+3, margin:25.5, competitors:22, legal:'SERBEST', status:'sat', statusLabel:'SATILIR', history:[79,80,81,82,83,84,85], alarms:{priceDown:false,scoreAlert:true,newCompetitor:false}, brief:'Ev-ofis segmentinde kalıcı talep. Ergonomi teması güçlü ve sezon bağımsız satış yapılabilir.' },
-  { id:4, name:'Katlanır Dar Alan Temizlik Seti', platform:'Trendyol', category:'Pratik', score:78, delta:-2, margin:22.1, competitors:31, legal:'SERBEST', status:'watch', statusLabel:'İZLENMELİ', history:[82,81,80,79,79,78,78], alarms:{priceDown:true,scoreAlert:true,newCompetitor:true}, brief:'Rakip sayısı artıyor ve fiyat baskısı hissediliyor. Marj koruması için farklılaşma gerekli.' },
-  { id:5, name:'Araç İçi Manyetik Kablo Düzenleyici', platform:'Amazon TR', category:'Oto Aksesuar', score:69, delta:-5, margin:18.2, competitors:38, legal:'SERBEST', status:'risk', statusLabel:'RİSKLİ', history:[78,76,74,73,71,70,69], alarms:{priceDown:true,scoreAlert:true,newCompetitor:true}, brief:'Hızlı düşüş trendi! Rakip yoğunluğu kritik seviyeye ulaştı. Fiyat savaşı devam ederse çıkış değerlendirilmeli.' },
-  { id:6, name:'Vakumlu Buzdolabı Düzenleyici Set', platform:'Amazon TR', category:'Mutfak Düzeni', score:89, delta:+1, margin:24.9, competitors:15, legal:'SERBEST', status:'sat', statusLabel:'SATILIR', history:[86,87,87,88,88,89,89], alarms:{priceDown:false,scoreAlert:false,newCompetitor:true}, brief:'Düşük rekabet ve güçlü hikâye potansiyeli. Kullanım senaryosu görsellerle dönüşüm artırılabilir.' }
-];
+<script type="module">
+import { getWatchlist, removeFromWatchlist } from '/src/js/store.js';
+import { auth } from '/src/js/firebase-config.js';
+import { onAuthStateChanged } from 'firebase/auth';
 
-let selectedId = 1;
+const PLATFORM_LABEL = {
+  trendyol: 'Trendyol', hepsiburada: 'Hepsiburada', 'amazon-tr': 'Amazon TR', amazon: 'Amazon TR', n11: 'N11'
+};
+const CATEGORY_LABEL = {
+  elektronik: 'Elektronik', moda: 'Moda & Giyim', kozmetik: 'Kozmetik',
+  'ev-yasam': 'Ev & Yaşam', ev: 'Ev & Yaşam', 'anne-bebek': 'Anne & Bebek',
+  spor: 'Spor & Outdoor', kirtasiye: 'Kırtasiye', supermarket: 'Süpermarket',
+  otomotiv: 'Otomotiv', mutfak: 'Mutfak', pet: 'Pet Ürünleri', ofis: 'Ofis & Kırtasiye',
+  diger: 'Diğer'
+};
+const LEGAL_WARN_CATS = new Set(['kozmetik','anne-bebek']);
+
+function toDisplay(item, id) {
+  const score = Math.round(Number.isFinite(item.dropScore) ? item.dropScore : (item.aiScore ?? 0));
+  const margin = Number.isFinite(item.marginPct) ? Math.round(item.marginPct * 10) / 10 : 0;
+  const competitors = Number.isFinite(item.competitorCount) ? item.competitorCount : 0;
+  const netProfit = Number.isFinite(item.netProfit) ? item.netProfit : 0;
+  const categoryKey = item.category || 'diger';
+  const platformKey = item.platform || 'trendyol';
+  const platformName = item.platformName || PLATFORM_LABEL[platformKey] || platformKey;
+  const categoryName = CATEGORY_LABEL[categoryKey] || categoryKey;
+  const legal = LEGAL_WARN_CATS.has(categoryKey) ? 'BELGE GEREKLİ' : 'SERBEST';
+
+  const status = score >= 70 ? 'sat' : score >= 45 ? 'watch' : 'risk';
+  const statusLabel = status === 'sat' ? 'SATILIR' : status === 'watch' ? 'İZLENMELİ' : 'RİSKLİ';
+
+  let name;
+  if (item.url) {
+    try { const u = new URL(item.url); name = u.hostname.replace(/^www\./, '') + u.pathname.slice(0, 36); }
+    catch { name = item.url.slice(0, 48); }
+  } else {
+    name = `${categoryName} — ${platformName}`;
+  }
+
+  const brief = `Net marj %${margin.toLocaleString('tr-TR')}, adet başı ₺${Math.round(netProfit).toLocaleString('tr-TR')} net kâr. ${platformName} · ${categoryName}. DropScore ${score}/100.`;
+
+  return {
+    id, name, platform: platformName, category: categoryName,
+    score, delta: 0, margin, competitors,
+    legal, status, statusLabel,
+    history: [score, score, score, score, score, score, score],
+    alarms: { priceDown: false, scoreAlert: false, newCompetitor: false },
+    brief,
+    url: item.url || null,
+    netProfit
+  };
+}
+
+let watchlist = [];
+let selectedId = null;
 let activeFilter = 'all';
 
 const filters = [
@@ -214,48 +257,82 @@ function sparkColor(val, max){ const pct = val/max; return pct >= .85 ? 'var(--g
 function renderList(){
   const list = getFiltered();
   document.getElementById('listCount').textContent = list.length + ' ÜRÜN';
+  if (list.length === 0) {
+    document.getElementById('wlList').innerHTML = `
+      <div style="padding:40px 20px;text-align:center;color:var(--muted);">
+        <div style="font-size:36px;margin-bottom:10px;">⭐</div>
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;">Takip listen boş</div>
+        <div style="font-size:12px;margin-bottom:16px;">Link Analizi veya Net Kâr Hesabı sayfasından ürün ekleyebilirsin.</div>
+        <a href="./dropscout.html" class="icon-btn primary" style="display:inline-block;">+ Ürün Ekle</a>
+      </div>`;
+    document.getElementById('scoreHero').innerHTML = '';
+    document.getElementById('briefText').textContent = 'Detay için bir ürün seç.';
+    document.getElementById('historyChart').innerHTML = '';
+    document.getElementById('alarmContent').innerHTML = '';
+    return;
+  }
   document.getElementById('wlList').innerHTML = list.map(w => {
-    const maxH = Math.max(...w.history);
+    const maxH = Math.max(...w.history, 1);
     const sparkBars = w.history.map(h => `<div class="spark-bar" style="height:${(h/maxH*100)}%;background:${sparkColor(h,100)}"></div>`).join('');
     const deltaPrefix = w.delta > 0 ? '+' : '';
     const deltaClass = w.delta > 0 ? 'up' : w.delta < 0 ? 'down' : 'flat';
     const statusClass = w.status === 'sat' ? 'ws-sat' : w.status === 'watch' ? 'ws-watch' : 'ws-risk';
-    return `<div class="wl-card${w.id===selectedId?' selected':''}" onclick="selectItem(${w.id})">
+    const legalClass = w.legal === 'SERBEST' ? 'g' : 'y';
+    return `<div class="wl-card${w.id===selectedId?' selected':''}" onclick="window.selectItem('${w.id}')">
       <div class="wl-top">
         <div class="wl-ring" style="--score:${w.score}"><span>${w.score}</span></div>
         <div class="wl-info">
-          <div class="wl-name">${w.name}</div>
-          <div class="wl-platform">${w.platform} · ${w.category} · <span class="wl-status ${statusClass}">${w.statusLabel}</span></div>
+          <div class="wl-name">${escapeHtml(w.name)}</div>
+          <div class="wl-platform">${escapeHtml(w.platform)} · ${escapeHtml(w.category)} · <span class="wl-status ${statusClass}">${w.statusLabel}</span></div>
         </div>
-        <div class="wl-delta"><div class="wl-delta-val ${deltaClass}">${deltaPrefix}${w.delta}</div><div class="wl-delta-sub">7 gün</div></div>
+        <div class="wl-delta"><div class="wl-delta-val ${deltaClass}">${deltaPrefix}${w.delta}</div><div class="wl-delta-sub">skor</div></div>
       </div>
       <div class="wl-spark">${sparkBars}</div>
       <div class="wl-metrics">
-        <div class="wlm"><div class="wlm-l">Net Marj</div><div class="wlm-v ${w.margin>=22?'g':w.margin>=15?'y':'o'}">%${w.margin}</div></div>
+        <div class="wlm"><div class="wlm-l">Net Marj</div><div class="wlm-v ${w.margin>=22?'g':w.margin>=15?'y':'o'}">%${w.margin.toLocaleString('tr-TR')}</div></div>
         <div class="wlm"><div class="wlm-l">Rakip</div><div class="wlm-v ${w.competitors>=30?'r':w.competitors>=20?'y':'g'}">${w.competitors}</div></div>
-        <div class="wlm"><div class="wlm-l">Yasal</div><div class="wlm-v g">${w.legal}</div></div>
-        <div class="wlm"><div class="wlm-l">Trend</div><div class="wlm-v ${w.delta>0?'g':w.delta<0?'r':'y'}">${w.delta>0?'↑ Yükselen':w.delta<0?'↓ Düşen':'→ Sabit'}</div></div>
+        <div class="wlm"><div class="wlm-l">Yasal</div><div class="wlm-v ${legalClass}">${w.legal}</div></div>
+        <div class="wlm"><div class="wlm-l">Net Kâr</div><div class="wlm-v ${w.netProfit>=0?'g':'r'}">₺${Math.round(w.netProfit).toLocaleString('tr-TR')}</div></div>
       </div>
       <div class="wl-foot">
         <div class="wl-actions">
-          <button class="wla">📊 Analiz Et</button>
-          <button class="wla">🔔 Alarm</button>
-          <button class="wla danger">✕ Kaldır</button>
+          ${w.url ? `<a class="wla" href="${escapeHtml(w.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🔗 Ürüne Git</a>` : ''}
+          <button class="wla danger" onclick="event.stopPropagation();window.removeItem('${w.id}')">✕ Kaldır</button>
         </div>
       </div>
     </div>`;
   }).join('');
 }
 
-function selectItem(id){
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+window.selectItem = function(id){
   selectedId = id;
   renderList();
   renderDetail();
-}
+};
+
+window.removeItem = async function(id){
+  if (!auth.currentUser) return;
+  try {
+    await removeFromWatchlist(auth.currentUser.uid, id);
+    watchlist = watchlist.filter(w => w.id !== id);
+    if (selectedId === id) selectedId = watchlist[0]?.id ?? null;
+    renderFilterRow(); updateKPIs(); renderList(); renderDetail();
+  } catch (err) { console.warn('Kaldırma başarısız:', err); }
+};
 
 function renderDetail(){
   const w = watchlist.find(x => x.id === selectedId);
-  if(!w) return;
+  if(!w) {
+    document.getElementById('scoreHero').innerHTML = '';
+    document.getElementById('briefText').textContent = 'Detay için bir ürün seç.';
+    document.getElementById('historyChart').innerHTML = '';
+    document.getElementById('alarmContent').innerHTML = '';
+    return;
+  }
 
   const decColor = w.score >= 80 ? 'var(--green)' : w.score >= 65 ? 'var(--yellow)' : 'var(--red)';
   const bgDim = w.score >= 80 ? 'green' : w.score >= 65 ? 'yellow' : 'red';
@@ -287,12 +364,43 @@ function renderDetail(){
 
 function updateKPIs(){
   document.getElementById('kpiTotal').textContent = watchlist.length;
-  document.getElementById('kpiUp').textContent = watchlist.filter(w=>w.delta>0).length;
-  document.getElementById('kpiDown').textContent = watchlist.filter(w=>w.delta<0).length;
-  document.getElementById('kpiAlert').textContent = watchlist.filter(w=>w.status==='watch'||w.status==='risk').length;
+  document.getElementById('kpiUp').textContent = watchlist.filter(w=>w.status==='sat').length;
+  document.getElementById('kpiDown').textContent = watchlist.filter(w=>w.status==='risk').length;
+  document.getElementById('kpiAlert').textContent = watchlist.filter(w=>w.status==='watch').length;
+  const total = document.querySelector('.stat-box.b .sb-sub');       if (total) total.textContent = 'Aktif takip';
+  const up    = document.querySelector('.stat-box.g .sb-sub');       if (up)    up.textContent    = 'DropScore ≥ 70';
+  const down  = document.querySelector('.stat-box.o .sb-sub');       if (down)  down.textContent  = 'DropScore < 45';
+  const alert = document.querySelector('.stat-box.y .sb-sub');       if (alert) alert.textContent = 'DropScore 45–69';
+  const upLbl    = document.querySelector('.stat-box.g .sb-label');  if (upLbl)    upLbl.textContent    = 'Satılır';
+  const downLbl  = document.querySelector('.stat-box.o .sb-label');  if (downLbl)  downLbl.textContent  = 'Riskli';
+  const alertLbl = document.querySelector('.stat-box.y .sb-label');  if (alertLbl) alertLbl.textContent = 'İzlenmeli';
 }
 
-renderFilterRow(); updateKPIs(); renderList(); renderDetail();
+window.setFilter = setFilter;
+
+function renderEmpty(){
+  watchlist = [];
+  selectedId = null;
+  renderFilterRow(); updateKPIs(); renderList(); renderDetail();
+}
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) { renderEmpty(); return; }
+  try {
+    const items = await getWatchlist(user.uid);
+    items.sort((a, b) => {
+      const ta = a.addedAt?.toMillis?.() ?? 0;
+      const tb = b.addedAt?.toMillis?.() ?? 0;
+      return tb - ta;
+    });
+    watchlist = items.map(it => toDisplay(it, it.id));
+    selectedId = watchlist[0]?.id ?? null;
+    renderFilterRow(); updateKPIs(); renderList(); renderDetail();
+  } catch (err) {
+    console.warn('Takip listesi yüklenemedi:', err);
+    renderEmpty();
+  }
+});
 
 </script>
 </body>

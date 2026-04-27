@@ -40,7 +40,14 @@
 .calc-btn:hover{transform:translateY(-1px);box-shadow:var(--key-shadow-strong)}
 .reset-btn{padding:12px 18px;background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Geist Mono',monospace;transition:all .15s}
 .reset-btn:hover{color:var(--text);border-color:var(--border2)}
-.btn-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.btn-row{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+
+/* SUPPLIER (button + info text — sits inside .btn-row, no card visual) */
+.supplier-wrap{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.fetch-supplier-btn{padding:12px 18px;border-radius:12px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'Geist Mono',monospace;letter-spacing:.3px;display:inline-flex;align-items:center;gap:6px;box-shadow:var(--button-shadow)}
+.fetch-supplier-btn:hover:not(:disabled){background:color-mix(in srgb,var(--blue) 88%,#000);transform:translateY(-1px);box-shadow:var(--key-shadow-strong)}
+.fetch-supplier-btn:disabled{opacity:.7;cursor:not-allowed;transform:none}
+.supplier-info{font-size:9.5px;color:var(--muted);line-height:1.4;text-align:right;white-space:nowrap;letter-spacing:.1px}
 
 /* RESULT GRID */
 .result-grid{display:grid;grid-template-columns:1fr 1fr 320px;gap:14px;margin-bottom:14px}
@@ -168,6 +175,9 @@
   .comm-grid{grid-template-columns:1fr 1fr}
   .btn-row{width:100%}
   .calc-btn,.reset-btn{flex:1;justify-content:center}
+  .supplier-wrap{margin-left:0;width:100%;max-width:none;align-items:stretch;margin-top:6px}
+  .fetch-supplier-btn{justify-content:center;width:100%}
+  .supplier-info{text-align:center;white-space:normal}
 }
 @media (max-width:480px){
   .nr-amount{font-size:24px}
@@ -227,11 +237,6 @@
         </label>
       </div>
     </div>
-    <div class="plan-card">
-      <div class="plan-tier">Pro Plan</div>
-      <div class="plan-name">Net Kâr Motoru Aktif ✓</div>
-      <div class="plan-meta"><span>₺499/ay · Sınırsız hesaplama</span><div class="upgrade-btn">Yönet</div></div>
-    </div>
   </div>
 </aside>
 
@@ -249,7 +254,8 @@
     </div>
     <div class="topbar-right">
       <button class="icon-btn" onclick="resetForm()">↻ Sıfırla</button>
-      <button class="icon-btn">📥 PDF İndir</button>
+      <button class="icon-btn" onclick="saveToWatchlist(event)" id="saveWatchBtn">⭐ Takibe Al</button>
+      <button class="icon-btn" onclick="window.print()">📥 PDF / Yazdır</button>
     </div>
   </div>
 
@@ -297,13 +303,15 @@
         <input class="input-field" id="inpCost" type="number" value="180" min="0" step="1">
       </div>
       <div class="input-group">
-        <div class="input-label">Platform</div>
-        <select class="param-select" id="inpPlatform">
-          <option value="trendyol" selected>Trendyol</option>
+        <div class="input-label">Platform <span style="color:var(--red);font-weight:700">*</span></div>
+        <select class="param-select" id="inpPlatform" required>
+          <option value="" selected disabled>Pazaryeri seç…</option>
+          <option value="trendyol">Trendyol</option>
           <option value="hepsiburada">Hepsiburada</option>
           <option value="n11">N11</option>
           <option value="amazon">Amazon TR</option>
         </select>
+        <div class="input-error" id="platformError" style="display:none;color:var(--red);font-size:11px;margin-top:4px;font-weight:600;">⚠ Lütfen pazaryeri seç</div>
       </div>
       <div class="input-group">
         <div class="input-label">Kategori</div>
@@ -319,25 +327,25 @@
         </select>
       </div>
       <div class="input-group">
-        <div class="input-label">Şirket Türü</div>
+        <div class="input-label">Şirket Türü <span style="font-size:9px;color:var(--muted2);font-weight:500">· profilden</span></div>
         <select class="param-select" id="inpCompany">
-          <option>Şahıs Şirketi</option>
-          <option>Ltd. Şti.</option>
-          <option>AŞ</option>
+          <option value="sahis">Şahıs Şirketi</option>
+          <option value="ltd">Ltd. Şti.</option>
+          <option value="as">AŞ</option>
         </select>
       </div>
       <div class="input-group">
-        <div class="input-label">Ürün Desi</div>
+        <div class="input-label">Ürün Desi <span style="font-size:9px;color:var(--muted2);font-weight:500" id="desiAutoNote">· kategoriye göre tahmin</span></div>
         <select class="param-select" id="inpDesi">
-          <option value="3" selected>1–3 desi (küçük)</option>
-          <option value="7">4–7 desi (orta)</option>
+          <option value="3">1–3 desi (küçük)</option>
+          <option value="7" selected>4–7 desi (orta)</option>
           <option value="15">8–15 desi (büyük)</option>
           <option value="25">15+ desi (ağır)</option>
         </select>
       </div>
       <div class="input-group">
-        <div class="input-label">Paketleme Maliyeti (₺)</div>
-        <input class="input-field" id="inpPacking" type="number" value="9.10" min="0" step="0.1">
+        <div class="input-label">Paketleme Maliyeti (₺) <span style="font-size:9px;color:var(--muted2);font-weight:500">· opsiyonel</span></div>
+        <input class="input-field" id="inpPacking" type="number" value="0" min="0" step="0.1" placeholder="0">
       </div>
       <div class="input-group">
         <div class="input-label">Ek Maliyet (₺)</div>
@@ -347,6 +355,10 @@
     <div class="btn-row">
       <button class="calc-btn" onclick="calculate()">⚡ Hesapla</button>
       <button class="reset-btn" onclick="resetForm()">↻ Sıfırla</button>
+      <div class="supplier-wrap" id="supplierSection" style="display:none">
+        <button id="fetchSupplierBtn" type="button" class="fetch-supplier-btn">🏭 Tedarikçi'den maliyet getir</button>
+        <div class="supplier-info">Buy Box fiyatı ve pazaryeri yüklendi. Maliyet için tedarikçiden teklif çek:</div>
+      </div>
     </div>
   </div>
 
@@ -408,19 +420,52 @@
 
 </main>
 
-<script>
-/* ── Platform Komisyon Tablosu ── */
+<script type="module">
+import { calculateNetProfit } from '/src/js/scoring.js';
+import { addToWatchlist, getUserProfile } from '/src/js/store.js';
+import { auth } from '/src/js/firebase-config.js';
+import { onAuthChange } from '/src/js/auth.js';
+import { searchSuppliers } from '/src/js/api.js';
+import { handleApiError, ensureQuota } from '/src/js/plan.js';
+
+/* ── Platform komisyon tablosu (kategori bazli). Gercek API baglaninca magazadan gelecek. ── */
 const PLATFORMS = {
   trendyol:    { name:'Trendyol',     commission:{ elektronik:12, moda:15, ev:10, kozmetik:14, spor:11, mutfak:10, pet:9, ofis:10 }},
   hepsiburada: { name:'Hepsiburada',  commission:{ elektronik:11, moda:13, ev:9,  kozmetik:12, spor:10, mutfak:9,  pet:8, ofis:9  }},
-  n11:         { name:'N11',           commission:{ elektronik:10, moda:12, ev:8,  kozmetik:11, spor:9,  mutfak:8,  pet:7, ofis:8  }},
-  amazon:      { name:'Amazon TR',     commission:{ elektronik:12, moda:14, ev:10, kozmetik:13, spor:11, mutfak:10, pet:9, ofis:10 }}
+  n11:         { name:'N11',          commission:{ elektronik:10, moda:12, ev:8,  kozmetik:11, spor:9,  mutfak:8,  pet:7, ofis:8  }},
+  amazon:      { name:'Amazon TR',    commission:{ elektronik:12, moda:14, ev:10, kozmetik:13, spor:11, mutfak:10, pet:9, ofis:10 }}
 };
-
 const KDV_RATES = { elektronik:20, moda:10, ev:20, kozmetik:20, spor:20, mutfak:20, pet:20, ofis:20 };
 const CARGO = { 3:95, 7:125, 15:165, 25:210 };
 
-/* ── Hesaplama Motoru ── */
+/* Kategori → tahmini desi (kullanıcı override edebilir) */
+const CATEGORY_DESI = {
+  elektronik: 7,   // küçük-orta cihazlar (kulaklık 3, mikser 7)
+  moda:       3,   // giyim katlanmış
+  ev:        15,   // mobilya/ev tekstili büyük
+  kozmetik:   3,   // şişe/kavanoz
+  spor:       7,   // mat, dumbbell tekli
+  mutfak:     7,   // tencere, set
+  pet:        7,   // mama, küçük kafes
+  ofis:       3    // kalem, defter
+};
+
+/* Trend Radar TRACKED_CATEGORIES → net-kar inpCategory eşleme (ek kategoriler için) */
+const TR_CATEGORY_MAP = {
+  'elektronik':'elektronik','giyim':'moda','ev-yasam':'ev','kozmetik':'kozmetik',
+  'spor-outdoor':'spor','mutfak':'mutfak','evcil-hayvan':'pet','kirtasiye':'ofis',
+  'anne-bebek':'ev','otomotiv':'ev','supermarket':'ev','kitap-hobi':'ofis',
+  'mobilya':'ev','aksesuar':'moda','oyuncak':'ev'
+};
+
+const USD_TRY = 33; // TODO: ileride FX API'dan gelir; şu an sabit yaklaşık kur
+
+/* Buy Box senaryoları — Trend Radar'dan gelen liste fiyatı = buy box anker'ı */
+let buyBoxAnchor = null;     // sayı, TRY (Trend Radar'dan veya ilk hesaplamadan)
+let competitorCount = null;  // ileride Trend Radar'dan; şimdi null = tek mod
+let userTouchedDesi = false; // kullanıcı desi'yi manuel değiştirdiyse kategori değişiminde dokunma
+let cameFromTrendRadar = false;
+
 function getInputs(){
   return {
     salePrice: parseFloat(document.getElementById('inpSalePrice').value) || 0,
@@ -433,39 +478,74 @@ function getInputs(){
   };
 }
 
+/** net-kar sayfasi icin hesap: scoring.js'in calculateNetProfit'ini sarmalar,
+ *  ek olarak kargo (desi bazli) ve kategoriye ozgu komisyon/KDV cekar. */
 function computeProfit(salePrice, cost, platform, category, desi, packing, extra){
-  const kdvRate = KDV_RATES[category] || 20;
-  const commRate = PLATFORMS[platform]?.commission[category] || 12;
-  const cargo = CARGO[desi] || 95;
+  const kdvRate  = KDV_RATES[category] ?? 20;
+  const commRate = PLATFORMS[platform]?.commission[category] ?? 12;
+  const cargo    = CARGO[desi] ?? 95;
 
-  const kdvAmount = salePrice - (salePrice / (1 + kdvRate/100));
-  const saleExVat = salePrice - kdvAmount;
-  const commAmount = salePrice * (commRate / 100);
-  const commVat = commAmount * 0.20;
-  const stopaj = saleExVat * 0.01;
-  const totalDeductions = kdvAmount + commAmount + commVat + cargo + stopaj + cost + packing + extra;
-  const netProfit = salePrice - totalDeductions;
-  const netMargin = salePrice > 0 ? (netProfit / salePrice) * 100 : 0;
+  const m = calculateNetProfit({
+    salePrice, cost,
+    shipping: cargo,
+    packaging: packing,
+    extraFee: extra,
+    commission: commRate,
+    vat: kdvRate,
+    commissionVat: 20,
+    withholding: 1
+  });
+
+  const kdvAmount   = salePrice - m.priceExVat;
+  const totalDeductions = kdvAmount + m.commissionAmt + m.commissionVatAmt + cargo + m.withholdingAmt + cost + packing + extra + m.vatAmt;
   const grossMargin = salePrice > 0 ? ((salePrice - cost) / salePrice) * 100 : 0;
 
-  let aiScore = 50;
-  if(netMargin >= 25) aiScore = 90;
-  else if(netMargin >= 20) aiScore = 82;
-  else if(netMargin >= 15) aiScore = 72;
-  else if(netMargin >= 10) aiScore = 58;
-  else if(netMargin >= 5) aiScore = 42;
-  else aiScore = 28;
+  let aiScore;
+  if      (m.marginPct >= 25) aiScore = 90;
+  else if (m.marginPct >= 20) aiScore = 82;
+  else if (m.marginPct >= 15) aiScore = 72;
+  else if (m.marginPct >= 10) aiScore = 58;
+  else if (m.marginPct >=  5) aiScore = 42;
+  else                        aiScore = 28;
 
-  return { salePrice, cost, kdvRate, kdvAmount, saleExVat, commRate, commAmount, commVat, cargo, stopaj, packing, extra, totalDeductions, netProfit, netMargin, grossMargin, aiScore, platformName: PLATFORMS[platform]?.name || platform, category };
+  return {
+    salePrice, cost, kdvRate, kdvAmount,
+    saleExVat: m.priceExVat,
+    commRate, commAmount: m.commissionAmt, commVat: m.commissionVatAmt,
+    cargo, stopaj: m.withholdingAmt, packing, extra,
+    totalDeductions,
+    netProfit: m.netProfit, netMargin: m.marginPct, grossMargin,
+    aiScore,
+    platformName: PLATFORMS[platform]?.name || platform,
+    category
+  };
 }
 
-function fmt(n){ return n.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function fmtI(n){ return Math.round(n).toLocaleString('tr-TR'); }
+function fmt(n){ return (Number.isFinite(n) ? n : 0).toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtI(n){ return Math.round(Number.isFinite(n) ? n : 0).toLocaleString('tr-TR'); }
+
+let lastResult = null;
 
 /* ── Render ── */
 function calculate(){
   const inp = getInputs();
+
+  // Platform zorunlu — boşsa hesaplama yapma, kırmızı uyarı
+  const platformErr = document.getElementById('platformError');
+  const platformSel = document.getElementById('inpPlatform');
+  if (!inp.platform){
+    platformErr.style.display = '';
+    platformSel.style.borderColor = 'var(--red)';
+    return;
+  } else {
+    platformErr.style.display = 'none';
+    platformSel.style.borderColor = '';
+  }
+
   const r = computeProfit(inp.salePrice, inp.cost, inp.platform, inp.category, inp.desi, inp.packing, inp.extra);
+
+  // Buy box anker'ı — Trend Radar'dan geldiyse kalır, yoksa ilk hesaplamada salePrice
+  if (buyBoxAnchor == null && inp.salePrice > 0) buyBoxAnchor = inp.salePrice;
 
   // KPI Strip
   document.getElementById('kpiSale').textContent = '₺' + fmtI(r.salePrice);
@@ -513,44 +593,51 @@ function calculate(){
     </div>
   `;
 
-  // Scenarios
-  const scenarios = [
-    { name:'Agresif Fiyat', mult:0.88 },
-    { name:'Optimal Fiyat', mult:1.0 },
-    { name:'Premium Fiyat', mult:1.2 },
-  ];
+  // Buy Box senaryoları — anker mevcut salePrice ya da Trend Radar'dan gelen liste fiyatı
+  const anchor = buyBoxAnchor || r.salePrice;
+  const singleSeller = competitorCount != null && competitorCount <= 1;
+
+  const scenarios = singleSeller
+    ? [{ key:'market',   name:'Pazar Fiyatı',     mult:1.00, desc:'Tek satıcı — rekabet yok, anker sabit' }]
+    : [
+        { key:'aggressive', name:'Agresif (Buy Box\'ı kap)', mult:0.97, desc:'Buy Box × 0.97 — küçük marj, hızlı satış' },
+        { key:'optimal',    name:'Optimal (varsayılan)',     mult:1.00, desc:'Buy Box × 1.00 — pazar fiyatına eşitle' },
+        { key:'premium',    name:'Premium (marj öncelikli)', mult:1.08, desc:'Buy Box × 1.08 — yavaş ama yüksek marj' }
+      ];
+
+  const currentSp = Math.round(r.salePrice);
   document.getElementById('scenarioRows').innerHTML = scenarios.map(s => {
-    const sp = Math.round(r.salePrice * s.mult);
+    const sp = Math.round(anchor * s.mult);
     const sr = computeProfit(sp, r.cost, inp.platform, inp.category, inp.desi, r.packing, r.extra);
     const barColor = sr.netMargin >= 20 ? 'high' : sr.netMargin >= 12 ? 'mid' : 'low';
     const netColor = sr.netMargin >= 20 ? 'g' : sr.netMargin >= 12 ? 'y' : 'o';
-    const decClass = sr.netMargin >= 20 ? 'sd-buy' : sr.netMargin >= 12 ? 'sd-wait' : 'sd-skip';
-    const decText = sr.netMargin >= 20 ? '✓ ÖNERİLEN' : sr.netMargin >= 12 ? '⏳ DÖNÜŞÜM TEST ET' : '⏳ RİSKLİ';
-    const isOpt = s.mult === 1.0;
-    return `<div class="sc-row${isOpt ? ' highlight' : ''}">
+    const isOpt = s.key === 'optimal' || s.key === 'market';
+    const isActive = sp === currentSp;
+    const btnLabel = isActive ? '✓ Uygulandı' : 'Bu senaryoyu uygula';
+    const btnDisabled = isActive ? 'disabled' : '';
+    return `<div class="sc-row${isOpt ? ' highlight' : ''}" data-scenario="${s.key}">
       <div class="sc-row-top">
         <div class="sc-name"${isOpt ? ' style="color:var(--green)"' : ''}>${isOpt ? '⭐ ' : ''}${s.name}</div>
         <div class="sc-price">₺${fmtI(sp)} satış · ₺${fmtI(r.cost)} maliyet</div>
       </div>
-      <div class="sc-bar-wrap"><div class="sc-bar ${barColor}" style="width:${Math.min(sr.netMargin * 2.5, 100)}%"></div></div>
+      <div class="sc-bar-wrap"><div class="sc-bar ${barColor}" style="width:${Math.min(Math.max(sr.netMargin, 0) * 2.5, 100)}%"></div></div>
       <div class="sc-row-bottom">
         <div><div class="sc-net ${netColor}">₺${fmtI(sr.netProfit)}</div><div class="sc-pct ${netColor}">net marj %${sr.netMargin.toFixed(1).replace('.',',')}</div></div>
-        <div class="sc-decision ${decClass}">${decText}</div>
+        <button class="scenario-apply-btn" data-price="${sp}" ${btnDisabled} style="padding:6px 11px;border-radius:8px;border:1px solid var(--border);background:${isActive ? 'var(--green-dim)' : 'var(--surface)'};color:${isActive ? 'var(--green)' : 'var(--text)'};font-size:11px;font-weight:700;cursor:${isActive ? 'default' : 'pointer'};${isActive ? 'opacity:.85;' : ''}">${btnLabel}</button>
       </div>
+      <div style="font-size:10px;color:var(--muted2);margin-top:3px;letter-spacing:.3px">${s.desc}</div>
     </div>`;
   }).join('');
 
-  // Volume
-  const vol50 = computeProfit(r.salePrice, r.cost, inp.platform, inp.category, inp.desi, r.packing, r.extra);
-  document.getElementById('scenarioRows').innerHTML += `
-    <div class="sc-row">
-      <div class="sc-row-top"><div class="sc-name">Yüksek Hacim</div><div class="sc-price">₺${fmtI(Math.round(r.salePrice * 0.95))} · 50 adet/ay tahmin</div></div>
-      <div class="sc-bar-wrap"><div class="sc-bar high" style="width:55%"></div></div>
-      <div class="sc-row-bottom">
-        <div><div class="sc-net g">₺${fmtI(vol50.netProfit * 50)}/ay</div><div class="sc-pct g">aylık net kâr</div></div>
-        <div class="sc-decision sd-buy">✓ HEDEF</div>
-      </div>
-    </div>`;
+  // "Uygula" butonları — satış fiyatı input'unu güncelle, calculate yenile
+  document.querySelectorAll('.scenario-apply-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const newPrice = parseInt(btn.dataset.price, 10);
+      if (!Number.isFinite(newPrice)) return;
+      document.getElementById('inpSalePrice').value = newPrice;
+      calculate();
+    });
+  });
 
   // AI Brief
   const decisionText = r.aiScore >= 80 ? '✓ SAT — Kârlı' : r.aiScore >= 60 ? '⏳ İZLE — Orta Risk' : '⛔ ATLA — Düşük Marj';
@@ -574,6 +661,7 @@ function calculate(){
   `;
 
   updateVolume();
+  lastResult = { ...r, inputs: inp };
 }
 
 function updateVolume(){
@@ -597,14 +685,72 @@ function updateVolume(){
 function resetForm(){
   document.getElementById('inpSalePrice').value = 620;
   document.getElementById('inpCost').value = 180;
-  document.getElementById('inpPlatform').value = 'trendyol';
+  document.getElementById('inpPlatform').value = '';
   document.getElementById('inpCategory').value = 'elektronik';
-  document.getElementById('inpDesi').value = '3';
-  document.getElementById('inpPacking').value = 9.10;
+  document.getElementById('inpDesi').value = String(CATEGORY_DESI.elektronik);
+  document.getElementById('inpPacking').value = 0;
   document.getElementById('inpExtra').value = 0;
   document.getElementById('volSlider').value = 50;
+  buyBoxAnchor = null;
+  competitorCount = null;
+  userTouchedDesi = false;
   calculate();
 }
+
+/* Kategori değişince desi'yi tahmine ata — kullanıcı manuel değiştirdiyse dokunma */
+function applyDesiForCategory(){
+  if (userTouchedDesi) return;
+  const cat = document.getElementById('inpCategory').value;
+  const desi = CATEGORY_DESI[cat];
+  if (desi != null){
+    document.getElementById('inpDesi').value = String(desi);
+  }
+}
+
+async function saveToWatchlist(ev){
+  if (!lastResult) calculate();
+  if (!auth.currentUser) {
+    flashBtn(ev?.target, '⚠ Giriş gerekli');
+    return;
+  }
+  const r = lastResult;
+  const id = 'calc_' + Date.now().toString(36);
+  try {
+    await addToWatchlist(auth.currentUser.uid, id, {
+      source: 'net-kar',
+      platform: r.inputs.platform,
+      platformName: r.platformName,
+      category: r.inputs.category,
+      salePrice: r.salePrice,
+      cost: r.cost,
+      shipping: r.cargo,
+      packaging: r.packing,
+      extraFee: r.extra,
+      commission: r.commRate,
+      vat: r.kdvRate,
+      netProfit: r.netProfit,
+      marginPct: r.netMargin,
+      dropScore: r.aiScore
+    });
+    flashBtn(ev?.target, '✓ Eklendi');
+  } catch (err) {
+    console.warn('Takip listesine eklenemedi:', err);
+    flashBtn(ev?.target, '✗ Hata');
+  }
+}
+
+function flashBtn(btn, msg){
+  if (!btn) return;
+  const prev = btn.textContent;
+  btn.textContent = msg;
+  setTimeout(() => { btn.textContent = prev; }, 1800);
+}
+
+// Global scope — onclick="..." ve diğer inline handler'lardan erişim icin
+window.calculate = calculate;
+window.updateVolume = updateVolume;
+window.resetForm = resetForm;
+window.saveToWatchlist = saveToWatchlist;
 
 // Live calculation on input change
 document.querySelectorAll('.input-field, .param-select').forEach(el => {
@@ -613,7 +759,143 @@ document.querySelectorAll('.input-field, .param-select').forEach(el => {
 });
 document.getElementById('volSlider').addEventListener('input', updateVolume);
 
-// Initial calculation
+// Kategori değişiminde desi otomatik (kullanıcı dokunmadıysa); desi'ye dokununca flag set
+document.getElementById('inpCategory').addEventListener('change', () => {
+  applyDesiForCategory();
+  calculate();
+});
+document.getElementById('inpDesi').addEventListener('change', () => {
+  userTouchedDesi = true;
+  document.getElementById('desiAutoNote').textContent = '· manuel';
+});
+
+// Kullanıcı profilinden şirket türünü ve son kullanılan platformu yükle
+onAuthChange(async (user) => {
+  if (!user) return;
+  try {
+    const profile = await getUserProfile(user.uid);
+    if (profile?.companyType){
+      const sel = document.getElementById('inpCompany');
+      const valid = Array.from(sel.options).some(o => o.value === profile.companyType);
+      if (valid) sel.value = profile.companyType;
+    }
+    if (profile?.lastNetKarPlatform){
+      const sel = document.getElementById('inpPlatform');
+      const valid = Array.from(sel.options).some(o => o.value === profile.lastNetKarPlatform);
+      if (valid && !sel.value) {
+        sel.value = profile.lastNetKarPlatform;
+        calculate();
+      }
+    }
+  } catch (e) { console.warn('Profil okunamadı', e); }
+});
+
+/* Tedarikçi'den maliyet getir — Trend Radar'dan gelirken görünür */
+async function fetchSupplierCost(productName, btn){
+  if (!productName) return;
+  const canQuota = await ensureQuota('supplier');
+  if (!canQuota) return;
+
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Aranıyor…';
+  try {
+    const resp = await searchSuppliers({ query: productName, maxItems: 10 });
+    const items = Array.isArray(resp?.items) ? resp.items : [];
+    if (!items.length){
+      btn.textContent = '✗ Tedarikçi bulunamadı';
+      setTimeout(() => { btn.disabled = false; btn.textContent = original; }, 2200);
+      return;
+    }
+    // En düşük USD fiyatını seç (kargo dahil değil — ilk yaklaşım)
+    const cheapest = items
+      .filter(it => Number(it.priceUsd) > 0)
+      .sort((a,b) => Number(a.priceUsd) - Number(b.priceUsd))[0];
+    if (!cheapest){
+      btn.textContent = '✗ Fiyatlı teklif yok';
+      setTimeout(() => { btn.disabled = false; btn.textContent = original; }, 2200);
+      return;
+    }
+    const costTry = Math.round(Number(cheapest.priceUsd) * USD_TRY);
+    document.getElementById('inpCost').value = costTry;
+    btn.textContent = `✓ ₺${costTry} (${resp.cached ? 'cache' : cheapest.platform || 'tedarikçi'})`;
+    btn.style.background = 'var(--green-dim)';
+    btn.style.color = 'var(--green)';
+    calculate();
+  } catch (err) {
+    if (!handleApiError(err)){
+      btn.textContent = '✗ Hata';
+      setTimeout(() => { btn.disabled = false; btn.textContent = original; }, 2200);
+      return;
+    }
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
+
+// ─── Trend Radar / diğer sayfalardan gelen query string ile formu önceden doldur
+// Trend Radar action linkleri: ?name=&price=&platform=&category=&competitors=
+(function applyIncomingParams(){
+  const params = new URLSearchParams(window.location.search);
+  const name        = params.get('name');
+  const priceStr    = params.get('price');
+  const platform    = params.get('platform');
+  const categoryRaw = params.get('category');
+  const compStr     = params.get('competitors');
+  if (!name && !priceStr && !platform && !categoryRaw) return;
+
+  cameFromTrendRadar = true;
+
+  // Trend Radar marketplace id → net-kar select option mapping
+  const PLATFORM_MAP = {
+    'trendyol':    'trendyol',
+    'hepsiburada': 'hepsiburada',
+    'n11':         'n11',
+    'amazon-tr':   'amazon'
+  };
+
+  if (priceStr) {
+    const price = Number(priceStr);
+    if (Number.isFinite(price) && price > 0) {
+      buyBoxAnchor = Math.round(price);
+      const inp = document.getElementById('inpSalePrice');
+      if (inp) inp.value = buyBoxAnchor;
+    }
+  }
+  if (platform) {
+    const sel = document.getElementById('inpPlatform');
+    if (sel) {
+      const mapped = PLATFORM_MAP[platform] || platform;
+      const valid = Array.from(sel.options).some(o => o.value === mapped);
+      if (valid) sel.value = mapped;
+    }
+  }
+  if (categoryRaw){
+    const mapped = TR_CATEGORY_MAP[categoryRaw] || categoryRaw;
+    const sel = document.getElementById('inpCategory');
+    if (sel){
+      const valid = Array.from(sel.options).some(o => o.value === mapped);
+      if (valid){
+        sel.value = mapped;
+        applyDesiForCategory();
+      }
+    }
+  }
+  if (compStr){
+    const c = parseInt(compStr, 10);
+    if (Number.isFinite(c)) competitorCount = c;
+  }
+  if (name) {
+    const safeName = name.replace(/[<>]/g, '');
+    const section = document.getElementById('supplierSection');
+    if (section) section.style.display = '';
+    document.getElementById('fetchSupplierBtn')?.addEventListener('click', (e) => {
+      fetchSupplierCost(safeName, e.currentTarget);
+    });
+  }
+})();
+
+// Initial calculation (platform yoksa kırmızı uyarıda kalır)
 calculate();
 
 </script>

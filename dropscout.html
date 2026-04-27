@@ -17,7 +17,7 @@
 <script type="module" src="/src/js/main.js"></script>
 <style>
 /* ═══════════════════════════════════
-   DROPSCOUT DASHBOARD (SPA) STYLES
+   DROPSCOUT DASHBOARD STYLES
    ═══════════════════════════════════ */
 /* STAT STRIP */
 .stat-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
@@ -315,6 +315,7 @@
 
 /* TAB BAR */
 .tab-bar{display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;margin-bottom:18px;width:fit-content;box-shadow:var(--key-shadow);}
+.meta-bar{margin-bottom:18px;padding:2px 0;font-family:'Geist Mono',monospace;letter-spacing:.4px}
 .tab{padding:7px 16px;border-radius:6px;font-size:11px;font-weight:600;font-family:'Geist Mono',monospace;color:var(--muted2);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
 .tab.active{background:var(--surface3);color:var(--text);}
 .tab:hover:not(.active){color:var(--text);}
@@ -359,11 +360,16 @@
 .analyze-btn:hover{background:#1d4ed8;box-shadow:0 12px 24px -12px rgba(37,99,235,0.38);}
 .analyze-btn.loading{opacity:0.7;pointer-events:none;}
 
-.params-row{display:flex;gap:10px;}
-.param-group{display:flex;flex-direction:column;gap:4px;flex:1;}
+.params-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}
+.params-row + .params-row{margin-top:8px;}
+.param-group{display:flex;flex-direction:column;gap:4px;min-width:0;}
 .param-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;}
-.param-select{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:11px;color:var(--text);font-family:'Geist Mono',monospace;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;}
+.param-select,.param-input{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-size:11px;color:var(--text);font-family:'Geist Mono',monospace;outline:none;width:100%;box-sizing:border-box;}
+.param-select{cursor:pointer;appearance:none;-webkit-appearance:none;}
+.param-input{font-variant-numeric:tabular-nums;}
+.param-input::-webkit-outer-spin-button,.param-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 .param-select option{background:var(--surface2);}
+.param-select:focus,.param-input:focus{border-color:rgba(59,130,246,0.5);box-shadow:0 0 0 3px rgba(59,130,246,0.08);}
 
 /* LOADING STATE */
 .loading-bar{height:2px;background:var(--surface2);border-radius:1px;overflow:hidden;display:none;}
@@ -461,6 +467,30 @@
 .score-big-decision{font-family:'Inter',sans-serif;font-size:15px;font-weight:800;color:var(--green);}
 
 .brief-text{font-size:11.5px;color:var(--muted);line-height:1.7;padding:10px 12px;background:var(--surface2);border-radius:7px;border-left:2px solid var(--purple);margin-bottom:10px;}
+
+/* AI INSIGHT (Claude Haiku) */
+.ai-insight-block{margin-top:10px;padding-top:12px;border-top:1px dashed var(--border);}
+.ai-insight-head{display:flex;align-items:center;gap:6px;font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.ai-insight-head .ai-insight-badge{background:rgba(138,97,233,0.12);color:var(--purple);padding:2px 6px;border-radius:3px;font-weight:700;}
+.ai-insight-head .ai-insight-cached{background:rgba(0,240,160,0.12);color:var(--green);padding:2px 6px;border-radius:3px;font-weight:700;}
+.ai-insight-status{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted);padding:10px 12px;background:var(--surface2);border-radius:7px;}
+.ai-insight-spinner{width:12px;height:12px;border:2px solid var(--border);border-top-color:var(--purple);border-radius:50%;animation:ai-spin 0.8s linear infinite;}
+@keyframes ai-spin{to{transform:rotate(360deg);}}
+.ai-insight-error{font-size:11px;color:var(--orange);padding:10px 12px;background:rgba(255,95,56,0.06);border:1px solid rgba(255,95,56,0.18);border-radius:7px;line-height:1.5;}
+.ai-insight-reasoning{font-size:11.5px;color:var(--text);line-height:1.7;padding:10px 12px;background:var(--surface2);border-radius:7px;border-left:2px solid var(--purple);margin-bottom:10px;}
+.ai-insight-lists{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+.ai-insight-col{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 10px;}
+.ai-insight-col-head{font-family:'Geist Mono',monospace;font-size:8.5px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:700;}
+.ai-insight-col.pros .ai-insight-col-head{color:var(--green);}
+.ai-insight-col.cons .ai-insight-col-head{color:var(--orange);}
+.ai-insight-col ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px;}
+.ai-insight-col li{font-size:10.5px;color:var(--muted);line-height:1.5;padding-left:10px;position:relative;}
+.ai-insight-col.pros li::before{content:'✓';position:absolute;left:0;top:0;color:var(--green);font-weight:700;}
+.ai-insight-col.cons li::before{content:'△';position:absolute;left:0;top:0;color:var(--orange);font-weight:700;}
+.ai-insight-strategy{font-size:11.5px;color:var(--text);line-height:1.7;padding:10px 12px;background:rgba(138,97,233,0.05);border:1px solid rgba(138,97,233,0.15);border-radius:7px;margin-bottom:10px;}
+.ai-insight-actions-head{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;font-weight:700;}
+.ai-insight-actions{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px;}
+.ai-insight-actions li{font-size:11px;color:var(--muted);line-height:1.5;padding:7px 10px;background:var(--surface2);border-radius:5px;border-left:2px solid var(--blue);}
 
 .mini-metrics{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px;}
 .mm{padding:9px 10px;background:var(--surface2);border-radius:7px;border:1px solid var(--border);}
@@ -1016,6 +1046,40 @@ html[data-theme='dark'] .sidebar-overlay{background:rgba(0,0,0,.48);}
   .module-kpi-grid{grid-template-columns:1fr;}
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   MATRIX REVEAL — sayfa açılışı + analiz başlatma sırasında scramble
+   ═══════════════════════════════════════════════════════════════ */
+#resultArea.slide-in{animation:resultSlideIn .55s cubic-bezier(.2,.8,.25,1) both}
+@keyframes resultSlideIn{
+  0%{opacity:0;max-height:0;transform:translateY(-10px)}
+  100%{opacity:1;max-height:5000px;transform:translateY(0)}
+}
+.matrix-scrambling{
+  color:var(--blue) !important;
+  text-shadow:0 0 8px color-mix(in srgb,var(--blue) 45%,transparent);
+  letter-spacing:0;
+  font-feature-settings:"tnum";
+  font-variant-numeric:tabular-nums;
+  transition:none !important;
+}
+.matrix-settle{animation:matrixSettle .3s ease both}
+@keyframes matrixSettle{
+  0%{transform:scale(1.06);text-shadow:0 0 12px currentColor;filter:brightness(1.4)}
+  60%{filter:brightness(1.15)}
+  100%{transform:scale(1);text-shadow:none;filter:brightness(1)}
+}
+.matrix-active .kpi-motion{animation:matrixChartFlicker .12s steps(2) infinite}
+.matrix-active .sc-bar{animation:matrixBarPulse .14s steps(2) infinite}
+@keyframes matrixChartFlicker{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.55;transform:scale(.96)}
+}
+@keyframes matrixBarPulse{
+  0%,100%{opacity:.55}
+  50%{opacity:1}
+}
+.matrix-bar-settling{transition:width .35s cubic-bezier(.2,.8,.25,1) !important}
+
 </style>
 </head>
 <body>
@@ -1028,7 +1092,7 @@ html[data-theme='dark'] .sidebar-overlay{background:rgba(0,0,0,.48);}
     <div class="nav-label">Keşif</div>
     <a class="nav-item" href="./trend-radar.html"><span class="nav-icon">📡</span>Trend Radar</a>
     <a class="nav-item" href="./gap-radar.html"><span class="nav-icon">🌍</span>Gap Radar <span class="nav-badge nb-purple">YENİ</span></a>
-    <a class="nav-item active" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi <span class="nav-badge nb-blue">YENİ</span></a>
+    <a class="nav-item" href="./dropscout.html"><span class="nav-icon">🔗</span>Link Analizi <span class="nav-badge nb-blue">YENİ</span></a>
     <a class="nav-item" href="./rakip-analizi.html"><span class="nav-icon">🔬</span>Rakip Analizi</a>
   </div>
   <div class="nav-group">
@@ -1072,11 +1136,6 @@ html[data-theme='dark'] .sidebar-overlay{background:rgba(0,0,0,.48);}
         </label>
       </div>
     </div>
-    <div class="plan-card">
-      <div class="plan-tier">Pro Plan</div>
-      <div class="plan-name">Link Analizi Aktif ✓</div>
-      <div class="plan-meta"><span>₺499/ay · 20 link/gün</span><div class="upgrade-btn">Yönet</div></div>
-    </div>
   </div>
 </aside>
 
@@ -1089,21 +1148,8 @@ html[data-theme='dark'] .sidebar-overlay{background:rgba(0,0,0,.48);}
       <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
-      <div>
-      <div class="page-title" id="pageTitle">Link Analizi + Trend Radar</div>
-      <div class="page-meta">// 31 MAR 2026 · 10:15 · PRO · 18/20 LİNK HAKKI KALDI</div>
-      </div>
     </div>
-    <div class="topbar-right">
-      <div class="platform-pills">
-        <div class="pp">Trendyol</div>
-        <div class="pp">Hepsiburada</div>
-        <div class="pp">Amazon TR</div>
-        <div class="pp">N11</div>
-        <div class="pp active">Tümü</div>
-      </div>
-      <div class="icon-btn">↻ Güncelle</div>
-    </div>
+    <div class="topbar-right"></div>
   </div>
 
   <!-- STAT STRIP -->
@@ -1263,12 +1309,8 @@ html[data-theme='dark'] .sidebar-overlay{background:rgba(0,0,0,.48);}
     </div>
   </div>
 
-  <!-- TAB BAR -->
-  <div class="tab-bar fade3">
-    <div class="tab"><div class="tdot"></div>Trend Radar</div>
-    <div class="tab active"><div class="tdot"></div>Link Analizi <span class="tnew">AKTİF</span></div>
-    <div class="tab"><div class="tdot"></div>Gap Radar</div>
-  </div>
+  <!-- META BAR — tarih, plan, kalan link hakkı -->
+  <div class="page-meta meta-bar fade3">// 31 MAR 2026 · 10:15 · PRO · 18/20 LİNK HAKKI KALDI</div>
 
   <!-- LINK MODULE -->
   <section class="section-block" id="section-link-analizi"><div class="link-module fade3">
@@ -1284,37 +1326,57 @@ html[data-theme='dark'] .sidebar-overlay{background:rgba(0,0,0,.48);}
     </div>
     <div class="params-row">
       <div class="param-group">
-        <div class="param-label">Şirket Türü</div>
-        <select class="param-select" id="companyType">
-          <option>Şahıs Şirketi</option>
-          <option>Ltd. Şti.</option>
-          <option>AŞ</option>
+        <div class="param-label">Platform</div>
+        <select class="param-select" id="platformSel">
+          <option value="trendyol">Trendyol</option>
+          <option value="hepsiburada">Hepsiburada</option>
+          <option value="amazon-tr">Amazon TR</option>
+          <option value="n11">N11</option>
         </select>
       </div>
       <div class="param-group">
-        <div class="param-label">Satıcı Seviyesi</div>
-        <select class="param-select" id="sellerLevel">
-          <option>Yeni Satıcı</option>
-          <option>Seviye 2</option>
-          <option>Seviye 3+</option>
+        <div class="param-label">Kategori</div>
+        <select class="param-select" id="categorySel">
+          <option value="elektronik">Elektronik</option>
+          <option value="moda">Moda & Giyim</option>
+          <option value="kozmetik">Kozmetik</option>
+          <option value="ev-yasam">Ev & Yaşam</option>
+          <option value="anne-bebek">Anne & Bebek</option>
+          <option value="spor">Spor & Outdoor</option>
+          <option value="kirtasiye">Kırtasiye</option>
+          <option value="supermarket">Süpermarket</option>
+          <option value="otomotiv">Otomotiv</option>
+          <option value="diger">Diğer</option>
         </select>
       </div>
       <div class="param-group">
-        <div class="param-label">Ürün Desi</div>
-        <select class="param-select" id="desi">
-          <option>1–3 desi (küçük)</option>
-          <option>4–7 desi (orta)</option>
-          <option>8–15 desi (büyük)</option>
-          <option>15+ desi (ağır)</option>
-        </select>
+        <div class="param-label">Satış Fiyatı (₺, KDV dahil)</div>
+        <input class="param-input" id="salePriceInp" type="number" min="0" step="0.01" inputmode="decimal" placeholder="620,00">
       </div>
       <div class="param-group">
-        <div class="param-label">Hedef Satış Fiyatı</div>
-        <select class="param-select" id="targetPrice">
-          <option>Mevcut fiyatı kullan</option>
-          <option>%10 altında fiyatla</option>
-          <option>%10 üstünde fiyatla</option>
-          <option>%20 üstünde fiyatla</option>
+        <div class="param-label">Maliyet (₺, KDV hariç)</div>
+        <input class="param-input" id="costInp" type="number" min="0" step="0.01" inputmode="decimal" placeholder="180,00">
+      </div>
+    </div>
+    <div class="params-row">
+      <div class="param-group">
+        <div class="param-label">Kargo + Paketleme (₺)</div>
+        <input class="param-input" id="shippingInp" type="number" min="0" step="0.01" inputmode="decimal" placeholder="104,10">
+      </div>
+      <div class="param-group">
+        <div class="param-label">Rakip Sayısı</div>
+        <input class="param-input" id="competitorInp" type="number" min="0" step="1" inputmode="numeric" placeholder="12">
+      </div>
+      <div class="param-group">
+        <div class="param-label">Aylık Satış (tahmin)</div>
+        <input class="param-input" id="monthlyInp" type="number" min="0" step="1" inputmode="numeric" placeholder="50">
+      </div>
+      <div class="param-group">
+        <div class="param-label">Trend</div>
+        <select class="param-select" id="trendSel">
+          <option value="rising">Yükselişte</option>
+          <option value="stable" selected>Durağan</option>
+          <option value="falling">Düşüşte</option>
         </select>
       </div>
     </div>
@@ -1337,51 +1399,47 @@ html[data-theme='dark'] .sidebar-overlay{background:rgba(0,0,0,.48);}
         </div>
 
         <div class="product-preview">
-          <div class="pp-icon">🧲</div>
+          <div class="pp-icon" id="pp-icon">🧲</div>
           <div>
-            <div class="pp-name">Manyetik Araç Tutucu (MagSafe Uyumlu)</div>
-            <div class="pp-meta">Trendyol · Elektronik · SKU: TR-2847193</div>
+            <div class="pp-name" id="pp-name">—</div>
+            <div class="pp-meta" id="pp-meta">—</div>
           </div>
-          <div class="pp-platform">Trendyol</div>
+          <div class="pp-platform" id="pp-platform">—</div>
         </div>
 
         <div class="bk-rows">
           <div class="bk-row">
             <div class="bk-label"><span class="bk-icon">💵</span>Satış Fiyatı (KDV dahil)</div>
-            <div class="bk-amount pos">+₺620,00</div>
+            <div class="bk-amount pos" id="bk-sale">—</div>
           </div>
           <div class="bk-row">
-            <div class="bk-label"><span class="bk-icon">🧾</span>KDV (%20 — Elektronik)</div>
-            <div class="bk-amount neg">−₺103,33</div>
+            <div class="bk-label"><span class="bk-icon">🧾</span><span id="bk-vat-label">KDV</span></div>
+            <div class="bk-amount neg" id="bk-vat">—</div>
           </div>
           <div class="bk-row">
             <div class="bk-label" style="padding-left:8px;font-size:11px;color:var(--muted)">= KDV hariç satış</div>
-            <div class="bk-amount" style="color:var(--muted2)">₺516,67</div>
+            <div class="bk-amount" id="bk-exvat" style="color:var(--muted2)">—</div>
           </div>
           <div class="bk-divider"></div>
           <div class="bk-row">
-            <div class="bk-label"><span class="bk-icon">🏪</span>Platform Komisyonu (%12)</div>
-            <div class="bk-amount neg">−₺62,00</div>
+            <div class="bk-label"><span class="bk-icon">🏪</span><span id="bk-commission-label">Platform Komisyonu</span></div>
+            <div class="bk-amount neg" id="bk-commission">—</div>
           </div>
           <div class="bk-row">
             <div class="bk-label"><span class="bk-icon">🧾</span>Komisyon KDV'si (%20)</div>
-            <div class="bk-amount neg">−₺12,40</div>
+            <div class="bk-amount neg" id="bk-commvat">—</div>
           </div>
           <div class="bk-row">
-            <div class="bk-label"><span class="bk-icon">📦</span>Kargo (3 desi · anlaşmalı)</div>
-            <div class="bk-amount neg">−₺95,00</div>
+            <div class="bk-label"><span class="bk-icon">📦</span>Kargo + Paketleme</div>
+            <div class="bk-amount neg" id="bk-shipping">—</div>
           </div>
           <div class="bk-row">
-            <div class="bk-label"><span class="bk-icon">📋</span>Stopaj Vergisi (%1)</div>
-            <div class="bk-amount warn">−₺5,17</div>
+            <div class="bk-label"><span class="bk-icon">📋</span><span id="bk-withholding-label">Stopaj Vergisi</span></div>
+            <div class="bk-amount warn" id="bk-withholding">—</div>
           </div>
           <div class="bk-row">
             <div class="bk-label"><span class="bk-icon">🛒</span>Ürün Maliyeti</div>
-            <div class="bk-amount neg">−₺180,00</div>
-          </div>
-          <div class="bk-row">
-            <div class="bk-label"><span class="bk-icon">📦</span>Paketleme & Etiket</div>
-            <div class="bk-amount neg">−₺9,10</div>
+            <div class="bk-amount neg" id="bk-cost">—</div>
           </div>
           <div class="bk-divider"></div>
         </div>
@@ -1389,17 +1447,17 @@ html[data-theme='dark'] .sidebar-overlay{background:rgba(0,0,0,.48);}
         <div class="net-result profit">
           <div>
             <div class="nr-label">GERÇEK NET KÂR / ADET</div>
-            <div class="nr-amount g">₺154,00</div>
+            <div class="nr-amount g" id="nr-amount">—</div>
           </div>
           <div class="nr-margin">
             <div class="nr-label">NET MARJ</div>
-            <div class="nr-pct g">%24,8</div>
+            <div class="nr-pct g" id="nr-pct">—</div>
           </div>
         </div>
 
-        <div style="margin-top:10px;padding:8px 12px;background:rgba(245,200,66,0.06);border-radius:7px;border:1px solid rgba(245,200,66,0.12);font-size:10.5px;color:var(--muted2);display:flex;align-items:center;gap:7px;">
+        <div id="nr-hint" style="margin-top:10px;padding:8px 12px;background:rgba(245,200,66,0.06);border-radius:7px;border:1px solid rgba(245,200,66,0.12);font-size:10.5px;color:var(--muted2);display:none;align-items:center;gap:7px;">
           <span>💡</span>
-          <span>Brüt marj <strong style="color:var(--yellow)">%71</strong> görünürdü — gerçek net marj <strong style="color:var(--green)">%24,8</strong>. Fark: komisyon + kargo + vergi.</span>
+          <span id="nr-hint-text"></span>
         </div>
       </div>
 
@@ -1411,65 +1469,17 @@ html[data-theme='dark'] .sidebar-overlay{background:rgba(0,0,0,.48);}
         </div>
         <div style="font-size:11px;color:var(--muted2);margin-bottom:4px;">Farklı satış fiyatlarında net kâr projeksiyon:</div>
 
-        <div class="sc-rows">
-          <div class="sc-row">
-            <div class="sc-row-top">
-              <div class="sc-name">Agresif Fiyat</div>
-              <div class="sc-price">₺549 satış · ₺180 maliyet</div>
-            </div>
-            <div class="sc-bar-wrap"><div class="sc-bar low" style="width:38%"></div></div>
-            <div class="sc-row-bottom">
-              <div><div class="sc-net o">₺89</div><div class="sc-pct o">net marj %16,2</div></div>
-              <div class="sc-decision sd-wait">⏳ RİSKLİ</div>
-            </div>
-          </div>
-
-          <div class="sc-row" style="border-color:rgba(0,240,160,0.2);">
-            <div class="sc-row-top">
-              <div class="sc-name" style="color:var(--green)">⭐ Optimal Fiyat</div>
-              <div class="sc-price">₺620 satış · ₺180 maliyet</div>
-            </div>
-            <div class="sc-bar-wrap"><div class="sc-bar high" style="width:65%"></div></div>
-            <div class="sc-row-bottom">
-              <div><div class="sc-net g">₺154</div><div class="sc-pct g">net marj %24,8</div></div>
-              <div class="sc-decision sd-buy">✓ ÖNERILEN</div>
-            </div>
-          </div>
-
-          <div class="sc-row">
-            <div class="sc-row-top">
-              <div class="sc-name">Premium Fiyat</div>
-              <div class="sc-price">₺749 satış · ₺180 maliyet</div>
-            </div>
-            <div class="sc-bar-wrap"><div class="sc-bar mid" style="width:82%"></div></div>
-            <div class="sc-row-bottom">
-              <div><div class="sc-net y">₺248</div><div class="sc-pct y">net marj %33,1</div></div>
-              <div class="sc-decision sd-wait">⏳ DÖNÜŞÜM TEST ET</div>
-            </div>
-          </div>
-
-          <div class="sc-row">
-            <div class="sc-row-top">
-              <div class="sc-name">Yüksek Hacim</div>
-              <div class="sc-price">₺590 · 50 adet/ay tahmin</div>
-            </div>
-            <div class="sc-bar-wrap"><div class="sc-bar high" style="width:55%"></div></div>
-            <div class="sc-row-bottom">
-              <div><div class="sc-net g">₺5.900/ay</div><div class="sc-pct g">aylık net kâr</div></div>
-              <div class="sc-decision sd-buy">✓ HEDEF</div>
-            </div>
-          </div>
-        </div>
+        <div class="sc-rows" id="scenarioRows"></div>
 
         <div style="margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
           <div style="font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">KOMİSYON DETAYI</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
-            <div style="font-size:10px;"><div style="color:var(--muted2);margin-bottom:2px;">Platform</div><div style="font-weight:600;font-family:'Geist Mono',monospace;color:var(--orange);">Trendyol</div></div>
-            <div style="font-size:10px;"><div style="color:var(--muted2);margin-bottom:2px;">Kategori</div><div style="font-weight:600;font-family:'Geist Mono',monospace;color:var(--text);">Elektronik</div></div>
-            <div style="font-size:10px;"><div style="color:var(--muted2);margin-bottom:2px;">Komisyon</div><div style="font-weight:600;font-family:'Geist Mono',monospace;color:var(--yellow);">%12,0</div></div>
-            <div style="font-size:10px;"><div style="color:var(--muted2);margin-bottom:2px;">KDV Oranı</div><div style="font-weight:600;font-family:'Geist Mono',monospace;color:var(--text);">%20</div></div>
-            <div style="font-size:10px;"><div style="color:var(--muted2);margin-bottom:2px;">Stopaj</div><div style="font-weight:600;font-family:'Geist Mono',monospace;color:var(--yellow);">%1</div></div>
-            <div style="font-size:10px;"><div style="color:var(--muted2);margin-bottom:2px;">Kargo</div><div style="font-weight:600;font-family:'Geist Mono',monospace;color:var(--text);">₺95</div></div>
+            <div style="font-size:10px;"><div style="color:var(--muted2);margin-bottom:2px;">Platform</div><div id="cd-platform" style="font-weight:600;font-family:'Geist Mono',monospace;color:var(--orange);">—</div></div>
+            <div style="font-size:10px;"><div style="color:var(--muted2);margin-bottom:2px;">Kategori</div><div id="cd-category" style="font-weight:600;font-family:'Geist Mono',monospace;color:var(--text);">—</div></div>
+            <div style="font-size:10px;"><div style="color:var(--muted2);margin-bottom:2px;">Komisyon</div><div id="cd-commission" style="font-weight:600;font-family:'Geist Mono',monospace;color:var(--yellow);">—</div></div>
+            <div style="font-size:10px;"><div style="color:var(--muted2);margin-bottom:2px;">KDV Oranı</div><div id="cd-vat" style="font-weight:600;font-family:'Geist Mono',monospace;color:var(--text);">—</div></div>
+            <div style="font-size:10px;"><div style="color:var(--muted2);margin-bottom:2px;">Stopaj</div><div id="cd-withholding" style="font-weight:600;font-family:'Geist Mono',monospace;color:var(--yellow);">—</div></div>
+            <div style="font-size:10px;"><div style="color:var(--muted2);margin-bottom:2px;">Kargo</div><div id="cd-shipping" style="font-weight:600;font-family:'Geist Mono',monospace;color:var(--text);">—</div></div>
           </div>
         </div>
       </div>
@@ -1482,31 +1492,59 @@ html[data-theme='dark'] .sidebar-overlay{background:rgba(0,0,0,.48);}
             <div class="ai-live"><div class="ai-dot"></div>CANLI</div>
           </div>
           <div class="score-big-row">
-            <div class="score-big-num">88</div>
+            <div class="score-big-num" id="scoreBigNum">—</div>
             <div>
-              <div class="score-big-label">AI Güven Skoru</div>
-              <div class="score-big-decision">✓ SAT — Kârlı</div>
+              <div class="score-big-label">DropScore</div>
+              <div class="score-big-decision" id="scoreDecision">—</div>
             </div>
           </div>
-          <div class="brief-text">Net marj <strong style="color:var(--green)">%24,8</strong> — tüm kesintiler düşüldükten sonra adet başı <strong style="color:var(--green)">₺154 kâr</strong>. 12 rakip, düşük doygunluk. Optimal fiyat ₺620.</div>
+          <div class="brief-text" id="briefText">Link + satış fiyatı + maliyet girerek analizi başlat.</div>
           <div class="mini-metrics">
-            <div class="mm"><div class="mm-l">Net Kâr/Adet</div><div class="mm-v g">₺154</div></div>
-            <div class="mm"><div class="mm-l">Net Marj</div><div class="mm-v g">%24,8</div></div>
-            <div class="mm"><div class="mm-l">Komisyon</div><div class="mm-v y">%12</div></div>
-            <div class="mm"><div class="mm-l">Rakip</div><div class="mm-v p">12</div></div>
+            <div class="mm"><div class="mm-l">Net Kâr/Adet</div><div class="mm-v g" id="mm-net">—</div></div>
+            <div class="mm"><div class="mm-l">Net Marj</div><div class="mm-v g" id="mm-margin">—</div></div>
+            <div class="mm"><div class="mm-l">Komisyon</div><div class="mm-v y" id="mm-commission">—</div></div>
+            <div class="mm"><div class="mm-l">Rakip</div><div class="mm-v p" id="mm-competitor">—</div></div>
+          </div>
+          <div class="ai-insight-block" id="aiInsightBlock" style="display:none;">
+            <div class="ai-insight-head">
+              <span class="ai-insight-badge">AI</span>
+              <span id="aiInsightSubtitle">Claude Haiku 4.5 içgörüsü</span>
+              <span class="ai-insight-cached" id="aiInsightCached" style="display:none;">CACHE</span>
+            </div>
+            <div class="ai-insight-status" id="aiInsightStatus">
+              <div class="ai-insight-spinner"></div>
+              <span>AI içgörü hazırlanıyor...</span>
+            </div>
+            <div class="ai-insight-error" id="aiInsightError" style="display:none;"></div>
+            <div class="ai-insight-body" id="aiInsightBody" style="display:none;">
+              <div class="ai-insight-reasoning" id="aiReasoning"></div>
+              <div class="ai-insight-lists">
+                <div class="ai-insight-col pros">
+                  <div class="ai-insight-col-head">Güçlü Yönler</div>
+                  <ul id="aiStrengths"></ul>
+                </div>
+                <div class="ai-insight-col cons">
+                  <div class="ai-insight-col-head">Zayıf Yönler</div>
+                  <ul id="aiWeaknesses"></ul>
+                </div>
+              </div>
+              <div class="ai-insight-strategy" id="aiStrategy"></div>
+              <div class="ai-insight-actions-head">Somut Aksiyonlar</div>
+              <ul class="ai-insight-actions" id="aiActions"></ul>
+            </div>
           </div>
         </div>
 
-        <div class="legal-mini lm-free">
-          <div class="lm-head"><div class="lm-icon">✅</div><div class="lm-title g">Yasal: SERBEST</div></div>
-          <div class="lm-desc">Herhangi bir izin veya belge gerekmez. Hemen satışa başlayabilirsiniz.</div>
+        <div class="legal-mini lm-free" id="legalMini">
+          <div class="lm-head"><div class="lm-icon" id="legalIcon">ℹ️</div><div class="lm-title g" id="legalTitle">Yasal durum: —</div></div>
+          <div class="lm-desc" id="legalDesc">Kategori seçildikten sonra yasal durum burada görünür.</div>
         </div>
 
         <div class="share-card">
           <div class="share-head">
             <div class="share-title">📤 Analizi Paylaş</div>
             <div class="share-btns">
-              <div class="share-btn sb-copy" onclick="copyLink()">📋 Kopyala</div>
+              <div class="share-btn sb-copy" onclick="copyLink(event)">📋 Kopyala</div>
               <div class="share-btn sb-wa">WhatsApp</div>
               <div class="share-btn sb-tg">Telegram</div>
             </div>
@@ -1516,17 +1554,17 @@ html[data-theme='dark'] .sidebar-overlay{background:rgba(0,0,0,.48);}
               <div class="sp-logo">Drop<span>Scout</span></div>
               <div class="sp-badge">LİNK ANALİZİ</div>
             </div>
-            <div class="sp-product">🧲 Manyetik Araç Tutucu</div>
-            <div class="sp-row"><span>Satış fiyatı</span><span>₺620</span></div>
-            <div class="sp-row"><span>Komisyon + Kargo + Vergi</span><span class="o">−₺283</span></div>
-            <div class="sp-row"><span>Ürün maliyeti</span><span class="o">−₺180</span></div>
+            <div class="sp-product" id="sp-product">—</div>
+            <div class="sp-row"><span>Satış fiyatı</span><span id="sp-sale">—</span></div>
+            <div class="sp-row"><span>Komisyon + Kargo + Vergi</span><span class="o" id="sp-fees">—</span></div>
+            <div class="sp-row"><span>Ürün maliyeti</span><span class="o" id="sp-cost">—</span></div>
             <div class="sp-divider"></div>
-            <div class="sp-row"><span>Net kâr/adet</span><span class="g">₺154</span></div>
-            <div class="sp-row"><span>Net marj</span><span class="g">%24,8</span></div>
+            <div class="sp-row"><span>Net kâr/adet</span><span class="g" id="sp-net">—</span></div>
+            <div class="sp-row"><span>Net marj</span><span class="g" id="sp-margin">—</span></div>
             <div class="sp-divider"></div>
             <div class="sp-verdict">
-              <div class="sp-verdict-text">✓ SATILIR — Kârlı</div>
-              <div class="sp-score">AI Skoru: 88/100</div>
+              <div class="sp-verdict-text" id="sp-verdict">—</div>
+              <div class="sp-score" id="sp-score">DropScore: —</div>
             </div>
           </div>
         </div>
@@ -1687,208 +1725,452 @@ html[data-theme='dark'] .sidebar-overlay{background:rgba(0,0,0,.48);}
 
 </main>
 
-<script>
-// Saklayacağımız gerçek değerler
-let originalValues = null;
-let originalBarWidths = null;
-let globalScrambleInterval = null;
-let sequenceTimeouts = [];
+<script type="module">
+import { calculateDropScore, DEFAULT_COMMISSION_BY_CATEGORY, DEFAULT_VAT } from '/src/js/scoring.js';
+import { saveProduct } from '/src/js/store.js';
+import { auth } from '/src/js/firebase-config.js';
+import { analyzeProduct } from '/src/js/api.js';
+import { ensureQuota, handleApiError } from '/src/js/plan.js';
 
-function startInfiniteScramble() {
-  const ra = document.getElementById('resultArea');
-  const btn = document.getElementById('analyzeBtn');
-  
-  if(!ra || !btn) return;
+const PLATFORM_LABEL = {
+  trendyol: 'Trendyol',
+  hepsiburada: 'Hepsiburada',
+  'amazon-tr': 'Amazon TR',
+  n11: 'N11'
+};
+const CATEGORY_LABEL = {
+  elektronik: 'Elektronik', moda: 'Moda & Giyim', kozmetik: 'Kozmetik',
+  'ev-yasam': 'Ev & Yaşam', 'anne-bebek': 'Anne & Bebek', spor: 'Spor & Outdoor',
+  kirtasiye: 'Kırtasiye', supermarket: 'Süpermarket', otomotiv: 'Otomotiv', diger: 'Diğer'
+};
+const DECISION = {
+  AL:           { text: '✓ SAT — Kârlı',  verdict: '✓ SATILIR — Kârlı' },
+  DEGERLENDIR:  { text: '⚠ DEĞERLENDİR',  verdict: '⚠ DEĞERLENDİR'    },
+  UZAK:         { text: '✗ UZAK DUR',     verdict: '✗ UZAK DUR'       }
+};
 
-  if(btn.classList.contains('loading')) return;
+// Yasal durum şimdilik kategori tabanlı basit eşleme. Faz 2.6'da detaylı DB.
+const LEGAL_STATUS = {
+  kozmetik:   { code: 'Belge Gerekli', cls: 'lm-warn', icon: '⚠️', color: 'var(--yellow)', desc: 'Kozmetik ürünler için Bakanlık bildirimi/onayı gerekebilir.' },
+  'anne-bebek': { code: 'Belge Gerekli', cls: 'lm-warn', icon: '⚠️', color: 'var(--yellow)', desc: 'Bebek ürünlerinde TSE/CE belgeleri kontrol edilmelidir.' }
+};
+const LEGAL_DEFAULT = { code: 'SERBEST', cls: 'lm-free', icon: '✅', color: 'var(--green)', desc: 'Bu kategori için ek belge gerekmiyor.' };
 
-  ra.classList.add('visible'); // Sonuç alanını hemen görünür yap
-
-  const textTargets = Array.from(document.querySelectorAll('.bk-amount, .nr-amount, .nr-pct, .sc-net, .sc-pct, .score-big-num, .mm-v, .sp-row span:last-child, .sp-score'));
-  if(!originalValues) {
-    originalValues = textTargets.map(el => el.textContent);
-  }
-
-  const barTargets = Array.from(document.querySelectorAll('.sc-bar'));
-  if(!originalBarWidths) {
-    originalBarWidths = barTargets.map(el => el.style.width);
-  }
-
-  // Zaten scramble varsa resetle
-  if(globalScrambleInterval) clearInterval(globalScrambleInterval);
-  sequenceTimeouts.forEach(t => clearTimeout(t));
-  sequenceTimeouts = [];
-
-  const chars = '*#-%01';
-  let activeTextTargets = [...textTargets];
-  let activeBarTargets = [...barTargets];
-  
-  globalScrambleInterval = setInterval(() => {
-    // 1) Rakamları Dalgalandır
-    activeTextTargets.forEach(el => {
-      let scrambled = '';
-      for(let i = 0; i < 3; i++) {
-        scrambled += chars[Math.floor(Math.random() * chars.length)];
-      }
-      el.textContent = scrambled;
-    });
-
-    // 2) Grafikleri (Barları) Dalgalandır
-    activeBarTargets.forEach(el => {
-      const randomWidth = Math.floor(Math.random() * 20) + 10;
-      el.style.width = randomWidth + '%';
-    });
-  }, 40);
-
-  // Kısa süre sonra * yapmasını cascade halinde sırayla sağla
-  setTimeout(() => {
-    const intervalTime = 70;
-
-    textTargets.forEach((el, index) => {
-      let tId = setTimeout(() => {
-        activeTextTargets = activeTextTargets.filter(t => t !== el);
-        el.textContent = '***';
-
-        if (activeTextTargets.length === 0) {
-          if(globalScrambleInterval) {
-            clearInterval(globalScrambleInterval);
-            globalScrambleInterval = null;
-          }
-        }
-      }, index * intervalTime);
-      sequenceTimeouts.push(tId);
-    });
-
-    barTargets.forEach((el, index) => {
-      let tId = setTimeout(() => {
-        activeBarTargets = activeBarTargets.filter(t => t !== el);
-        el.style.width = '0%';
-      }, index * intervalTime);
-      sequenceTimeouts.push(tId);
-    });
-  }, 600);
+function $(id) { return document.getElementById(id); }
+function fmtTL(n) {
+  if (!Number.isFinite(n)) return '—';
+  const neg = n < 0;
+  const abs = Math.abs(n).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return (neg ? '−' : '') + '₺' + abs;
+}
+function fmtTLPos(n) { return Number.isFinite(n) ? '+₺' + n.toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '—'; }
+function fmtPct(n) { return Number.isFinite(n) ? '%' + n.toLocaleString('tr-TR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : '—'; }
+function hashId(url) {
+  let h = 0;
+  for (let i = 0; i < url.length; i++) h = ((h << 5) - h + url.charCodeAt(i)) | 0;
+  return 'p_' + Math.abs(h).toString(36);
 }
 
-function runAnalysis() {
-  const linkInput = document.getElementById('linkInput');
-  const btn = document.getElementById('analyzeBtn');
-  const txt = document.getElementById('btnText');
-  const lb = document.getElementById('loadingBar');
-  const lbf = document.getElementById('lbFill');
-  const ra = document.getElementById('resultArea');
+/* ═══════════════════════════════════════════════════════════════
+   MATRIX REVEAL SİSTEMİ — sayfa açılışı + analiz tetikleme
+   ═══════════════════════════════════════════════════════════════ */
+const MATRIX_CHARS = '0123456789₺%+-/·';
+const MATRIX_TARGET_IDS = [
+  'pp-name','pp-meta','pp-platform',
+  'bk-sale','bk-vat','bk-exvat','bk-commission','bk-commvat','bk-shipping','bk-withholding','bk-cost',
+  'nr-amount','nr-pct',
+  'scoreBigNum','scoreDecision',
+  'mm-net','mm-margin','mm-commission','mm-competitor',
+  'cd-platform','cd-category','cd-commission','cd-vat','cd-withholding','cd-shipping',
+  'sp-product','sp-sale','sp-fees','sp-cost','sp-net','sp-margin','sp-score','sp-verdict'
+];
 
-  if(btn.classList.contains('loading')) return;
+let _matrixTimer = null;
+function _scrambleStr(len){
+  let s = '';
+  const max = Math.max(2, len|0);
+  for (let i = 0; i < max; i++) s += MATRIX_CHARS[Math.floor(Math.random() * MATRIX_CHARS.length)];
+  return s;
+}
+function _stopMatrix(){
+  if (_matrixTimer) { clearInterval(_matrixTimer); _matrixTimer = null; }
+}
 
-  // URL doğrulama — boş, düz yazı veya sayı girilirse hata ver
-  const val = linkInput.value.trim();
-  const urlPattern = /^https?:\/\/.+\..+/i;
-  if(!val || !urlPattern.test(val)) {
-    linkInput.classList.remove('error-pulse');
-    void linkInput.offsetWidth;
-    linkInput.classList.add('error-pulse');
-    linkInput.placeholder = val ? '⚠ Geçerli bir ürün linki yapıştırın (https://...)' : 'https://www.trendyol.com/... veya diğer pazaryeri ürün linkini yapıştır...';
-    setTimeout(() => { linkInput.placeholder = 'https://www.trendyol.com/... veya diğer pazaryeri ürün linkini yapıştır...'; }, 3000);
+/**
+ * Matrix scramble + sıralı settle.
+ * @param {Array<{el:HTMLElement,value:string}>} targets
+ * @param {{scrambleMs?:number, stagger?:number}} opts
+ */
+async function runMatrix(targets, opts = {}){
+  const scrambleMs = opts.scrambleMs ?? 550;
+  const stagger    = opts.stagger    ?? 35;
+  if (!targets.length) return;
+
+  // Arka plan kart/grafik flicker'ı
+  const ra = $('resultArea');
+  const ss = document.querySelector('.stat-strip');
+  ra?.classList.add('matrix-active');
+  ss?.classList.add('matrix-active');
+
+  // Scramble fazı
+  targets.forEach(t => { t._settled = false; t.el?.classList.add('matrix-scrambling'); });
+  _stopMatrix();
+  _matrixTimer = setInterval(() => {
+    targets.forEach(t => {
+      if (!t._settled && t.el) t.el.textContent = _scrambleStr(t.value.length || 3);
+    });
+  }, 55);
+
+  await new Promise(r => setTimeout(r, scrambleMs));
+
+  // Settle fazı — sırayla aç
+  for (const t of targets){
+    t._settled = true;
+    if (t.el){
+      t.el.textContent = t.value;
+      t.el.classList.remove('matrix-scrambling');
+      t.el.classList.add('matrix-settle');
+      const elRef = t.el;
+      setTimeout(() => elRef.classList.remove('matrix-settle'), 320);
+    }
+    await new Promise(r => setTimeout(r, stagger));
+  }
+  _stopMatrix();
+  setTimeout(() => {
+    ra?.classList.remove('matrix-active');
+    ss?.classList.remove('matrix-active');
+  }, 250);
+}
+
+/** Senaryo bar grafikleri — placeholder veya gerçek değer için animasyonlu width geçişi */
+function _animateScenarioBars(){
+  document.querySelectorAll('#scenarioRows .sc-bar').forEach((bar, i) => {
+    const finalWidth = bar.style.width || '50%';
+    bar.classList.add('matrix-bar-settling');
+    bar.style.width = '0%';
+    setTimeout(() => { bar.style.width = finalWidth; }, 60 + i * 80);
+  });
+}
+
+/** Placeholder senaryolar — sayfa açılışında (analiz yokken) görünür */
+function renderPlaceholderScenarios(){
+  const rows = ['Düşük Fiyat', 'Pazar Fiyatı', 'Premium Fiyat'].map((name, i) => {
+    const tagCls = ['low','mid','high'][i];
+    return `<div class="sc-row">
+      <div class="sc-row-top"><div class="sc-name">${name}</div><div class="sc-price">*** ₺ satış · *** ₺ maliyet</div></div>
+      <div class="sc-bar-wrap"><div class="sc-bar ${tagCls}" style="width:${[28,55,78][i]}%"></div></div>
+      <div class="sc-row-bottom">
+        <div><div class="sc-net y">***</div><div class="sc-pct y">net marj **%</div></div>
+        <div class="sc-decision sd-wait">⏳ DEĞERLENDİR</div>
+      </div>
+    </div>`;
+  }).join('');
+  $('scenarioRows').innerHTML = rows;
+}
+
+/** Tüm hedef elementleri target objesine sarmala */
+function _collectTargets(valueMap){
+  return MATRIX_TARGET_IDS
+    .map(id => ({ el: document.getElementById(id), value: valueMap?.[id] ?? '***' }))
+    .filter(t => t.el);
+}
+
+/** Sayfa açılışında çalıştırılan ilk Matrix — tüm değerler "*" placeholder */
+async function initialMatrixReveal(){
+  const ra = $('resultArea');
+  if (!ra) return;
+  // Result area'yı görünür yap + slide-in
+  ra.classList.add('visible');
+  ra.classList.remove('slide-in'); void ra.offsetWidth; ra.classList.add('slide-in');
+  // Placeholder senaryolar
+  renderPlaceholderScenarios();
+  // Stat-strip flicker tetikle
+  const ss = document.querySelector('.stat-strip');
+  ss?.classList.add('matrix-active');
+  setTimeout(() => ss?.classList.remove('matrix-active'), 700);
+  // Bar animasyonu
+  setTimeout(_animateScenarioBars, 80);
+  // Tüm hedefleri "***" değerine settle eden Matrix
+  await runMatrix(_collectTargets(), { scrambleMs: 600, stagger: 28 });
+}
+
+/** Analiz sonrası — gerçek değerleri elementlerden okuyup Matrix oynat */
+async function postAnalysisMatrixReveal(){
+  // renderAnalysis() zaten gerçek değerleri yazdı; şimdi capture et + scramble + settle
+  const valueMap = {};
+  MATRIX_TARGET_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) valueMap[id] = el.textContent || '***';
+  });
+  setTimeout(_animateScenarioBars, 60);
+  await runMatrix(_collectTargets(valueMap), { scrambleMs: 480, stagger: 32 });
+}
+
+window.runAnalysis = async function runAnalysis() {
+  const linkInput = $('linkInput');
+  const btn = $('analyzeBtn');
+  const txt = $('btnText');
+  const lb = $('loadingBar');
+  const lbf = $('lbFill');
+  const ra = $('resultArea');
+  if (btn.classList.contains('loading')) return;
+
+  const url = linkInput.value.trim();
+  const salePrice = parseFloat($('salePriceInp').value);
+  const cost = parseFloat($('costInp').value);
+
+  const missing = [];
+  if (!url || !/^https?:\/\/.+\..+/i.test(url)) missing.push(linkInput);
+  if (!Number.isFinite(salePrice) || salePrice <= 0) missing.push($('salePriceInp'));
+  if (!Number.isFinite(cost) || cost < 0) missing.push($('costInp'));
+  if (missing.length) {
+    missing.forEach(el => { el.classList.remove('error-pulse'); void el.offsetWidth; el.classList.add('error-pulse'); });
     return;
   }
 
-  const textTargets = Array.from(document.querySelectorAll('.bk-amount, .nr-amount, .nr-pct, .sc-net, .sc-pct, .score-big-num, .mm-v, .sp-row span:last-child, .sp-score'));
-  const barTargets = Array.from(document.querySelectorAll('.sc-bar'));
-  
-  if(!originalValues) { originalValues = textTargets.map(el => el.textContent); }
-  if(!originalBarWidths) { originalBarWidths = barTargets.map(el => el.style.width); }
+  const platform = $('platformSel').value;
+  const category = $('categorySel').value;
+  const shipping = parseFloat($('shippingInp').value) || 0;
+  const competitorCount = parseInt($('competitorInp').value) || 0;
+  const monthlySales = parseInt($('monthlyInp').value) || 0;
+  const trend = $('trendSel').value;
+  const commission = DEFAULT_COMMISSION_BY_CATEGORY[category] ?? 15;
+
+  const scoring = calculateDropScore({
+    salePrice, cost, shipping, commission, vat: DEFAULT_VAT,
+    competitorCount, trend, monthlySales
+  });
 
   btn.classList.add('loading');
-  txt.textContent = '⏳ AI Analizi Devam Ediyor...';
+  txt.textContent = '⏳ Hesaplanıyor...';
   lb.classList.add('active');
-  lbf.style.animation = 'none';
-  lbf.offsetHeight; // Reflow tetikle
-  lbf.style.animation = 'loadprogress 1.8s ease forwards';
-
+  lbf.style.animation = 'none'; void lbf.offsetHeight;
+  lbf.style.animation = 'loadprogress 600ms ease forwards';
   ra.classList.add('visible');
-  setTimeout(() => {
-    ra.scrollIntoView({behavior:'smooth', block:'start'});
-  }, 50);
 
-  // Tekrar matrix animasyonunu başlat
-  if(globalScrambleInterval) clearInterval(globalScrambleInterval);
-  sequenceTimeouts.forEach(t => clearTimeout(t));
-  sequenceTimeouts = [];
-
-  const chars = '0123456789₺% ';
-  
-  let activeTextTargets = [...textTargets];
-  let activeBarTargets = [...barTargets];
-  
-  globalScrambleInterval = setInterval(() => {
-    activeTextTargets.forEach(el => {
-      let len = Math.max(2, el.textContent.length);
-      let scrambled = '';
-      for(let i = 0; i < len; i++) {
-        scrambled += chars[Math.floor(Math.random() * chars.length)];
-      }
-      el.textContent = scrambled;
-    });
-
-    activeBarTargets.forEach(el => {
-      const randomWidth = Math.floor(Math.random() * 80) + 10;
-      el.style.width = randomWidth + '%';
-    });
-  }, 40);
-
-  // Yükleme bitince (1.8s sonra) GERÇEK değerleri sırayla (cascade) göster
-  setTimeout(() => {
+  const payload = { url, platform, category, salePrice, cost, shipping, commission, competitorCount, monthlySales, trend, scoring };
+  setTimeout(async () => {
+    renderAnalysis(payload);
+    await postAnalysisMatrixReveal();   // gerçek değerlere Matrix scramble + settle
     lb.classList.remove('active');
     btn.classList.remove('loading');
     txt.textContent = '🔍 Analizi Yenile';
-    
-    ra.classList.remove('section-flash');
-    void ra.offsetWidth;
-    ra.classList.add('section-flash');
+    ra.classList.remove('section-flash'); void ra.offsetWidth; ra.classList.add('section-flash');
+    setTimeout(() => ra.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+  }, 100);
 
-    const intervalTime = 70; // Her hedefin açılması arası süreç
-
-    textTargets.forEach((el, index) => {
-      let tId = setTimeout(() => {
-        activeTextTargets = activeTextTargets.filter(t => t !== el);
-        el.textContent = originalValues[index];
-
-        if (activeTextTargets.length === 0) {
-          clearInterval(globalScrambleInterval);
-          globalScrambleInterval = null;
-        }
-      }, index * intervalTime);
-      sequenceTimeouts.push(tId);
-    });
-
-    barTargets.forEach((el, index) => {
-      let tId = setTimeout(() => {
-        activeBarTargets = activeBarTargets.filter(t => t !== el);
-        el.style.width = originalBarWidths[index];
-      }, index * intervalTime);
-      sequenceTimeouts.push(tId);
-    });
-  }, 1800);
-}
-
-document.getElementById('linkInput').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') runAnalysis();
-});
-
-// Sayfa ilk yüklendiğinde Link Analizi scramble efektini otomatik başlat
-// (Sidebar'dan bu sayfaya gelince veya F5 ile yenileyince)
-document.addEventListener('DOMContentLoaded', function() {
-  const ra = document.getElementById('resultArea');
-  if (ra) {
-    // Kısa bir gecikmeyle scramble animasyonunu başlat
-    setTimeout(() => { startInfiniteScramble(); }, 400);
+  if (auth.currentUser) {
+    const productId = hashId(url);
+    saveProduct(auth.currentUser.uid, productId, {
+      url, platform, category, salePrice, cost, shipping,
+      commission, vat: DEFAULT_VAT, competitorCount, monthlySales, trend,
+      netProfit: scoring.margin.netProfit, marginPct: scoring.margin.marginPct,
+      dropScore: scoring.score, signal: scoring.signal
+    }).catch(err => console.warn('Ürün kaydı başarısız:', err));
   }
+};
+
+function renderAnalysis(a) {
+  const { platform, category, salePrice, cost, shipping, commission, competitorCount, monthlySales, trend, scoring } = a;
+  const m = scoring.margin;
+  const pLabel = PLATFORM_LABEL[platform] || platform;
+  const cLabel = CATEGORY_LABEL[category] || category;
+  const netCls = m.netProfit >= 0 ? 'g' : 'r';
+
+  $('pp-name').textContent = 'Ürün (link: ' + shortUrl(a.url) + ')';
+  $('pp-meta').textContent = `${pLabel} · ${cLabel}`;
+  $('pp-platform').textContent = pLabel;
+
+  $('bk-sale').textContent = fmtTLPos(salePrice);
+  $('bk-vat-label').textContent = `KDV (${fmtPct(DEFAULT_VAT)})`;
+  $('bk-vat').textContent = fmtTL(-(salePrice - m.priceExVat));
+  $('bk-exvat').textContent = fmtTL(m.priceExVat);
+  $('bk-commission-label').textContent = `Platform Komisyonu (${fmtPct(commission)})`;
+  $('bk-commission').textContent = fmtTL(-m.commissionAmt);
+  $('bk-commvat').textContent = fmtTL(-m.commissionVatAmt);
+  $('bk-shipping').textContent = fmtTL(-shipping);
+  $('bk-withholding').textContent = fmtTL(-m.withholdingAmt);
+  $('bk-withholding-label').textContent = 'Stopaj Vergisi';
+  $('bk-cost').textContent = fmtTL(-cost);
+
+  const nrAmt = $('nr-amount'); nrAmt.textContent = fmtTL(m.netProfit); nrAmt.className = 'nr-amount ' + netCls;
+  const nrPct = $('nr-pct');    nrPct.textContent = fmtPct(m.marginPct); nrPct.className = 'nr-pct ' + netCls;
+
+  const grossPct = salePrice > 0 ? ((salePrice - cost) / salePrice) * 100 : 0;
+  const hint = $('nr-hint'), hintTxt = $('nr-hint-text');
+  hint.style.display = 'flex';
+  hintTxt.innerHTML = `Brüt marj <strong style="color:var(--yellow)">${fmtPct(grossPct)}</strong> görünürdü — gerçek net marj <strong style="color:var(--${netCls === 'g' ? 'green' : 'red'})">${fmtPct(m.marginPct)}</strong>. Fark: komisyon + kargo + vergi.`;
+
+  $('cd-platform').textContent = pLabel;
+  $('cd-category').textContent = cLabel;
+  $('cd-commission').textContent = fmtPct(commission);
+  $('cd-vat').textContent = fmtPct(DEFAULT_VAT);
+  $('cd-withholding').textContent = fmtPct(0);
+  $('cd-shipping').textContent = fmtTL(shipping);
+
+  const dec = DECISION[scoring.signal];
+  $('scoreBigNum').textContent = String(scoring.score);
+  $('scoreDecision').textContent = dec.text;
+  $('briefText').innerHTML =
+    `Net marj <strong style="color:var(--${netCls === 'g' ? 'green' : 'red'})">${fmtPct(m.marginPct)}</strong>, adet başı <strong style="color:var(--${netCls === 'g' ? 'green' : 'red'})">${fmtTL(m.netProfit)}</strong>. DropScore kırılımı → marj ${scoring.breakdown.margin}/40 · rekabet ${scoring.breakdown.competition}/25 · trend ${scoring.breakdown.trend}/20 · talep ${scoring.breakdown.demand}/15.`;
+  $('mm-net').textContent = fmtTL(m.netProfit);
+  $('mm-margin').textContent = fmtPct(m.marginPct);
+  $('mm-commission').textContent = fmtPct(commission);
+  $('mm-competitor').textContent = String(competitorCount);
+
+  const legal = LEGAL_STATUS[category] || LEGAL_DEFAULT;
+  const legalBox = $('legalMini');
+  legalBox.className = 'legal-mini ' + legal.cls;
+  $('legalIcon').textContent = legal.icon;
+  $('legalTitle').textContent = 'Yasal: ' + legal.code;
+  $('legalTitle').style.color = legal.color;
+  $('legalDesc').textContent = legal.desc;
+
+  $('sp-product').textContent = '🔗 ' + cLabel;
+  $('sp-sale').textContent = fmtTL(salePrice);
+  const fees = m.commissionAmt + m.commissionVatAmt + shipping + m.vatAmt + m.withholdingAmt;
+  $('sp-fees').textContent = fmtTL(-fees);
+  $('sp-cost').textContent = fmtTL(-cost);
+  $('sp-net').textContent = fmtTL(m.netProfit);
+  $('sp-margin').textContent = fmtPct(m.marginPct);
+  $('sp-verdict').textContent = dec.verdict;
+  $('sp-score').textContent = `DropScore: ${scoring.score}/100`;
+
+  renderScenarios({ basePrice: salePrice, cost, shipping, commission, competitorCount, monthlySales, trend });
+
+  window._lastAnalysis = a;
+
+  loadAIInsight(a);
+}
+
+function escHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+let _aiInsightReqId = 0;
+async function loadAIInsight(a) {
+  const block = $('aiInsightBlock');
+  const status = $('aiInsightStatus');
+  const body = $('aiInsightBody');
+  const errorEl = $('aiInsightError');
+  const cachedTag = $('aiInsightCached');
+  if (!block) return;
+
+  const reqId = ++_aiInsightReqId;
+
+  block.style.display = 'block';
+  status.style.display = 'flex';
+  body.style.display = 'none';
+  errorEl.style.display = 'none';
+  cachedTag.style.display = 'none';
+
+  if (!auth.currentUser) {
+    status.style.display = 'none';
+    errorEl.style.display = 'block';
+    errorEl.textContent = 'AI içgörü için giriş yapmalısın.';
+    return;
+  }
+
+  // On-demand kota ön-kontrolu (backend gercek kapiyi tutar, bu UX icin)
+  const allowed = await ensureQuota('linkAnalysis', { showAlert: true });
+  if (!allowed) {
+    if (reqId !== _aiInsightReqId) return;
+    status.style.display = 'none';
+    errorEl.style.display = 'block';
+    errorEl.textContent = 'Link analiz hakkınız dolmuş. Plan sayfasından yükseltebilirsiniz.';
+    return;
+  }
+
+  try {
+    const result = await analyzeProduct({
+      source: 'manual_url',
+      url: a.url,
+      platform: a.platform,
+      category: a.category,
+      salePrice: a.salePrice,
+      cost: a.cost,
+      dropScore: a.scoring.score,
+      marginPct: Math.round((a.scoring.margin.marginPct ?? 0) * 10) / 10,
+      competitorCount: a.competitorCount,
+      monthlySales: a.monthlySales,
+      trend: a.trend
+    });
+
+    if (reqId !== _aiInsightReqId) return;
+
+    const ins = result.insight || {};
+    $('aiReasoning').textContent = ins.scoreReasoning || '';
+    $('aiStrengths').innerHTML = (ins.strengths || []).map(s => `<li>${escHtml(s)}</li>`).join('');
+    $('aiWeaknesses').innerHTML = (ins.weaknesses || []).map(s => `<li>${escHtml(s)}</li>`).join('');
+    $('aiStrategy').textContent = ins.strategy || '';
+    $('aiActions').innerHTML = (ins.actions || []).map(s => `<li>${escHtml(s)}</li>`).join('');
+
+    cachedTag.style.display = result.cached ? 'inline-block' : 'none';
+    status.style.display = 'none';
+    body.style.display = 'block';
+  } catch (err) {
+    if (reqId !== _aiInsightReqId) return;
+    status.style.display = 'none';
+    errorEl.style.display = 'block';
+    if (handleApiError(err)) {
+      errorEl.textContent = err?.body?.message || err?.message || 'Analiz hakkı doldu.';
+    } else {
+      errorEl.textContent = 'AI içgörü alınamadı: ' + (err?.message || 'bilinmeyen hata') + '. Analizi yenilemeyi deneyebilirsin.';
+    }
+  }
+}
+
+function renderScenarios({ basePrice, cost, shipping, commission, competitorCount, monthlySales, trend }) {
+  const configs = [
+    { name: 'Agresif Fiyat',   factor: 0.9,  tag: 'low'  },
+    { name: '⭐ Optimal Fiyat', factor: 1.0,  tag: 'high', highlight: true },
+    { name: 'Premium Fiyat',   factor: 1.2,  tag: 'mid'  },
+    { name: 'Yüksek Hacim',    factor: 0.95, tag: 'high', volume: true }
+  ];
+  const rows = configs.map(c => {
+    const price = Math.round(basePrice * c.factor);
+    const s = calculateDropScore({ salePrice: price, cost, shipping, commission, vat: DEFAULT_VAT, competitorCount, trend, monthlySales });
+    const cls = s.margin.netProfit >= 0 ? 'g' : 'o';
+    const decisionCls = s.signal === 'AL' ? 'sd-buy' : 'sd-wait';
+    const decisionTxt = s.signal === 'AL' ? '✓ ÖNERİLEN' : s.signal === 'UZAK' ? '✗ RİSKLİ' : '⏳ DEĞERLENDİR';
+    const topLabel = c.volume && monthlySales > 0
+      ? `${fmtTL(price)} · ${monthlySales} adet/ay`
+      : `${fmtTL(price)} satış · ${fmtTL(cost)} maliyet`;
+    const netLabel = c.volume && monthlySales > 0 ? fmtTL(s.margin.netProfit * monthlySales) + '/ay' : fmtTL(s.margin.netProfit);
+    const pctLabel = c.volume && monthlySales > 0 ? 'aylık net kâr' : `net marj ${fmtPct(s.margin.marginPct)}`;
+    const barPct = Math.max(5, Math.min(95, s.score));
+    const style = c.highlight ? ' style="border-color:rgba(0,240,160,0.2);"' : '';
+    const nameStyle = c.highlight ? ' style="color:var(--green)"' : '';
+    return `<div class="sc-row"${style}>
+      <div class="sc-row-top"><div class="sc-name"${nameStyle}>${c.name}</div><div class="sc-price">${topLabel}</div></div>
+      <div class="sc-bar-wrap"><div class="sc-bar ${c.tag}" style="width:${barPct}%"></div></div>
+      <div class="sc-row-bottom">
+        <div><div class="sc-net ${cls}">${netLabel}</div><div class="sc-pct ${cls}">${pctLabel}</div></div>
+        <div class="sc-decision ${decisionCls}">${decisionTxt}</div>
+      </div>
+    </div>`;
+  }).join('');
+  $('scenarioRows').innerHTML = rows;
+}
+
+function shortUrl(url) {
+  try { const u = new URL(url); return u.hostname.replace(/^www\./, '') + u.pathname.slice(0, 20) + '…'; }
+  catch { return url.slice(0, 40) + '…'; }
+}
+
+$('linkInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') window.runAnalysis(); });
+['salePriceInp','costInp','shippingInp','competitorInp','monthlyInp'].forEach(id => {
+  $(id).addEventListener('keydown', (e) => { if (e.key === 'Enter') window.runAnalysis(); });
 });
 
-function copyLink() {
-  navigator.clipboard.writeText('DropScout Analizi — Manyetik Araç Tutucu\nNet Kâr: ₺154 | Net Marj: %24,8 | AI Skoru: 88\ndropscout.tr/analiz/share/TR-2847193').catch(()=>{});
-  event.target.textContent = '✓ Kopyalandı';
-  setTimeout(() => event.target.textContent = '📋 Kopyala', 2000);
-}
+window.copyLink = function copyLink(e) {
+  const a = window._lastAnalysis;
+  const text = a
+    ? `DropScout Analizi — ${CATEGORY_LABEL[a.category] || a.category}\nNet Kâr: ${fmtTL(a.scoring.margin.netProfit)} | Net Marj: ${fmtPct(a.scoring.margin.marginPct)} | DropScore: ${a.scoring.score}/100\n${a.url}`
+    : 'DropScout — henüz analiz yok.';
+  navigator.clipboard.writeText(text).catch(() => {});
+  const tgt = e && e.target; if (tgt) { tgt.textContent = '✓ Kopyalandı'; setTimeout(() => tgt.textContent = '📋 Kopyala', 2000); }
+};
 
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -1930,7 +2212,6 @@ document.querySelectorAll('.nav-item[data-nav-group]').forEach(item => {
         void target.offsetWidth;
         target.classList.add('section-flash');
         target.scrollIntoView({behavior:'smooth', block:'start'});
-        if (targetId === 'section-link-analizi') { startInfiniteScramble(); }
       }
     }
   });
@@ -2742,6 +3023,75 @@ document.addEventListener('visibilitychange', () => {
 
 startTrendRadarRotation();
 
+// ─── Trend Radar / diğer sayfalardan gelen query string ile formu önceden doldur
+// Trend Radar action linkleri: ?url=&platform=&category=
+(function applyIncomingParams(){
+  const params = new URLSearchParams(window.location.search);
+  const url      = params.get('url');
+  const platform = params.get('platform');
+  const category = params.get('category');
+  if (!url && !platform && !category) return;
+
+  // Trend Radar TRACKED_CATEGORIES → dropscout select option mapping
+  const CATEGORY_MAP = {
+    'elektronik':   'elektronik',
+    'ev-yasam':     'ev-yasam',
+    'kozmetik':     'kozmetik',
+    'giyim':        'moda',
+    'spor-outdoor': 'spor',
+    'anne-bebek':   'anne-bebek',
+    'kirtasiye':    'kirtasiye',
+    'otomotiv':     'otomotiv',
+    'supermarket':  'supermarket',
+    'kitap-hobi':   'diger',
+    'mobilya':      'diger',
+    'aksesuar':     'diger',
+    'oyuncak':      'diger',
+    'mutfak':       'ev-yasam',
+    'evcil-hayvan': 'diger'
+  };
+
+  if (url) {
+    const inp = document.getElementById('linkInput');
+    if (inp) inp.value = url;
+  }
+  if (platform) {
+    const sel = document.getElementById('platformSel');
+    if (sel) {
+      const valid = Array.from(sel.options).some(o => o.value === platform);
+      if (valid) sel.value = platform;
+    }
+  }
+  if (category) {
+    const sel = document.getElementById('categorySel');
+    if (sel) {
+      const mapped = CATEGORY_MAP[category] || category;
+      const valid = Array.from(sel.options).some(o => o.value === mapped);
+      if (valid) sel.value = mapped;
+    }
+  }
+
+  // Section'a kaydır + linkInput'a focus
+  const link = document.getElementById('linkInput');
+  if (link) {
+    link.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    link.focus({ preventScroll: true });
+  }
+})();
+
+/* Sayfa açılışı — analiz sonuç alanını Matrix ile aç (placeholder *** değerleri) */
+(function bootstrapMatrix(){
+  // Trend Radar'dan gelen kullanıcı için linkInput dolu olabilir → analiz tetiklenmeden de
+  // sonuç alanının başlangıç matrix'iyle açılmasını istiyoruz; çünkü kullanıcı henüz Analiz Et'e basmadı.
+  const start = () => {
+    try { initialMatrixReveal(); } catch (e) { console.warn('Matrix reveal hatası:', e); }
+  };
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(start, 220);
+  } else {
+    window.addEventListener('DOMContentLoaded', () => setTimeout(start, 220), { once:true });
+  }
+})();
 
 </script>
 </body>

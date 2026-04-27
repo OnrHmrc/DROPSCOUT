@@ -23,11 +23,21 @@ export default defineConfig({
         onboarding:     resolve(__dirname, 'onboarding.html'),
         index:          resolve(__dirname, 'index.html'),
         profil:         resolve(__dirname, 'profil.html'),
+        pricing:        resolve(__dirname, 'pricing.html'),
       }
     },
     outDir: 'dist',
   },
   server: {
     open: '/dropscout.html',
+    proxy: {
+      // Lokal geliştirmede /api/** → Firebase Functions emulator (5001)
+      // Prod'da Firebase Hosting rewrite ile aynı path'e yönlenir
+      '/api': {
+        target: 'http://127.0.0.1:5001/dropscoutapp/europe-west1/api',
+        changeOrigin: true,
+        rewrite: (path) => path
+      }
+    }
   }
 });

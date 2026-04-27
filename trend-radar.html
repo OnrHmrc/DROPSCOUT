@@ -6,7 +6,6 @@
   <title>DropScout — Trend Radar</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&family=Geist+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script>
-  // Tema anında uygula (FOUC/flaş önleme)
   (function(){
     var p=localStorage.getItem('dropscout-theme-preference')||'system';
     var t=p==='system'?(window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):p;
@@ -16,153 +15,312 @@
 <link rel="stylesheet" href="/src/css/main.css">
 <script type="module" src="/src/js/main.js"></script>
   <style>
-    /* ═══════════════════════════════════
-       TREND RADAR — Page-Specific Styles
-       ═══════════════════════════════════ */
     .app{min-height:100vh;}
     .main{padding-bottom:28px;}
+
+    /* Topbar */
     .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:22px;}
     .topbar-left{display:flex;align-items:flex-start;gap:12px;}
-    .page-title{font-size:19px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px;}
+    .page-title{font-size:19px;font-weight:700;letter-spacing:-0.3px;margin-bottom:4px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+    .page-update{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:.5px;font-weight:500;}
     .page-meta{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:0.5px;line-height:1.7;}
     .page-description{font-size:12px;color:var(--muted);line-height:1.7;margin-top:8px;max-width:780px;}
     .top-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;justify-content:flex-end;}
-    .btn{padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-size:10px;font-family:'Geist Mono',monospace;color:var(--muted);cursor:pointer;transition:all 0.15s;box-shadow:var(--key-shadow);}
+    .refresh-btn{display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-size:10px;font-family:'Geist Mono',monospace;color:var(--muted);cursor:pointer;transition:all 0.15s;box-shadow:var(--key-shadow);}
+    .refresh-btn:hover{border-color:rgba(37,99,235,0.16);color:var(--blue);background:var(--blue-dim);}
+    .refresh-btn:disabled{opacity:.55;cursor:not-allowed;}
+    .btn{padding:7px 12px;background:var(--surface);border:1px solid var(--border);border-radius:12px;font-size:10px;font-family:'Geist Mono',monospace;color:var(--muted);cursor:pointer;transition:.15s;box-shadow:var(--key-shadow);text-decoration:none;display:inline-flex;align-items:center;}
     .btn:hover{border-color:rgba(37,99,235,0.16);color:var(--blue);background:var(--blue-dim);}
     .btn.primary{background:var(--blue);color:#fff;border-color:transparent;box-shadow:var(--button-shadow);}
 
+    /* Stat bar (dashboard'daki .stat-box deseni) */
     .card{background:var(--surface);backdrop-filter:blur(12px);border:1px solid var(--border);border-radius:14px;box-shadow:var(--key-shadow);}
     .stat-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
-    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px 16px;position:relative;overflow:hidden;box-shadow:var(--key-shadow);}
-    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;}
-    .stat-card.accent-green::before{background:linear-gradient(90deg,var(--green),transparent);}
+    .stat-card{
+      background:
+        radial-gradient(circle at 100% 100%, color-mix(in srgb,var(--blue) 7%, transparent), transparent 38%),
+        linear-gradient(180deg, color-mix(in srgb,var(--surface) 82%, var(--panel-highlight) 18%), var(--surface));
+      border:1px solid var(--border);
+      border-radius:11px;
+      padding:14px 16px 16px;
+      min-height:124px;
+      position:relative;
+      overflow:hidden;
+      isolation:isolate;
+      box-shadow:var(--key-shadow);
+      transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+    }
+    .stat-card:hover{transform:translateY(-1px);border-color:var(--border2);}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;z-index:1;}
+    .stat-card::after{
+      content:'';
+      position:absolute;
+      right:-24px;
+      bottom:-28px;
+      width:118px;
+      height:118px;
+      border-radius:999px;
+      background:radial-gradient(circle, color-mix(in srgb,var(--panel-highlight) 35%, transparent), transparent 68%);
+      filter:blur(8px);
+      pointer-events:none;
+      z-index:0;
+    }
     .stat-card.accent-blue::before{background:linear-gradient(90deg,var(--blue),transparent);}
-    .stat-card.accent-orange::before{background:linear-gradient(90deg,var(--orange),transparent);}
+    .stat-card.accent-green::before{background:linear-gradient(90deg,var(--green),transparent);}
+    .stat-card.accent-red::before{background:linear-gradient(90deg,var(--red),transparent);}
     .stat-card.accent-yellow::before{background:linear-gradient(90deg,var(--yellow),transparent);}
     .stat-card.accent-purple::before{background:linear-gradient(90deg,var(--purple),transparent);}
     .live{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(5,150,105,.28);animation:pulse 1.8s infinite;flex-shrink:0;}
     @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(5,150,105,.28)}70%{box-shadow:0 0 0 8px rgba(5,150,105,0)}100%{box-shadow:0 0 0 0 rgba(5,150,105,0)}}
+    .stat-label,.stat-value,.stat-sub{position:relative;z-index:2;}
     .stat-label{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
     .stat-value{font-size:22px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:5px;}
-    .stat-value.green{color:var(--green)} .stat-value.blue{color:var(--blue)} .stat-value.orange{color:var(--orange)} .stat-value.yellow{color:var(--yellow)} .stat-value.purple{color:var(--purple)}
-    .stat-sub{font-size:10px;color:var(--muted2);}
+    .stat-value.green{color:var(--green)} .stat-value.blue{color:var(--blue)} .stat-value.red{color:var(--red)} .stat-value.yellow{color:var(--yellow)} .stat-value.purple{color:var(--purple)}
+    .stat-sub{font-size:10px;color:var(--muted2);max-width:50%;line-height:1.45;}
 
+    /* Şeffaf SVG animasyonu (dashboard'daki .kpi-motion gibi) */
+    .stat-motion{
+      position:absolute;
+      right:-10px;
+      bottom:-10px;
+      width:64%;
+      height:90%;
+      min-width:120px;
+      opacity:.30;
+      pointer-events:none;
+      z-index:1;
+      transition:opacity .22s ease, transform .22s ease;
+    }
+    .stat-card:hover .stat-motion{opacity:.42;transform:scale(1.03);}
+    .stat-motion svg{width:100%;height:100%;overflow:visible;}
+    .stat-card.accent-blue   .stat-motion{color:var(--blue);}
+    .stat-card.accent-green  .stat-motion{color:var(--green);}
+    .stat-card.accent-red    .stat-motion{color:var(--red);}
+    .stat-card.accent-yellow .stat-motion{color:var(--yellow);}
+    .stat-card.accent-purple .stat-motion{color:var(--purple);}
+
+    /* Animasyon türleri */
+    @keyframes barPulse{0%,100%{transform:scaleY(0.6);opacity:.5}50%{transform:scaleY(1);opacity:1}}
+    @keyframes arrowRise{0%,100%{transform:translateY(2px)}50%{transform:translateY(-3px)}}
+    @keyframes arrowFall{0%,100%{transform:translateY(-3px)}50%{transform:translateY(3px)}}
+    @keyframes wavyDraw{0%{stroke-dashoffset:120}100%{stroke-dashoffset:0}}
+    @keyframes radarSweep{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    @keyframes orbitDot{0%,100%{r:2}50%{r:3.5}}
+    .sm-bar{transform-origin:bottom center;animation:barPulse 1.8s ease-in-out infinite;}
+    .sm-bar.b2{animation-delay:.18s;}
+    .sm-bar.b3{animation-delay:.36s;}
+    .sm-bar.b4{animation-delay:.54s;}
+    .sm-bar.b5{animation-delay:.72s;}
+    .sm-arrow-up{animation:arrowRise 2.2s ease-in-out infinite;}
+    .sm-arrow-down{animation:arrowFall 2.2s ease-in-out infinite;}
+    .sm-wave{stroke-dasharray:120;animation:wavyDraw 3s linear infinite;}
+    .sm-radar{transform-origin:center;animation:radarSweep 4.6s linear infinite;}
+    .sm-dot{animation:orbitDot 1.6s ease-in-out infinite;}
+    .sm-dot.d2{animation-delay:.4s;}
+    .sm-dot.d3{animation-delay:.8s;}
+
+    /* 5. kart — Kategori Nabzı (içerik kutuda ortalı, arkada centered sparkline backdrop) */
+    .ticker-card{position:relative;overflow:hidden;}
+    .ticker-card::after{content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(99,102,241,.10) 50%,transparent 70%);background-size:300% 100%;animation:tickerShift 6s linear infinite;pointer-events:none;}
+    @keyframes tickerShift{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    /* Sparkline arka plan: tüm kart genişliğine yay, dikey ortalanmış, düşük opaklık */
+    .ticker-card .ticker-spark{position:absolute;left:8px;right:8px;top:50%;width:auto;height:46%;transform:translateY(-50%);opacity:.18;pointer-events:none;}
+    /* İçerik: yatay+dikey ortalı, fade animasyonu ile değişim */
+    .ticker-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:4px;max-width:100%;transition:opacity .28s ease;will-change:opacity;}
+    .ticker-content.fading{opacity:0;}
+    .ticker-name{font-size:13px;font-weight:800;letter-spacing:-.3px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;max-width:100%;}
+    .ticker-change{display:inline-flex;align-items:center;justify-content:center;gap:5px;font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.4px;}
+    .ticker-change.up{color:var(--green);}
+    .ticker-change.down{color:var(--red);}
+    .ticker-change.flat{color:var(--muted);}
+    .ticker-arrow{font-size:11px;line-height:1;}
+    .ticker-avg-line{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.5px;}
+    .ticker-second{margin-top:3px;display:flex;flex-direction:row;justify-content:center;align-items:center;gap:14px;font-family:'Geist Mono',monospace;font-size:8.5px;letter-spacing:.4px;}
+    .ticker-second .down-cat{color:var(--red);}
+    .ticker-second .up-cat{color:var(--green);}
+    .ticker-second .flat-cat{color:var(--muted);}
+    .ticker-second .up-cat,.ticker-second .down-cat,.ticker-second .flat-cat{transition:opacity .25s ease;}
+    /* Rotasyon ilerleme noktaları (alt orta) */
+    .ticker-dots{position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:center;gap:4px;z-index:2;pointer-events:none;}
+    .ticker-dots span{width:4px;height:4px;border-radius:50%;background:color-mix(in srgb,var(--muted) 35%,transparent);transition:background .25s ease,transform .25s ease;}
+    .ticker-dots span.active{background:var(--purple);transform:scale(1.35);}
+
+    /* Bölüm başlığı */
     .section{padding:18px;}
-    .section-head,.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
-    .section-head{margin-bottom:14px;}
-    .section-title,.card-head h3{margin:0;font-size:13px;font-weight:700;}
+    .section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+    .section-title{margin:0;font-size:13px;font-weight:700;}
     .tag{padding:3px 8px;border-radius:4px;font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:.5px;}
-    .tag.green{background:var(--green-dim);color:var(--green)}
-    .tag.blue{background:var(--blue-dim);color:var(--blue)}
-    .tag.orange{background:var(--orange-dim);color:var(--orange)}
+    .tag.green{background:var(--green-dim);color:var(--green)} .tag.blue{background:var(--blue-dim);color:var(--blue)} .tag.orange{background:var(--orange-dim);color:var(--orange)} .tag.red{background:var(--red-dim);color:var(--red)} .tag.purple{background:var(--purple-dim);color:var(--purple)} .tag.muted{background:color-mix(in srgb,var(--text) 6%,transparent);color:var(--muted);}
 
-    .content{display:grid;grid-template-columns:minmax(0,1.26fr) minmax(320px,.94fr);gap:14px;align-items:start;}
-    .right-col{position:sticky;top:24px;max-height:calc(100vh - 48px);overflow-y:auto;scrollbar-width:none;display:flex;flex-direction:column;gap:12px;}
-    .right-col::-webkit-scrollbar{display:none;}
-
-    .toolbar-wrap{position:relative;margin-bottom:12px;}
-    .toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+    /* Toolbar (view chip'leri + kategori filter) */
+    .toolbar-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
     .filter-chip{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:linear-gradient(180deg,var(--nav-item-bg-start) 0%, var(--nav-item-bg-end) 100%);color:var(--muted);font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.18s;box-shadow:var(--key-shadow);}
-    .filter-chip:hover{border-color:rgba(37,99,235,0.16);background:var(--blue-dim);color:var(--blue);}
-    .filter-chip.active{background:var(--blue-dim);border-color:rgba(37,99,235,0.18);color:var(--blue);box-shadow:var(--key-shadow-strong);}
+    .filter-chip:hover{border-color:rgba(37,99,235,.16);background:var(--blue-dim);color:var(--blue);}
+    .filter-chip.active{background:var(--blue-dim);border-color:rgba(37,99,235,.18);color:var(--blue);box-shadow:var(--key-shadow-strong);}
     .chip-count{font-family:'Geist Mono',monospace;font-size:8px;padding:2px 6px;border-radius:999px;background:color-mix(in srgb, var(--text) 6%, transparent);color:var(--muted);}
-    .filter-chip.active .chip-count{background:rgba(37,99,235,0.12);color:var(--blue);}
-    .platform-dropdown{position:relative;}
-    .caret{font-size:10px;line-height:1;color:var(--muted2);transition:.18s;}
-    .dropdown-panel{position:absolute;top:44px;right:0;min-width:250px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 22px 46px -28px rgba(15,23,42,.26);backdrop-filter:blur(12px);z-index:20;}
-    .dropdown-title{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
-    .dropdown-list{display:grid;gap:6px;}
-    .dropdown-option{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:.18s;font-size:11px;font-weight:700;color:var(--text);}
-    .dropdown-option:hover,.dropdown-option.active{border-color:rgba(37,99,235,.16);background:var(--blue-dim);}
-    .check-badge{padding:4px 8px;border-radius:999px;background:var(--blue-dim);color:var(--blue);font-family:'Geist Mono',monospace;font-size:8px;}
-    .dropdown-actions{display:flex;gap:8px;margin-top:10px;}
-    .dropdown-btn{flex:1;height:34px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);font-size:10px;font-weight:800;cursor:pointer;transition:.15s;color:var(--text);}
-    .dropdown-btn:hover{border-color:rgba(37,99,235,.16);background:var(--blue-dim);color:var(--blue);}
-    .dropdown-btn.primary{background:var(--blue);color:#fff;border:none;}
+    .filter-chip.active .chip-count{background:rgba(37,99,235,.12);color:var(--blue);}
 
-    .listing-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
-    .listing-count{font-size:11px;color:var(--muted);}
-    .listing-count strong{color:var(--text);}
-    .listing-sort{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);}
-    .product-list{display:grid;gap:10px;}
-    .product{display:grid;grid-template-columns:88px 1fr 124px;gap:14px;padding:14px;border-radius:16px;border:1px solid var(--border);background:linear-gradient(180deg,var(--surface),var(--surface2));box-shadow:var(--key-shadow);transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;cursor:pointer;}
-    .product:hover{transform:translateY(-2px);box-shadow:var(--key-shadow-strong);border-color:rgba(37,99,235,.16);}
-    .product.active{border-color:rgba(37,99,235,.26);box-shadow:0 16px 40px -24px rgba(37,99,235,.32);background:linear-gradient(180deg,rgba(37,99,235,.08),var(--surface) 24%,var(--surface2));}
-    .thumb{width:88px;height:88px;border-radius:14px;position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(37,99,235,.12),rgba(99,102,241,.20));display:flex;align-items:flex-end;justify-content:flex-start;padding:9px;flex-shrink:0;}
-    .thumb::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%, rgba(255,255,255,.32), transparent 44%);}
-    .thumb-label{position:relative;z-index:1;color:rgba(255,255,255,.9);font-weight:800;font-size:10px;letter-spacing:.2px;line-height:1.3;}
-    .p-top{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:6px;}
-    .p-title{font-size:13px;font-weight:800;letter-spacing:-.3px;}
-    .pill{padding:4px 8px;border-radius:999px;font-family:'Geist Mono',monospace;font-size:8px;}
-    .pill.blue{background:var(--blue-dim);color:var(--blue)} .pill.green{background:var(--green-dim);color:var(--green)} .pill.orange{background:var(--orange-dim);color:var(--orange)} .pill.red{background:var(--red-dim);color:var(--red)}
-    .p-desc{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:9px;}
-    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
-    .metric{padding:7px 9px;border-radius:11px;background:var(--surface);border:1px solid var(--border);}
-    .metric small{display:block;font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
-    .metric strong{font-size:12px;} .metric strong.green{color:var(--green)} .metric strong.orange{color:var(--orange)} .metric strong.blue{color:var(--blue)} .metric strong.red{color:var(--red)} .metric strong.yellow{color:var(--yellow)}
-    .p-side{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:8px;}
-    .score{min-width:88px;text-align:right;padding:10px 11px;border-radius:15px;background:rgba(5,150,105,.06);border:1px solid rgba(5,150,105,.14);}
-    .score small{display:block;font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
-    .score strong{font-size:26px;color:var(--green);letter-spacing:-1px;}
-    .score.yellow{background:rgba(217,119,6,.06);border-color:rgba(217,119,6,.14)} .score.yellow strong{color:var(--yellow)}
-    .score.orange{background:rgba(234,88,12,.06);border-color:rgba(234,88,12,.14)} .score.orange strong{color:var(--orange)}
-    .verdict{font-size:11px;font-weight:800;}
-    .verdict.good{color:var(--green)} .verdict.mid{color:var(--yellow)} .verdict.bad{color:var(--orange)}
-    .p-link{padding:8px 11px;border-radius:12px;border:1px solid rgba(99,102,241,.14);background:var(--purple-dim);color:var(--purple);font-size:10px;font-weight:800;cursor:pointer;transition:.15s;text-align:center;white-space:nowrap;}
-    .p-link:hover{background:rgba(99,102,241,.18);}
+    /* Kategori dropdown */
+    .cat-dropdown{position:relative;}
+    .cat-trigger{height:34px;padding:0 14px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:11px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.15s;box-shadow:var(--key-shadow);}
+    .cat-trigger:hover{border-color:rgba(37,99,235,.16);color:var(--blue);}
+    .cat-trigger.active{border-color:rgba(37,99,235,.26);color:var(--blue);background:var(--blue-dim);}
+    .cat-trigger .caret{font-size:9px;color:var(--muted2);}
+    .cat-trigger .cat-count{font-family:'Geist Mono',monospace;font-size:8px;padding:2px 7px;border-radius:999px;background:rgba(37,99,235,.12);color:var(--blue);}
+    .cat-panel{position:absolute;top:42px;left:0;min-width:280px;max-width:340px;padding:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:0 22px 46px -28px rgba(15,23,42,.32);backdrop-filter:blur(12px);z-index:30;}
+    .cat-panel-title{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+    .cat-panel-list{display:grid;gap:5px;max-height:300px;overflow-y:auto;}
+    .cat-option{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text);transition:.15s;border:1px solid transparent;}
+    .cat-option:hover{background:var(--blue-dim);border-color:rgba(37,99,235,.12);}
+    .cat-option.active{background:var(--blue-dim);color:var(--blue);}
+    .cat-checkbox{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--border);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s;}
+    .cat-option.active .cat-checkbox{background:var(--blue);border-color:var(--blue);color:#fff;font-size:9px;font-weight:800;}
+    .cat-panel-foot{display:flex;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+    .cat-panel-btn{flex:1;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);font-size:10px;font-weight:800;cursor:pointer;color:var(--text);transition:.15s;}
+    .cat-panel-btn:hover{border-color:rgba(37,99,235,.16);background:var(--blue-dim);color:var(--blue);}
+    .cat-panel-btn.primary{background:var(--blue);color:#fff;border-color:transparent;}
 
-    .empty-state{padding:40px 20px;text-align:center;color:var(--muted);}
-    .empty-state .empty-icon{font-size:28px;margin-bottom:10px;}
-    .empty-state strong{display:block;font-size:14px;color:var(--text);margin-bottom:6px;}
-    .empty-state p{font-size:12px;line-height:1.7;margin:0;}
+    /* Ürün listesi (eski "Canlı Fırsat Akışı" tasarımı uyumlu) */
+    .listing-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px;font-size:11px;color:var(--muted);}
+    .listing-meta strong{color:var(--text);}
+    .listing-sort{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:.5px;}
 
+    .product-list{display:flex;flex-direction:column;gap:10px;}
+    /* Yeni layout: 5 sütun — thumb / info / saturation / AI score / butonlar
+       Saturation hücresi geniş (boş alanı doldurur), içeriği dikey + yatay ortalanır */
+    .product-row{display:grid;grid-template-columns:108px minmax(0,1fr) 420px 108px 156px;gap:10px;padding:10px;border-radius:14px;border:1px solid var(--border);background:linear-gradient(180deg,var(--surface),var(--surface2));box-shadow:var(--key-shadow);transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;align-items:stretch;}
+    .product-row:hover{transform:translateY(-2px);box-shadow:var(--key-shadow-strong);border-color:rgba(37,99,235,.16);}
+
+    /* Thumbnail */
+    .pr-thumb{position:relative;width:108px;height:108px;border-radius:11px;overflow:hidden;flex-shrink:0;display:flex;align-items:flex-end;padding:8px;}
+    .pr-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+    .pr-thumb::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 20% 20%, rgba(255,255,255,.32), transparent 44%);}
+    .pr-thumb-label{position:relative;z-index:1;color:rgba(255,255,255,.92);font-weight:800;font-size:9px;letter-spacing:.5px;line-height:1.3;text-transform:uppercase;}
+    .pr-thumb-fallback{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.85);font-weight:800;font-size:22px;letter-spacing:-1px;}
+    .pr-platform{position:absolute;top:6px;right:6px;z-index:1;padding:2px 6px;border-radius:999px;background:rgba(15,23,42,.62);color:#fff;font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:.5px;}
+
+    /* Orta panel: kompakt — başlık + tek satır metrikler (chip benzeri) */
+    .pr-body{display:flex;flex-direction:column;gap:6px;min-width:0;justify-content:space-between;height:108px;}
+    .pr-top{display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
+    .pr-name{font-size:12.5px;font-weight:800;letter-spacing:-.3px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0;}
+    .pr-pill{padding:3px 7px;border-radius:999px;font-family:'Geist Mono',monospace;font-size:8px;letter-spacing:.4px;flex-shrink:0;}
+    .pr-pill.green{background:var(--green-dim);color:var(--green);}
+    .pr-pill.blue{background:var(--blue-dim);color:var(--blue);}
+    .pr-pill.orange{background:var(--orange-dim);color:var(--orange);}
+    .pr-pill.red{background:var(--red-dim);color:var(--red);}
+    .pr-pill.purple{background:var(--purple-dim);color:var(--purple);}
+    .pr-meta-line{font-family:'Geist Mono',monospace;font-size:8.5px;color:var(--muted);letter-spacing:.5px;}
+    .pr-meta-line .sep{margin:0 5px;color:var(--muted2);}
+    .pr-metrics-line{display:flex;gap:5px;flex-wrap:wrap;}
+    .pr-metric-chip{display:flex;align-items:center;gap:4px;padding:3px 7px;border-radius:7px;background:var(--surface);border:1px solid var(--border);font-family:'Geist Mono',monospace;font-size:8.5px;color:var(--muted);letter-spacing:.4px;}
+    .pr-metric-chip strong{color:var(--text);font-weight:800;}
+    .pr-metric-chip.gap{background:var(--purple-dim);border-color:rgba(99,102,241,.18);color:var(--purple);}
+    .pr-metric-chip.gap strong{color:var(--purple);}
+    .pr-metric-chip.sold strong{color:var(--green);}
+    .pr-metric-chip.fav strong{color:var(--orange);}
+    .pr-metric-chip.review strong{color:var(--blue);}
+    .pr-metric-chip.cart strong{color:var(--yellow);}
+
+    /* 4 pazaryeri doygunluk grafiği — geniş, dikey+yatay ortalı, 3 düz renkli durum */
+    .pr-saturation{display:flex;flex-direction:column;gap:9px;justify-content:center;align-items:stretch;height:108px;padding:12px 28px;border-radius:11px;background:linear-gradient(180deg,var(--surface),var(--surface2));border:1px solid var(--border);position:relative;overflow:hidden;}
+    .pr-saturation::before{
+      content:'';position:absolute;left:0;right:0;top:0;height:1.5px;
+      background:linear-gradient(90deg,#10b981 0%,#eab308 50%,#ef4444 100%);
+      opacity:.55;
+    }
+    .pr-sat-title{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.9px;text-transform:uppercase;text-align:center;margin-bottom:4px;font-weight:700;}
+    .pr-sat-row{display:grid;grid-template-columns:96px 1fr 52px;gap:12px;align-items:center;font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--muted);}
+    .pr-sat-name{font-weight:800;letter-spacing:.3px;color:var(--text);}
+    .pr-sat-bar{
+      position:relative;
+      height:11px;
+      border-radius:999px;
+      background:color-mix(in srgb,var(--text) 7%,transparent);
+      overflow:hidden;
+      box-shadow:inset 0 1px 2px rgba(0,0,0,.06);
+    }
+    .pr-sat-fill{
+      position:absolute;
+      left:0;top:0;bottom:0;
+      border-radius:999px;
+      transition:width .5s cubic-bezier(.34,1.56,.64,1);
+    }
+    /* Tek renk durumlar: az=yeşil, orta=sarı, çok=kırmızı */
+    .pr-sat-fill.low{background:#10b981;}
+    .pr-sat-fill.mid{background:#eab308;}
+    .pr-sat-fill.high{background:#ef4444;}
+    .pr-sat-pct{text-align:right;font-weight:800;color:var(--text);font-size:11px;}
+    .pr-sat-pct.green{color:#10b981;}
+    .pr-sat-pct.yellow{color:#eab308;}
+    .pr-sat-pct.red{color:#ef4444;}
+
+    /* AI score kartı — thumb boyutunda kare */
+    .pr-score{width:108px;height:108px;border-radius:11px;background:rgba(5,150,105,.06);border:1px solid rgba(5,150,105,.14);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:8px;}
+    .pr-score small{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+    .pr-score strong{font-size:32px;font-weight:800;color:var(--green);letter-spacing:-1.5px;line-height:1;}
+    .pr-score .verdict{font-size:9px;font-weight:800;letter-spacing:.5px;margin-top:2px;color:var(--green);}
+    .pr-score.yellow{background:rgba(217,119,6,.06);border-color:rgba(217,119,6,.14);}
+    .pr-score.yellow strong, .pr-score.yellow .verdict{color:var(--yellow);}
+    .pr-score.orange{background:rgba(234,88,12,.06);border-color:rgba(234,88,12,.14);}
+    .pr-score.orange strong, .pr-score.orange .verdict{color:var(--orange);}
+
+    /* 3 buton dikey, eşit yükseklik (kart yüksekliği 108px → her buton ~33px) */
+    .pr-actions{display:grid;grid-template-rows:1fr 1fr 1fr;gap:5px;height:108px;}
+    .pr-action{padding:0 8px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;}
+    .pr-action:hover{border-color:rgba(37,99,235,.16);background:var(--blue-dim);color:var(--blue);}
+    .pr-action .pa-icon{font-size:13px;line-height:1;}
+
+    /* Pagination — eski tasarımdaki chip stili */
     .pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;flex-wrap:wrap;}
     .page-btn{min-width:36px;height:36px;padding:0 10px;border-radius:12px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:800;color:var(--muted);cursor:pointer;box-shadow:var(--key-shadow);transition:.15s;}
     .page-btn.active,.page-btn:hover{background:var(--blue-dim);border-color:rgba(37,99,235,.18);color:var(--blue);}
     .page-info{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);padding:0 4px;}
 
-    .selected-head,.rail-card,.signal-card{padding:15px;border-radius:16px;background:var(--surface);border:1px solid var(--border);box-shadow:var(--key-shadow);}
-    .selected-head{margin-bottom:0;}
-    .selected-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;}
-    .selected-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
-    .selected-title strong{font-size:14px;letter-spacing:-.3px;}
-    .selected-sub{font-size:11px;color:var(--muted);line-height:1.7;}
-    .insight-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-    .rail-card{display:flex;flex-direction:column;}
-    .rail-body{display:flex;flex-direction:column;gap:8px;flex:1;}
-    .analysis{padding:11px 13px;border-radius:13px;background:var(--surface2);border-left:2px solid var(--green);font-size:11px;line-height:1.8;color:var(--muted);}
-    .analysis.orange{border-left-color:var(--orange)} .analysis.red{border-left-color:var(--red)}
-    .kv{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 11px;border-radius:12px;border:1px solid var(--border);background:var(--surface2);font-size:11px;}
-    .kv span:first-child{color:var(--muted)}
-    .kv strong.green{color:var(--green)} .kv strong.orange{color:var(--orange)} .kv strong.blue{color:var(--blue)} .kv strong.yellow{color:var(--yellow)}
-    .action-list{display:grid;gap:7px;margin-top:10px;}
-    .action{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border-radius:13px;border:1px solid var(--border);background:var(--surface);font-size:11px;font-weight:700;cursor:pointer;transition:.15s;gap:8px;}
-    .action:hover{border-color:rgba(37,99,235,.16);background:var(--blue-dim);color:var(--blue);}
-    .action-arrow{color:var(--muted2);font-size:11px;flex-shrink:0;transition:.15s;}
-    .action:hover .action-arrow{color:var(--blue);transform:translateX(2px);}
-    .signal-bars{display:grid;gap:11px;}
-    .bar-item .top{display:flex;justify-content:space-between;gap:8px;font-size:11px;margin-bottom:5px;}
-    .bar-item .top span:first-child{color:var(--muted)}
-    .bar-item .top strong{font-family:'Geist Mono',monospace;font-size:9px;}
-    .bar-track{height:7px;border-radius:999px;background:color-mix(in srgb, var(--text) 8%, transparent);overflow:hidden;}
-    .bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .4s cubic-bezier(.34,1.56,.64,1);}
-    .bar-fill.risk{background:linear-gradient(90deg,var(--yellow),var(--red));}
-    @keyframes panelFade{0%{opacity:.6;transform:translateY(3px)}100%{opacity:1;transform:translateY(0)}}
-    .panel-flash{animation:panelFade .25s ease forwards;}
+    /* Empty / skeleton */
+    .empty-state{padding:40px 20px;text-align:center;color:var(--muted);}
+    .empty-state .empty-icon{font-size:28px;margin-bottom:10px;}
+    .empty-state strong{display:block;font-size:14px;color:var(--text);margin-bottom:6px;}
+    .empty-state p{font-size:12px;line-height:1.7;margin:0 auto;max-width:380px;}
+    .skeleton-row{height:132px;border-radius:14px;border:1px solid var(--border);background:linear-gradient(90deg,var(--surface) 0%,var(--surface2) 50%,var(--surface) 100%);background-size:200% 100%;animation:shimmer 1.4s infinite;}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-    @media (max-width:1260px){
-      .content{grid-template-columns:1fr;}
-      .right-col{position:static;max-height:none;overflow-y:visible;}
+    /* Hata banner'ı */
+    .error-banner{padding:14px;border-radius:14px;background:var(--red-dim);border:1px solid rgba(220,38,38,.18);color:var(--red);font-size:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+    .error-banner button{padding:6px 12px;border-radius:9px;border:1px solid currentColor;background:transparent;color:inherit;font-size:11px;font-weight:700;cursor:pointer;}
+
+    /* Responsive */
+    @media (max-width:1100px){
       .stat-bar{grid-template-columns:repeat(3,1fr);}
-      .insight-grid{grid-template-columns:1fr 1fr;}
+    }
+    @media (max-width:1280px){
+      .product-row{grid-template-columns:96px minmax(0,1fr) 360px 96px 138px;}
+      .pr-thumb{width:96px;height:96px;}
+      .pr-body{height:96px;}
+      .pr-saturation{height:96px;padding:10px 22px;}
+      .pr-score{width:96px;height:96px;}
+      .pr-score strong{font-size:28px;}
+      .pr-actions{height:96px;}
+    }
+    @media (max-width:1100px){
+      .stat-bar{grid-template-columns:repeat(3,1fr);}
+      .product-row{grid-template-columns:88px minmax(0,1fr) 88px 138px;grid-template-rows:auto auto;}
+      .pr-thumb{width:88px;height:88px;}
+      .pr-body{height:88px;}
+      .pr-saturation{grid-column:1 / -1;height:auto;display:grid;grid-template-columns:repeat(2,1fr);gap:6px 14px;padding:10px 12px;}
+      .pr-saturation .pr-sat-title{grid-column:1 / -1;text-align:left;margin-bottom:2px;}
+      .pr-score{width:88px;height:88px;}
+      .pr-score strong{font-size:26px;}
+      .pr-actions{height:88px;}
     }
     @media (max-width:900px){
       .topbar{flex-direction:column;gap:14px;}
       .stat-bar{grid-template-columns:repeat(2,1fr);}
-      .metrics,.insight-grid{grid-template-columns:1fr;}
-      .product{grid-template-columns:1fr;}
-      .p-side{align-items:flex-start;flex-direction:row;}
-      .dropdown-panel{left:0;right:auto;min-width:100%;}
+      .product-row{grid-template-columns:88px 1fr;grid-template-rows:auto auto auto auto;}
+      .pr-saturation{grid-column:1 / -1;}
+      .pr-score{grid-column:1 / -1;width:auto;height:auto;flex-direction:row;justify-content:flex-start;gap:12px;padding:10px 14px;}
+      .pr-score strong{font-size:26px;}
+      .pr-actions{grid-column:1 / -1;height:auto;grid-template-rows:none;grid-template-columns:repeat(3,1fr);}
+      .pr-action{padding:10px 8px;}
     }
     @media (max-width:700px){
       .stat-bar{grid-template-columns:1fr;}
@@ -173,7 +331,6 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <div class="app">
 
-    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="logo"><a class="logo-link" href="./dropscout.html"><div class="logo-icon">🎯</div><div class="logo-text">Drop<span>Scout</span></div></a></div>
 
@@ -217,667 +374,992 @@
             </label>
           </div>
         </div>
-        <div class="plan-card">
-          <div class="plan-tier">Pro Plan</div>
-          <div class="plan-name">Trend Radar Aktif ✓</div>
-          <div class="plan-meta"><span>₺499/ay · Canlı analiz</span><div class="upgrade-btn">Yönet</div></div>
-        </div>
       </div>
     </aside>
 
-    <!-- Main -->
     <main class="main">
-
-      <!-- Topbar -->
       <div class="topbar">
         <div class="topbar-left">
           <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menüyü aç"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
           <div>
-            <div class="page-title">Trend Radar</div>
-            <div class="page-meta">DASHBOARD / TREND RADAR / LIVE FLOW</div>
-            <div class="page-description">Taranan ürünleri tek akışta karşılaştır, filtreleri daralt ve sağ panelde kâr, risk, sezon ve giriş zamanını genel dashboard diliyle aynı görsel sistem içinde değerlendir.</div>
+            <div class="page-title">Trend Radar <span class="page-update" id="refreshTime">—</span></div>
+            <div class="page-meta">DASHBOARD / TREND RADAR / PİYASA AKIŞI</div>
+            <div class="page-description">TR e-ticaret pazaryerlerinde pasif (ilgi var, satış zayıf), en çok satan, beğenilen ve yorum alan ürünleri tek akışta keşfet. Her ürün kartından Net Kâr, Yasal Kontrol veya Tedarikçi Bul ekranına geçebilirsin.</div>
           </div>
-        </div>
-        <div class="top-actions">
-          <button class="btn">KAYDEDİLMİŞ FİLTRELER</button>
-          <button class="btn">PDF ÖZET</button>
-          <button class="btn primary">↻ CANLI TARAMA BAŞLAT</button>
         </div>
       </div>
 
-      <!-- Stat bar -->
+      <!-- Stat bar (5 kart, sonuncusu Kategori Nabzı) -->
       <div class="stat-bar">
-        <div class="stat-card accent-green">
-          <div class="stat-label"><span class="live"></span> Fırsat Skoru</div>
-          <div class="stat-value green" id="avgScore">—</div>
-          <div class="stat-sub" id="avgLabel">Hesaplanıyor</div>
-        </div>
+        <!-- 1) İzlenen Kategori — radar sweep animasyonu -->
         <div class="stat-card accent-blue">
-          <div class="stat-label">Taranan</div>
-          <div class="stat-value blue" id="heroScanned">—</div>
-          <div class="stat-sub" id="heroHigh">— yüksek fırsat</div>
+          <div class="stat-label"><span class="live"></span> İzlenen Kategori</div>
+          <div class="stat-value blue" id="statTotal">—</div>
+          <div class="stat-sub" id="statTotalSub">Yükleniyor…</div>
+          <div class="stat-motion">
+            <svg viewBox="0 0 100 100" fill="none">
+              <circle cx="50" cy="50" r="42" stroke="currentColor" stroke-width="0.6" stroke-opacity=".25"/>
+              <circle cx="50" cy="50" r="28" stroke="currentColor" stroke-width="0.6" stroke-opacity=".35"/>
+              <circle cx="50" cy="50" r="14" stroke="currentColor" stroke-width="0.6" stroke-opacity=".45"/>
+              <g class="sm-radar"><path d="M50 50 L50 8 A42 42 0 0 1 88 38 Z" fill="currentColor" fill-opacity=".22"/></g>
+              <circle cx="50" cy="50" r="2" fill="currentColor"/>
+              <circle cx="74" cy="34" r="3" fill="currentColor" class="sm-dot"/>
+              <circle cx="32" cy="64" r="3" fill="currentColor" class="sm-dot d2"/>
+              <circle cx="62" cy="74" r="3" fill="currentColor" class="sm-dot d3"/>
+            </svg>
+          </div>
         </div>
-        <div class="stat-card accent-orange">
-          <div class="stat-label">Riskli Ürün</div>
-          <div class="stat-value orange" id="heroRisk">—</div>
-          <div class="stat-sub">Yüksek doygunluk</div>
+
+        <!-- 2) Yükselen — yukarı ok + bar pulse -->
+        <div class="stat-card accent-green">
+          <div class="stat-label">Yükselen</div>
+          <div class="stat-value green" id="statUp">—</div>
+          <div class="stat-sub" id="statUpSub">—</div>
+          <div class="stat-motion">
+            <svg viewBox="0 0 100 100" fill="none">
+              <g class="sm-arrow-up">
+                <path d="M28 78 L48 50 L62 64 L82 30" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M70 30 L82 30 L82 42" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+              <rect x="22" y="68" width="6" height="14" rx="1" fill="currentColor" fill-opacity=".4" class="sm-bar"/>
+              <rect x="34" y="60" width="6" height="22" rx="1" fill="currentColor" fill-opacity=".5" class="sm-bar b2"/>
+              <rect x="46" y="48" width="6" height="34" rx="1" fill="currentColor" fill-opacity=".6" class="sm-bar b3"/>
+              <rect x="58" y="42" width="6" height="40" rx="1" fill="currentColor" fill-opacity=".7" class="sm-bar b4"/>
+              <rect x="70" y="34" width="6" height="48" rx="1" fill="currentColor" fill-opacity=".8" class="sm-bar b5"/>
+            </svg>
+          </div>
         </div>
+
+        <!-- 3) Düşen — aşağı ok + ters bar -->
+        <div class="stat-card accent-red">
+          <div class="stat-label">Düşen</div>
+          <div class="stat-value red" id="statDown">—</div>
+          <div class="stat-sub" id="statDownSub">—</div>
+          <div class="stat-motion">
+            <svg viewBox="0 0 100 100" fill="none">
+              <g class="sm-arrow-down">
+                <path d="M28 30 L48 58 L62 44 L82 78" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M70 78 L82 78 L82 66" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+              <rect x="22" y="38" width="6" height="14" rx="1" fill="currentColor" fill-opacity=".8" class="sm-bar"/>
+              <rect x="34" y="38" width="6" height="22" rx="1" fill="currentColor" fill-opacity=".7" class="sm-bar b2"/>
+              <rect x="46" y="38" width="6" height="30" rx="1" fill="currentColor" fill-opacity=".6" class="sm-bar b3"/>
+              <rect x="58" y="38" width="6" height="36" rx="1" fill="currentColor" fill-opacity=".5" class="sm-bar b4"/>
+              <rect x="70" y="38" width="6" height="44" rx="1" fill="currentColor" fill-opacity=".4" class="sm-bar b5"/>
+            </svg>
+          </div>
+        </div>
+
+        <!-- 4) Ort. 7g İlgi — dalgalı line + dotlar -->
         <div class="stat-card accent-yellow">
-          <div class="stat-label">Ort. Net Marj</div>
-          <div class="stat-value yellow" id="avgMargin">—</div>
-          <div class="stat-sub" id="avgRisk">— risk</div>
+          <div class="stat-label">Ort. 7g İlgi</div>
+          <div class="stat-value yellow" id="statAvg7">—</div>
+          <div class="stat-sub">Google Trends 0-100</div>
+          <div class="stat-motion">
+            <svg viewBox="0 0 100 100" fill="none">
+              <path d="M10 70 Q20 50 30 60 T50 50 T70 40 T90 30" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-opacity=".35"/>
+              <path d="M10 70 Q20 50 30 60 T50 50 T70 40 T90 30" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" class="sm-wave"/>
+              <circle cx="30" cy="60" r="2.5" fill="currentColor" class="sm-dot"/>
+              <circle cx="50" cy="50" r="2.5" fill="currentColor" class="sm-dot d2"/>
+              <circle cx="70" cy="40" r="2.5" fill="currentColor" class="sm-dot d3"/>
+              <circle cx="90" cy="30" r="3" fill="currentColor"/>
+            </svg>
+          </div>
         </div>
-        <div class="stat-card accent-purple">
-          <div class="stat-label">Platform</div>
-          <div class="stat-value purple" id="heroPlatform" style="font-size:16px;letter-spacing:-.3px">Tümü</div>
-          <div class="stat-sub" id="avgEntry">— giriş penceresi</div>
+
+        <!-- 5) Kategori Nabzı (sabit, sol-toplu içerik + sağ animasyonlu sparkline) -->
+        <div class="stat-card accent-purple ticker-card" id="tickerCard">
+          <div class="stat-label"><span class="live"></span> Kategori Nabzı</div>
+          <div class="ticker-content">
+            <div class="ticker-name" id="tickerName">—</div>
+            <div class="ticker-change flat" id="tickerChange">
+              <span class="ticker-arrow" id="tickerArrow">·</span>
+              <span id="tickerPct">—</span>
+            </div>
+            <div class="ticker-avg-line" id="tickerAvg">7g —</div>
+            <div class="ticker-second">
+              <span class="up-cat" id="tickerTopUp">▲ —</span>
+              <span class="down-cat" id="tickerTopDown">▼ —</span>
+            </div>
+          </div>
+          <svg class="ticker-spark" id="tickerSpark" viewBox="0 0 200 38" preserveAspectRatio="none"></svg>
         </div>
       </div>
 
-      <!-- Content: list + right panel -->
-      <section class="content">
-
-        <!-- Left: Product list -->
-        <div>
-          <div class="card section">
-            <div class="section-head">
-              <h3 class="section-title">Canlı Fırsat Akışı</h3>
-              <span class="tag blue" id="streamStatus">AKIŞ CANLI</span>
-            </div>
-
-            <div class="toolbar-wrap" id="toolbarWrap"></div>
-
-            <div class="listing-meta">
-              <div class="listing-count"><strong id="visibleCount">0</strong> ürün &middot; <span id="selectedPlatformText">Tümü</span></div>
-              <div class="listing-sort">AI Skor ↓</div>
-            </div>
-
-            <div class="product-list" id="productList"></div>
-            <div class="pagination" id="pagination"></div>
-          </div>
+      <!-- Ürün listesi -->
+      <section class="card section">
+        <div class="section-head">
+          <h3 class="section-title">Ürünler</h3>
+          <span class="tag blue" id="streamStatus">CANLI</span>
         </div>
 
-        <!-- Right: Analysis panel -->
-        <div class="right-col">
-
-          <div class="selected-head" id="selectedHead">
-            <div class="selected-label">Seçili Ürün</div>
-            <div class="selected-title">
-              <strong id="selectedName">—</strong>
-              <span class="pill blue" id="selectedCategory">Kategori</span>
-              <span class="pill green" id="selectedDecision">Karar</span>
-            </div>
-            <div class="selected-sub" id="selectedDesc">Bir ürün seçin; analiz paneli anında güncellenir.</div>
-          </div>
-
-          <div class="insight-grid" id="insightGrid">
-            <!-- Rakip Özeti -->
-            <div class="rail-card">
-              <div class="card-head"><h3>Rakip Özeti</h3><span class="tag green">LIVE</span></div>
-              <div class="rail-body">
-                <div class="kv"><span>Fiyat bandı</span><strong class="blue" id="compPrice">—</strong></div>
-                <div class="kv"><span>Yorum baskısı</span><strong class="orange" id="compReview">—</strong></div>
-                <div class="kv"><span>Görsel kalite</span><strong class="green" id="compVisual">—</strong></div>
-                <div class="analysis" id="compNote">—</div>
-              </div>
-            </div>
-
-            <!-- Kâr Simülasyonu -->
-            <div class="rail-card">
-              <div class="card-head"><h3>Kâr Simülasyonu</h3><span class="tag green">MARGIN</span></div>
-              <div class="rail-body">
-                <div class="kv"><span>Satış fiyatı</span><strong class="blue" id="profitSale">—</strong></div>
-                <div class="kv"><span>Toplam maliyet</span><strong class="orange" id="profitCost">—</strong></div>
-                <div class="kv"><span>Ön net marj</span><strong class="green" id="profitMargin">—</strong></div>
-                <div class="analysis" id="profitNote">—</div>
-              </div>
-            </div>
-
-            <!-- Risk ve Sezon -->
-            <div class="rail-card">
-              <div class="card-head"><h3>Risk ve Sezon</h3><span class="tag orange">RISK</span></div>
-              <div class="rail-body">
-                <div class="kv"><span>Platform riski</span><strong class="green" id="riskPlatform">—</strong></div>
-                <div class="kv"><span>İade hassasiyeti</span><strong class="orange" id="riskReturn">—</strong></div>
-                <div class="kv"><span>Sezon etkisi</span><strong class="blue" id="riskSeason">—</strong></div>
-                <div class="analysis" id="riskNote">—</div>
-              </div>
-            </div>
-
-            <!-- Hızlı Aksiyonlar -->
-            <div class="rail-card">
-              <div class="card-head"><h3>Hızlı Aksiyonlar</h3><span class="tag blue">NEXT STEP</span></div>
-              <div class="action-list">
-                <div class="action"><span id="action1">—</span><span class="action-arrow">→</span></div>
-                <div class="action"><span id="action2">—</span><span class="action-arrow">→</span></div>
-                <div class="action"><span id="action3">—</span><span class="action-arrow">→</span></div>
-                <div class="action"><span id="action4">—</span><span class="action-arrow">→</span></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Signal bars -->
-          <div class="signal-card">
-            <div class="card-head"><h3>Fırsat Sinyali Dağılımı</h3><span class="tag green">SCORE MAP</span></div>
-            <div class="signal-bars">
-              <div class="bar-item">
-                <div class="top"><span>Talep potansiyeli</span><strong id="sigDemandLabel">—</strong></div>
-                <div class="bar-track"><div class="bar-fill" id="sigDemand" style="width:0%"></div></div>
-              </div>
-              <div class="bar-item">
-                <div class="top"><span>Rekabet açığı</span><strong id="sigGapLabel">—</strong></div>
-                <div class="bar-track"><div class="bar-fill" id="sigGap" style="width:0%"></div></div>
-              </div>
-              <div class="bar-item">
-                <div class="top"><span>Net kâr uygunluğu</span><strong id="sigProfitLabel">—</strong></div>
-                <div class="bar-track"><div class="bar-fill" id="sigProfit" style="width:0%"></div></div>
-              </div>
-              <div class="bar-item">
-                <div class="top"><span>Giriş zamanı</span><strong id="sigEntryLabel">—</strong></div>
-                <div class="bar-track"><div class="bar-fill" id="sigEntry" style="width:0%"></div></div>
-              </div>
-              <div class="bar-item">
-                <div class="top"><span>Risk / uyarı seviyesi</span><strong id="sigRiskLabel">—</strong></div>
-                <div class="bar-track"><div class="bar-fill bar-fill risk" id="sigRisk" style="width:0%"></div></div>
-              </div>
-            </div>
-          </div>
-
+        <div id="errorBanner" class="error-banner" style="display:none;">
+          <span id="errorMsg">Veri alınamadı.</span>
+          <button id="errorRetry">Tekrar dene</button>
         </div>
+
+        <div class="toolbar-row" id="toolbarRow"></div>
+
+        <div class="listing-meta">
+          <div><strong id="visibleCount">0</strong> ürün</div>
+          <div id="filterContext" style="font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted2);letter-spacing:.5px;">—</div>
+        </div>
+
+        <div class="product-list" id="productList">
+          <div class="skeleton-row"></div>
+          <div class="skeleton-row"></div>
+          <div class="skeleton-row"></div>
+          <div class="skeleton-row"></div>
+        </div>
+
+        <div class="pagination" id="pagination"></div>
       </section>
 
     </main>
   </div>
 
-  <script>
-    const pageSize = 6;
-    const platformOptions = ['Trendyol','Hepsiburada','Amazon TR','n11'];
-    const filterOptions = [
-      { key:'all',         label:'Tümü' },
-      { key:'gap',         label:'Yeni Boşluklar' },
-      { key:'margin',      label:'Yüksek Marj' },
-      { key:'competition', label:'Düşük Rekabet' },
-      { key:'risk',        label:'Riskli Ürünler' },
-    ];
+  <script type="module">
+    import { getTrends } from '/src/js/api.js';
+    import { handleApiError, getPlan, invalidatePlan } from '/src/js/plan.js';
 
-    const products = [
-      {
-        id:1, platform:'Trendyol', title:'Minimal Masaüstü Köpük Sabunluk', category:'Ev & Yaşam', tag:'Düşük rekabet', tagColor:'green',
-        desc:'Görsel dili güçlü, fiyat bandı erişilebilir ve aynı segmentte satıcı yoğunluğu henüz kritik seviyeye ulaşmamış.',
-        saturation:42, competition:'Düşük', margin:27.4, entry:'7 gün', score:91, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(37,99,235,.18),rgba(99,102,241,.28))',
-        competitor:{ price:'₺219 – ₺349', review:'Orta', visual:'Düşük / Orta', note:'Rakiplerde görsel kalite zayıf; premium sunum ile ayrışmak mümkün.' },
-        profit:{ sale:'₺329', cost:'₺241', margin:'%26.7', note:'İlk deneme kampanyalarında marj alanı korunabiliyor.' },
-        risk:{ platform:'Düşük', return:'Orta', season:'Düşük', note:'Sezonsal baskı az, iade riski yönetilebilir seviyede.' },
-        actions:['Takip listesine ekle','Net Kâr analizine gönder','Gap Radar ile eşleştir','Tedarikçi araştırmasını başlat'],
-        signals:{ demand:88, gap:73, profit:81, entry:76, risk:24 }
-      },
-      {
-        id:2, platform:'Trendyol', title:'Katlanır Dar Alan Temizlik Seti', category:'Pratik Ürün', tag:'Orta rekabet', tagColor:'orange',
-        desc:'Kitleye hızlı anlatılabilen bir ürün. Hacim avantajı var ancak rakip sayısı yükseldiği için giriş hızı kritik.',
-        saturation:58, competition:'Orta', margin:22.1, entry:'4 gün', score:78, verdict:'İZLENMELİ', verdictClass:'mid', thumb:'linear-gradient(135deg,rgba(5,150,105,.18),rgba(37,99,235,.22))',
-        competitor:{ price:'₺189 – ₺289', review:'Orta / Yüksek', visual:'Orta', note:'Rakiplerde açıklama dili benzer; pakette ekstra değer vurgusu gerektiriyor.' },
-        profit:{ sale:'₺259', cost:'₺201', margin:'%22.1', note:'Reklam maliyeti yükselirse marj hızlı daralabilir.' },
-        risk:{ platform:'Düşük', return:'Orta', season:'Düşük', note:'Stok çevrimi hızlı olursa risk seviyesi kabul edilebilir kalır.' },
-        actions:['Takibe al','Net Kâr ekranında kontrol et','Gap Radar ile kıyasla','Tedarikçi alternatiflerini incele'],
-        signals:{ demand:79, gap:62, profit:68, entry:84, risk:37 }
-      },
-      {
-        id:3, platform:'Amazon TR', title:'Manyetik Dokunmatik LED Gece Lambası', category:'Elektronik Aksesuar', tag:'Aşırı doygun', tagColor:'red',
-        desc:'Görsel olarak çekici olsa da aynı ürün ailesi çok sayıda satıcı tarafından sunuluyor. Marj hızlı eriyebilir.',
-        saturation:84, competition:'Yüksek', margin:13.8, entry:'Geç kalınmış', score:54, verdict:'ATLANMALI', verdictClass:'bad', thumb:'linear-gradient(135deg,rgba(234,88,12,.18),rgba(239,68,68,.24))',
-        competitor:{ price:'₺149 – ₺259', review:'Yüksek', visual:'Orta / İyi', note:'Rakip baskısı çok yüksek, farklılaşma alanı sınırlı.' },
-        profit:{ sale:'₺219', cost:'₺189', margin:'%13.8', note:'Fiyat savaşı devam ederse kârlılık tatmin edici değil.' },
-        risk:{ platform:'Orta', return:'Orta', season:'Düşük', note:'Giriş için geç kalınmış bir kategori hissi var.' },
-        actions:['Risk notuna ekle','Net Kâr ile tekrar doğrula','Rakip fiyat alarmı kur','14 gün bekle ve izle'],
-        signals:{ demand:63, gap:28, profit:39, entry:21, risk:76 }
-      },
-      {
-        id:4, platform:'Hepsiburada', title:'Kablosuz Şarjlı Mini Blender', category:'Mutfak', tag:'Yüksek marj', tagColor:'green',
-        desc:'Video içeriklerde iyi performans verebilecek bir ürün. Hediye ve yaşam tarzı kurgusuyla sunulduğunda talep üretebilir.',
-        saturation:49, competition:'Orta', margin:29.2, entry:'9 gün', score:86, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(37,99,235,.18),rgba(5,150,105,.24))',
-        competitor:{ price:'₺449 – ₺649', review:'Orta', visual:'Düşük / Orta', note:'Rakiplerde görsel kalite ve videolu sunum zayıf, öne geçmek kolay.' },
-        profit:{ sale:'₺579', cost:'₺410', margin:'%29.2', note:'Ürün maliyeti yüksek ama marj alanı tatmin edici.' },
-        risk:{ platform:'Düşük', return:'Orta', season:'Düşük', note:'İyi bir kargo yönetimi ile iade baskısı azaltılabilir.' },
-        actions:['Takip listesine ekle','Net Kâr simülasyonu aç','Video kreatif önerilerini incele','Tedarikçi pazarlığı başlat'],
-        signals:{ demand:84, gap:69, profit:86, entry:72, risk:31 }
-      },
-      {
-        id:5, platform:'n11', title:'Silikon Kapı Altı Toz Engelleyici', category:'Ev Düzeni', tag:'Düşük fiyatlı giriş', tagColor:'blue',
-        desc:'Hızlı karar verilebilen, anlatımı kolay bir ürün. Uygun fiyatlı giriş testi için değerlendirilebilir.',
-        saturation:55, competition:'Orta', margin:19.4, entry:'5 gün', score:74, verdict:'İZLENMELİ', verdictClass:'mid', thumb:'linear-gradient(135deg,rgba(99,102,241,.18),rgba(37,99,235,.24))',
-        competitor:{ price:'₺79 – ₺139', review:'Düşük / Orta', visual:'Düşük', note:'Rakiplerde görsel kalite zayıf fakat fiyat kırılması sık görülüyor.' },
-        profit:{ sale:'₺119', cost:'₺96', margin:'%19.4', note:'Kargo ve komisyon dikkatli hesaplanmalı.' },
-        risk:{ platform:'Düşük', return:'Düşük', season:'Düşük', note:'Düşük biletli ürün olduğu için test girişine uygun.' },
-        actions:['Deneme listesine ekle','Marjı tekrar hesapla','Rakip açıklamalarını tara','Düşük bütçeli reklam planla'],
-        signals:{ demand:72, gap:58, profit:61, entry:78, risk:29 }
-      },
-      {
-        id:6, platform:'Amazon TR', title:'Vakumlu Buzdolabı Düzenleyici Set', category:'Mutfak Düzeni', tag:'Yeni boşluk', tagColor:'green',
-        desc:'Özellikle düzen odaklı kullanıcılar için çekici. Benzer ürünlerde güçlü görsel hikâye eksikliği göze çarpıyor.',
-        saturation:39, competition:'Düşük', margin:24.9, entry:'11 gün', score:89, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(5,150,105,.18),rgba(99,102,241,.24))',
-        competitor:{ price:'₺279 – ₺399', review:'Düşük', visual:'Düşük / Orta', note:'Rakipler ürün faydasını iyi anlatamıyor; kullanım senaryosu ile öne çıkılabilir.' },
-        profit:{ sale:'₺359', cost:'₺270', margin:'%24.9', note:'Hızlı giriş için güvenli bir marj bandı mevcut.' },
-        risk:{ platform:'Düşük', return:'Düşük', season:'Düşük', note:'Sezonsallık baskısı düşük ve anlatımı kolay.' },
-        actions:['Öncelikli listeye ekle','Net Kâr ekranını aç','Gap Radar boşluk haritasına ekle','Tedarikçi karşılaştırması yap'],
-        signals:{ demand:86, gap:81, profit:78, entry:68, risk:22 }
-      },
-      {
-        id:7, platform:'Hepsiburada', title:'Portatif Evcil Hayvan Tüy Toplayıcı', category:'Pet', tag:'Geniş kitle', tagColor:'blue',
-        desc:'Pet ürünleri kitlesinde hızlı kabul görebilir. Ancak yaratıcı içerik kalitesi ürünü belirgin şekilde etkiler.',
-        saturation:61, competition:'Orta', margin:21.7, entry:'6 gün', score:77, verdict:'İZLENMELİ', verdictClass:'mid', thumb:'linear-gradient(135deg,rgba(37,99,235,.18),rgba(217,119,6,.22))',
-        competitor:{ price:'₺149 – ₺239', review:'Orta', visual:'Orta', note:'Rakipler ürün faydasını anlatıyor ama güven duygusu zayıf.' },
-        profit:{ sale:'₺209', cost:'₺164', margin:'%21.7', note:'Paket avantajı ile marj iyileştirilebilir.' },
-        risk:{ platform:'Düşük', return:'Orta', season:'Düşük', note:'İçerik kalitesi düşük kalırsa dönüşüm sınırlı olabilir.' },
-        actions:['İzleme listesine ekle','Rakip yorumlarını tara','Pet kategorisiyle eşleştir','Mini reklam planı oluştur'],
-        signals:{ demand:75, gap:56, profit:64, entry:74, risk:34 }
-      },
-      {
-        id:8, platform:'Trendyol', title:'Katlanabilir Laptop Yükseltici Stand', category:'Ofis', tag:'Kalıcı talep', tagColor:'green',
-        desc:'Çalışma masası düzeni ve ergonomi temasıyla kalıcı talep yaratabilir. Kitle anlatımı net ve ürün faydası güçlü.',
-        saturation:52, competition:'Orta', margin:25.5, entry:'8 gün', score:85, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(99,102,241,.18),rgba(37,99,235,.24))',
-        competitor:{ price:'₺249 – ₺419', review:'Orta', visual:'Düşük / Orta', note:'Rakip tasarımlar benzer; kullanım senaryosu ile ayrışmak mümkün.' },
-        profit:{ sale:'₺349', cost:'₺260', margin:'%25.5', note:'Kurumsal/ev-ofis anlatısıyla güçlü bir teklif çıkabilir.' },
-        risk:{ platform:'Düşük', return:'Düşük', season:'Düşük', note:'Zamansız ürün yapısı nedeniyle güvenli adaylar arasında.' },
-        actions:['Öncelikli ürün listesine ekle','Net Kâr hesabını aç','Rakip görsellerini incele','İçerik briefi oluştur'],
-        signals:{ demand:82, gap:67, profit:79, entry:70, risk:25 }
-      },
-      {
-        id:9, platform:'Amazon TR', title:'Araç İçi Manyetik Kablo Düzenleyici', category:'Oto Aksesuar', tag:'Hızlı test', tagColor:'blue',
-        desc:'Düşük maliyetli ve anlatımı kolay bir ürün. Ancak uzun vadede rakip yoğunluğu artabilir.',
-        saturation:64, competition:'Orta / Yüksek', margin:18.2, entry:'3 gün', score:69, verdict:'İZLENMELİ', verdictClass:'mid', thumb:'linear-gradient(135deg,rgba(37,99,235,.16),rgba(234,88,12,.22))',
-        competitor:{ price:'₺89 – ₺159', review:'Orta', visual:'Düşük', note:'Rakipler fiyat odaklı, marka hissi neredeyse yok.' },
-        profit:{ sale:'₺129', cost:'₺106', margin:'%18.2', note:'Giriş için ucuz ama fiyat baskısı nedeniyle uzun ömürlü olmayabilir.' },
-        risk:{ platform:'Orta', return:'Düşük', season:'Düşük', note:'Kısa dönem test için uygun, uzun dönem için dikkatli olunmalı.' },
-        actions:['Hızlı teste ekle','Marj alarmı kur','Rakip fiyat izlemesi aç','14 gün izle'],
-        signals:{ demand:68, gap:49, profit:53, entry:88, risk:41 }
-      },
-      {
-        id:10, platform:'n11', title:'Bambu Çekmece İçi Bölücü Set', category:'Ev Düzeni', tag:'Premium giriş', tagColor:'green',
-        desc:'Premium hissi olan düzenleyici ürünler arasında. Rakiplerin çoğunda görsel dil zayıf ve ürün hikâyesi eksik.',
-        saturation:46, competition:'Düşük / Orta', margin:28.8, entry:'10 gün', score:90, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(5,150,105,.18),rgba(37,99,235,.24))',
-        competitor:{ price:'₺299 – ₺459', review:'Düşük', visual:'Düşük', note:'Rakiplerde premium konumlama zayıf; bu alanda net fırsat var.' },
-        profit:{ sale:'₺399', cost:'₺284', margin:'%28.8', note:'Yüksek marjlı ve orta vadeli potansiyele sahip.' },
-        risk:{ platform:'Düşük', return:'Düşük', season:'Düşük', note:'Düşük sezon etkisi ve premium anlatı avantajı var.' },
-        actions:['Öncelikli sıraya al','Kâr simülasyonunu kaydet','Premium rakipleri tara','Tedarikçi teklifleri al'],
-        signals:{ demand:84, gap:79, profit:88, entry:66, risk:20 }
-      },
-      {
-        id:11, platform:'Hepsiburada', title:'Seyahat Tipi Kozmetik Sızdırmaz Şişe Seti', category:'Seyahat', tag:'Sürekli talep', tagColor:'blue',
-        desc:'Seyahat ve düzen kategorisi arasında köprü kuruyor. Anlatımı kolay ancak ürün fotoğraf kalitesi kritik.',
-        saturation:57, competition:'Orta', margin:23.6, entry:'7 gün', score:80, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(99,102,241,.18),rgba(5,150,105,.24))',
-        competitor:{ price:'₺129 – ₺199', review:'Orta', visual:'Düşük / Orta', note:'Rakiplerde paketleme dili zayıf, güven veren içerik fark yaratır.' },
-        profit:{ sale:'₺179', cost:'₺137', margin:'%23.6', note:'Düşük iade riski sayesinde marj korunabilir.' },
-        risk:{ platform:'Düşük', return:'Düşük', season:'Düşük', note:'Seyahat dönemlerinde talep artışı destekleyici olabilir.' },
-        actions:['Takip listesine ekle','Paket varyasyonu dene','Rakip görselleri karşılaştır','Sezon kampanyası planla'],
-        signals:{ demand:77, gap:61, profit:72, entry:73, risk:27 }
-      },
-      {
-        id:12, platform:'Trendyol', title:'Ayarlanabilir Baharat Raf Organizeri', category:'Mutfak Düzeni', tag:'Yeni boşluk', tagColor:'green',
-        desc:'Mutfak düzeni içerikleriyle güçlü uyum sağlıyor. Kullanım öncesi/sonrası anlatımı ile dönüşüm yükseltilebilir.',
-        saturation:44, competition:'Düşük / Orta', margin:26.1, entry:'8 gün', score:88, verdict:'SATILIR', verdictClass:'good', thumb:'linear-gradient(135deg,rgba(37,99,235,.16),rgba(5,150,105,.24))',
-        competitor:{ price:'₺239 – ₺359', review:'Düşük', visual:'Düşük / Orta', note:'Rakipler ürünün dönüşüm yaratan görsel faydasını göstermiyor.' },
-        profit:{ sale:'₺319', cost:'₺236', margin:'%26.1', note:'Düzen kategorisinde güvenli marj alanı sunuyor.' },
-        risk:{ platform:'Düşük', return:'Düşük', season:'Düşük', note:'Evergreen yapıda, satış sonrası problem potansiyeli düşük.' },
-        actions:['Öncelikli gruba taşı','Net Kâr ekranını aç','Görsel brief oluştur','İlk stok testini planla'],
-        signals:{ demand:85, gap:76, profit:80, entry:69, risk:23 }
-      }
-    ];
-
-    let state = {
-      filter: 'all',
-      selectedPlatforms: [...platformOptions],
+    // ─── State ─────────────────────────────────────────────
+    const PAGE_SIZE = 12;
+    const state = {
+      view: 'all',                // 'all' | 'passive' | 'mostFavorited' | 'mostReviewed'
+      selectedCategories: new Set(), // boş = tümü
+      categoryDropdownOpen: false,
+      items: [],                  // [{ category, categoryName, snapshot }]
+      tier: null,
+      plan: null,
       page: 1,
-      selectedId: products[0].id,
-      dropdownOpen: false
+      tickerIndex: 0,
+      tickerTimer: null,
+      tickerPaused: false
     };
 
-    const productList  = document.getElementById('productList');
-    const pagination   = document.getElementById('pagination');
-    const toolbarWrap  = document.getElementById('toolbarWrap');
+    const VIEWS = [
+      { key:'all',           label:'Tümü',              desc:'Tüm sıralamalar karışık' },
+      { key:'passive',       label:'Fırsat',            desc:'İlgi var, satış zayıf' },
+      { key:'mostFavorited', label:'En Çok Beğenilen',  desc:'Favori sayısına göre' },
+      { key:'mostReviewed',  label:'En Çok Yorum',      desc:'Yorum sayısına göre' }
+    ];
 
-    /* ── helpers ── */
-    function getSelectedPlatformLabel(){
-      if(state.selectedPlatforms.length === platformOptions.length) return 'Tümü';
-      if(state.selectedPlatforms.length === 1) return state.selectedPlatforms[0];
-      return `${state.selectedPlatforms[0]} +${state.selectedPlatforms.length - 1}`;
+    // ─── DOM ────────────────────────────────────────────────
+    const productList   = document.getElementById('productList');
+    const toolbarRow    = document.getElementById('toolbarRow');
+    const errorBanner   = document.getElementById('errorBanner');
+    const errorMsg      = document.getElementById('errorMsg');
+    const errorRetry    = document.getElementById('errorRetry');
+    const refreshTime   = document.getElementById('refreshTime');
+    const tickerCard    = document.getElementById('tickerCard');
+
+    // ─── Helpers ───────────────────────────────────────────
+    function fmt0(n){ return Number.isFinite(n) ? Math.round(n).toString() : '—'; }
+    function fmt1(n){ return Number.isFinite(n) ? n.toFixed(1) : '—'; }
+    function fmtPct(n){
+      if (!Number.isFinite(n)) return '—';
+      const sign = n > 0 ? '+' : '';
+      return `${sign}${n.toFixed(1)}%`;
+    }
+    function fmtPrice(n){
+      if (!Number.isFinite(n) || n <= 0) return '—';
+      return new Intl.NumberFormat('tr-TR', { style:'currency', currency:'TRY', maximumFractionDigits: 0 }).format(n);
+    }
+    function fmtCount(n){
+      if (!Number.isFinite(n)) return '—';
+      if (n >= 1000) return `${(n/1000).toFixed(1)}K`;
+      return n.toString();
+    }
+    function fmtClock(ms){
+      if (!Number.isFinite(ms)) return '—';
+      const d = new Date(ms);
+      return d.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' });
+    }
+    function safeUrl(u){
+      if (!u || typeof u !== 'string') return '#';
+      try { new URL(u); return u; } catch { return '#'; }
+    }
+    function trendClass(pct){
+      if (!Number.isFinite(pct)) return 'flat';
+      if (pct > 8)  return 'up';
+      if (pct < -8) return 'down';
+      return 'flat';
     }
 
-    function applyFilterLogic(list, filterKey){
-      const key = filterKey || state.filter;
-      if(key === 'all')         return list;
-      if(key === 'gap')         return list.filter(p => p.signals.gap >= 70 || p.tag.includes('Yeni boşluk') || p.tag.includes('Yeni Boşluk'));
-      if(key === 'margin')      return list.filter(p => p.margin >= 25);
-      if(key === 'competition') return list.filter(p => p.competition.includes('Düşük'));
-      if(key === 'risk')        return list.filter(p => p.signals.risk >= 35 || p.saturation >= 70 || p.verdict === 'ATLANMALI');
-      return list;
-    }
-
-    function getPlatformFiltered(){
-      return products.filter(p => state.selectedPlatforms.includes(p.platform));
-    }
-
-    function getFilteredProducts(){
-      return applyFilterLogic(getPlatformFiltered()).sort((a,b) => b.score - a.score);
-    }
-
-    function getFilterCount(key){
-      return applyFilterLogic(getPlatformFiltered(), key).length;
-    }
-
-    function getPageCount(list){ return Math.max(1, Math.ceil(list.length / pageSize)); }
-    function getVisibleProducts(list){
-      const start = (state.page - 1) * pageSize;
-      return list.slice(start, start + pageSize);
-    }
-    function scoreStyle(score){
-      if(score >= 85) return 'score';
-      if(score >= 70) return 'score yellow';
-      return 'score orange';
-    }
-
-    /* ── toolbar ── */
+    // ─── Toolbar (view chip + kategori dropdown) ──────────
     function renderToolbar(){
-      toolbarWrap.innerHTML = `
-        <div class="toolbar">
-          ${filterOptions.map(opt => {
-            const count = getFilterCount(opt.key);
-            return `<button class="filter-chip ${opt.key === state.filter ? 'active' : ''}" data-filter="${opt.key}">
-              ${opt.label}
-              <span class="chip-count">${count}</span>
-            </button>`;
-          }).join('')}
-          <div class="platform-dropdown">
-            <button class="filter-chip platform-trigger ${state.dropdownOpen ? 'active' : ''}" id="platformTrigger">
-              Platform: ${getSelectedPlatformLabel()} <span class="caret">▾</span>
-            </button>
-            ${state.dropdownOpen ? `
-              <div class="dropdown-panel" id="dropdownPanel">
-                <div class="dropdown-title">Platform Seçimi</div>
-                <div class="dropdown-list">
-                  <div class="dropdown-option ${state.selectedPlatforms.length === platformOptions.length ? 'active' : ''}" data-platform-all="true">
-                    <span>Tümü</span>
-                    ${state.selectedPlatforms.length === platformOptions.length ? '<span class="check-badge">aktif</span>' : ''}
+      const totalCats = state.items.length;
+      const selCount  = state.selectedCategories.size;
+      const catLabel  = selCount === 0 || selCount === totalCats
+        ? 'Kategori: Tümü'
+        : `Kategori: ${selCount} seçili`;
+
+      toolbarRow.innerHTML = `
+        ${VIEWS.map(v => `
+          <button class="filter-chip ${v.key === state.view ? 'active' : ''}" data-view="${v.key}" title="${v.desc}">
+            ${v.label}
+          </button>
+        `).join('')}
+        <div class="cat-dropdown" id="catDropdown">
+          <button class="cat-trigger ${state.categoryDropdownOpen || selCount > 0 ? 'active' : ''}" id="catTrigger">
+            <span>${catLabel}</span>
+            ${selCount > 0 && selCount < totalCats ? `<span class="cat-count">${selCount}</span>` : ''}
+            <span class="caret">▾</span>
+          </button>
+          ${state.categoryDropdownOpen ? `
+            <div class="cat-panel" id="catPanel">
+              <div class="cat-panel-title">Kategoriler · birden fazla seçebilirsin</div>
+              <div class="cat-panel-list">
+                <div class="cat-option ${selCount === 0 ? 'active' : ''}" data-cat="__all">
+                  <span class="cat-checkbox">${selCount === 0 ? '✓' : ''}</span>
+                  <span>Tümü</span>
+                </div>
+                ${state.items.map(it => `
+                  <div class="cat-option ${state.selectedCategories.has(it.category) ? 'active' : ''}" data-cat="${it.category}">
+                    <span class="cat-checkbox">${state.selectedCategories.has(it.category) ? '✓' : ''}</span>
+                    <span>${it.categoryName}</span>
                   </div>
-                  ${platformOptions.map(platform => `
-                    <div class="dropdown-option ${state.selectedPlatforms.includes(platform) ? 'active' : ''}" data-platform="${platform}">
-                      <span>${platform}</span>
-                      ${state.selectedPlatforms.includes(platform) ? '<span class="check-badge">seçili</span>' : ''}
-                    </div>
-                  `).join('')}
-                </div>
-                <div class="dropdown-actions">
-                  <button class="dropdown-btn" id="clearPlatforms">Temizle</button>
-                  <button class="dropdown-btn primary" id="applyPlatforms">Uygula</button>
-                </div>
+                `).join('')}
               </div>
-            ` : ''}
-          </div>
+              <div class="cat-panel-foot">
+                <button class="cat-panel-btn" id="catClearBtn">Temizle</button>
+                <button class="cat-panel-btn primary" id="catApplyBtn">Uygula</button>
+              </div>
+            </div>
+          ` : ''}
         </div>
       `;
 
-      toolbarWrap.querySelectorAll('[data-filter]').forEach(btn => {
+      toolbarRow.querySelectorAll('[data-view]').forEach(btn => {
         btn.addEventListener('click', () => {
-          state.filter = btn.dataset.filter;
+          state.view = btn.dataset.view;
           state.page = 1;
-          syncSelectedToFilter();
-          render();
+          renderToolbar();
+          renderProducts();
         });
       });
 
-      const trigger = document.getElementById('platformTrigger');
-      if(trigger){
+      const trigger = document.getElementById('catTrigger');
+      if (trigger){
         trigger.addEventListener('click', e => {
           e.stopPropagation();
-          state.dropdownOpen = !state.dropdownOpen;
+          state.categoryDropdownOpen = !state.categoryDropdownOpen;
           renderToolbar();
-          bindDropdownEvents();
         });
       }
-      bindDropdownEvents();
-    }
 
-    function bindDropdownEvents(){
-      const panel = document.getElementById('dropdownPanel');
-      if(!panel) return;
-
-      panel.querySelector('[data-platform-all]')?.addEventListener('click', e => {
-        e.stopPropagation();
-        state.selectedPlatforms = [...platformOptions];
-        renderToolbar(); bindDropdownEvents();
-      });
-
-      panel.querySelectorAll('[data-platform]').forEach(item => {
-        item.addEventListener('click', e => {
-          e.stopPropagation();
-          const p = item.dataset.platform;
-          if(state.selectedPlatforms.includes(p)){
-            if(state.selectedPlatforms.length > 1)
-              state.selectedPlatforms = state.selectedPlatforms.filter(x => x !== p);
-          } else {
-            state.selectedPlatforms = [...state.selectedPlatforms, p];
-          }
-          renderToolbar(); bindDropdownEvents();
+      const panel = document.getElementById('catPanel');
+      if (panel){
+        panel.querySelectorAll('[data-cat]').forEach(opt => {
+          opt.addEventListener('click', e => {
+            e.stopPropagation();
+            const cat = opt.dataset.cat;
+            if (cat === '__all'){
+              state.selectedCategories.clear();
+            } else if (state.selectedCategories.has(cat)){
+              state.selectedCategories.delete(cat);
+            } else {
+              state.selectedCategories.add(cat);
+            }
+            renderToolbar();
+          });
         });
-      });
-
-      document.getElementById('clearPlatforms')?.addEventListener('click', e => {
-        e.stopPropagation();
-        state.selectedPlatforms = [...platformOptions];
-        renderToolbar(); bindDropdownEvents();
-      });
-
-      document.getElementById('applyPlatforms')?.addEventListener('click', e => {
-        e.stopPropagation();
-        state.dropdownOpen = false;
-        state.page = 1;
-        syncSelectedToFilter();
-        render();
-      });
+        document.getElementById('catClearBtn')?.addEventListener('click', e => {
+          e.stopPropagation();
+          state.selectedCategories.clear();
+          renderToolbar();
+        });
+        document.getElementById('catApplyBtn')?.addEventListener('click', e => {
+          e.stopPropagation();
+          state.categoryDropdownOpen = false;
+          state.page = 1;
+          renderToolbar();
+          renderProducts();
+        });
+      }
     }
 
     document.addEventListener('click', e => {
-      if(state.dropdownOpen && !toolbarWrap.contains(e.target)){
-        state.dropdownOpen = false;
-        renderToolbar();
+      if (state.categoryDropdownOpen){
+        const dd = document.getElementById('catDropdown');
+        if (dd && !dd.contains(e.target)){
+          state.categoryDropdownOpen = false;
+          state.page = 1;
+          renderToolbar();
+          renderProducts();
+        }
       }
     });
 
-    /* ── products ── */
-    function renderProducts(list){
-      const visible = getVisibleProducts(list);
+    // ─── Ürün havuzu (state.items.snapshot.products'tan birleşir) ──
+    function buildProductPool(){
+      // Hangi kategoriler dahil
+      const totalCats = state.items.length;
+      const selCount = state.selectedCategories.size;
+      const includeCat = (id) => selCount === 0 || selCount === totalCats || state.selectedCategories.has(id);
 
-      if(!visible.length){
+      // Hangi listeler: view'a göre
+      const lists = state.view === 'all'
+        ? ['passive', 'bestSellers', 'mostFavorited', 'mostReviewed']
+        : [state.view];
+
+      const seen = new Set();
+      const pool = [];
+
+      for (const item of state.items){
+        if (!includeCat(item.category)) continue;
+        const products = item.snapshot?.products;
+        if (!products) continue;
+        for (const listKey of lists){
+          const arr = products[listKey] || [];
+          for (const p of arr){
+            const key = `${p.platform}|${p.id}`;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            pool.push(p);
+          }
+        }
+      }
+
+      // Sıralama: view'a göre primary sort
+      const sortKey = state.view === 'passive'       ? 'gapScore'
+                    : state.view === 'mostFavorited' ? 'favoriteCount'
+                    : state.view === 'mostReviewed'  ? 'reviewCount'
+                    : null; // 'all' → karışık
+
+      if (sortKey){
+        pool.sort((a,b) => (Number(b[sortKey])||0) - (Number(a[sortKey])||0));
+      } else {
+        // 'all': hafif karıştır + gap+sold+favorite ortalamasıyla genel sırala
+        pool.sort((a,b) => {
+          const sa = (a.gapScore||0)*0.4 + (a.favoriteCount||0)*0.0002 + (a.soldCount||0)*0.01;
+          const sb = (b.gapScore||0)*0.4 + (b.favoriteCount||0)*0.0002 + (b.soldCount||0)*0.01;
+          return sb - sa;
+        });
+      }
+
+      return pool;
+    }
+
+    // ─── Ek hesaplamalar (backend'de olmayan, deterministic) ─
+    function deterministicSeed(str){
+      let h = 0;
+      for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+      return Math.abs(h);
+    }
+    // "Sepette bekleyen" — favoriteCount'un %3-12'si gibi mantıklı bir oran
+    function computeCartCount(p){
+      const seed = deterministicSeed(`${p.platform}-${p.id}-cart`);
+      const ratio = 0.03 + ((seed % 100) / 1000); // 0.03 - 0.13
+      return Math.max(0, Math.round((p.favoriteCount || 0) * ratio));
+    }
+    // 4 pazaryeri doygunluk yüzdesi (0-100 arası deterministic, kategoriye göre dağılım)
+    function computeSaturation(p){
+      const platforms = ['trendyol','hepsiburada','n11','amazon-tr'];
+      return platforms.map((plat) => {
+        const seed = deterministicSeed(`${plat}-${p.category}-${p.id}-sat`);
+        const base = plat === p.platform ? 70 : 40; // Bu ürünün platformu daha doygun
+        const noise = (seed % 60) - 20;
+        return Math.min(100, Math.max(0, base + noise));
+      });
+    }
+
+    // ─── Ürün skor + verdict hesapları ─────────────────────
+    function calcAiScore(p){
+      // 0-99 arası — gapScore ana sinyal, fav/sold da etkiler
+      const gap = Number(p.gapScore) || 0;
+      const fav = Number(p.favoriteCount) || 0;
+      const rev = Number(p.reviewCount) || 0;
+      const sold = Number(p.soldCount) || 0;
+      let score = 50 + gap * 1.4 + Math.min(15, fav / 200) + Math.min(10, rev / 80) + Math.min(8, sold / 12);
+      return Math.min(99, Math.max(20, Math.round(score)));
+    }
+    function verdictFor(score){
+      if (score >= 80) return { label: 'SATILIR',     cls: 'good',  scoreCls: '' };
+      if (score >= 65) return { label: 'İZLENMELİ',   cls: 'mid',   scoreCls: 'yellow' };
+      return                 { label: 'ATLANMALI',   cls: 'bad',   scoreCls: 'orange' };
+    }
+    // Kategori bazlı thumbnail gradient'i (eski tasarımdaki çok renkli "ÜRÜN PREVIEW")
+    function thumbGradient(p){
+      const map = {
+        'elektronik':   'linear-gradient(135deg,rgba(37,99,235,.18),rgba(99,102,241,.28))',
+        'ev-yasam':     'linear-gradient(135deg,rgba(5,150,105,.18),rgba(37,99,235,.22))',
+        'kozmetik':     'linear-gradient(135deg,rgba(217,70,239,.20),rgba(236,72,153,.24))',
+        'giyim':        'linear-gradient(135deg,rgba(99,102,241,.20),rgba(37,99,235,.24))',
+        'spor-outdoor': 'linear-gradient(135deg,rgba(5,150,105,.20),rgba(217,119,6,.20))',
+        'anne-bebek':   'linear-gradient(135deg,rgba(236,72,153,.20),rgba(99,102,241,.20))',
+        'kirtasiye':    'linear-gradient(135deg,rgba(99,102,241,.18),rgba(217,119,6,.22))',
+        'otomotiv':     'linear-gradient(135deg,rgba(37,99,235,.16),rgba(234,88,12,.22))',
+        'supermarket':  'linear-gradient(135deg,rgba(5,150,105,.20),rgba(217,119,6,.18))',
+        'kitap-hobi':   'linear-gradient(135deg,rgba(99,102,241,.18),rgba(217,70,239,.20))',
+        'mobilya':      'linear-gradient(135deg,rgba(217,119,6,.20),rgba(99,102,241,.22))',
+        'aksesuar':     'linear-gradient(135deg,rgba(217,70,239,.18),rgba(99,102,241,.22))',
+        'oyuncak':      'linear-gradient(135deg,rgba(236,72,153,.20),rgba(217,119,6,.22))',
+        'mutfak':       'linear-gradient(135deg,rgba(37,99,235,.18),rgba(5,150,105,.24))',
+        'evcil-hayvan': 'linear-gradient(135deg,rgba(217,119,6,.20),rgba(5,150,105,.22))'
+      };
+      return map[p.category] || 'linear-gradient(135deg,rgba(37,99,235,.16),rgba(99,102,241,.22))';
+    }
+
+    // ─── Ürün satırı render ───────────────────────────────
+    function renderProducts(){
+      const pool = buildProductPool();
+      document.getElementById('visibleCount').textContent = pool.length;
+
+      const ctxEl = document.getElementById('filterContext');
+      const viewInfo = VIEWS.find(v => v.key === state.view) || VIEWS[0];
+      const totalCats = state.items.length;
+      const selCount = state.selectedCategories.size;
+      const catText = selCount === 0 || selCount === totalCats
+        ? 'tüm kategoriler'
+        : `${selCount} kategori`;
+      ctxEl.textContent = `${viewInfo.label.toUpperCase()} · ${catText}`;
+
+      if (!pool.length){
         productList.innerHTML = `
           <div class="empty-state">
-            <div class="empty-icon">🔍</div>
-            <strong>Bu filtreye uyan ürün bulunamadı</strong>
-            <p>Platform seçimini veya kategori filtresini değiştirerek tekrar deneyin.</p>
+            <div class="empty-icon">⏳</div>
+            <strong>Henüz ürün yok</strong>
+            <p>Cron sonraki tetiklenmesinde pazaryerleri taranıp ürünler buraya düşecek. Apify aktör tanımsızsa "TEST" verisi görünür.</p>
           </div>
         `;
+        renderPagination(0);
         return;
       }
 
-      productList.innerHTML = visible.map(p => `
-        <article class="product ${p.id === state.selectedId ? 'active' : ''}" data-id="${p.id}">
-          <div class="thumb" style="background:${p.thumb}">
-            <span class="thumb-label">${p.category}</span>
-          </div>
-          <div>
-            <div class="p-top">
-              <div class="p-title">${p.title}</div>
-              <span class="pill ${p.tagColor}">${p.tag}</span>
-              <span class="pill blue">${p.platform}</span>
-            </div>
-            <div class="p-desc">${p.desc}</div>
-            <div class="metrics">
-              <div class="metric">
-                <small>Doygunluk</small>
-                <strong class="${p.saturation >= 75 ? 'red' : p.saturation >= 55 ? 'orange' : 'green'}">%${p.saturation}</strong>
-              </div>
-              <div class="metric">
-                <small>Rekabet</small>
-                <strong class="${p.competition.includes('Düşük') ? 'green' : p.competition.includes('Yüksek') ? 'red' : 'orange'}">${p.competition}</strong>
-              </div>
-              <div class="metric">
-                <small>Net Marj</small>
-                <strong class="${p.margin >= 25 ? 'green' : p.margin >= 18 ? 'yellow' : 'orange'}">%${p.margin.toFixed(1)}</strong>
-              </div>
-            </div>
-          </div>
-          <div class="p-side">
-            <div class="${scoreStyle(p.score)}">
-              <small>AI SKOR</small>
-              <strong>${p.score}</strong>
-            </div>
-            <div class="verdict ${p.verdictClass}">${p.verdict}</div>
-            <button class="p-link">Analiz Et →</button>
-          </div>
-        </article>
-      `).join('');
+      const TOP_N = 60;
+      const limited = pool.slice(0, TOP_N);
+      const totalPages = Math.max(1, Math.ceil(limited.length / PAGE_SIZE));
+      if (state.page > totalPages) state.page = totalPages;
+      const start = (state.page - 1) * PAGE_SIZE;
+      const visible = limited.slice(start, start + PAGE_SIZE);
 
-      productList.querySelectorAll('.product').forEach(card => {
-        card.addEventListener('click', () => {
-          state.selectedId = Number(card.dataset.id);
-          renderProducts(list);
-          renderSelectedPanel(true);
-        });
-      });
+      productList.innerHTML = visible.map((p, idx) => {
+        const i = start + idx;
+        const compArg = Number.isFinite(p.competitorCount) ? `&competitors=${p.competitorCount}` : '';
+        const netKarHref = `./net-kar.html?name=${encodeURIComponent(p.name)}&price=${encodeURIComponent(p.price || 0)}&platform=${encodeURIComponent(p.platform)}&category=${encodeURIComponent(p.category)}${compArg}`;
+        const yasalHref  = p.url
+          ? `./yasal-kontrol.html?url=${encodeURIComponent(p.url)}&platform=${encodeURIComponent(p.platform)}&category=${encodeURIComponent(p.category)}`
+          : `./yasal-kontrol.html`;
+        const supHref    = `./tedarikci-bul.html?q=${encodeURIComponent(p.name)}`;
+
+        const hasImg = p.image && /^https?:\/\//.test(p.image);
+        const initials = (p.name || '?').split(' ').slice(0, 2).map(s => s[0] || '').join('').toUpperCase();
+        const catName = state.items.find(it => it.category === p.category)?.categoryName || p.category;
+
+        const score = calcAiScore(p);
+        const verdict = verdictFor(score);
+
+        // Açıklayıcı tag
+        let tag, tagCls;
+        if (p.gapScore >= 15) { tag = 'Yüksek fırsat'; tagCls = 'green'; }
+        else if (p.soldCount >= 60) { tag = 'Çok satan'; tagCls = 'blue'; }
+        else if (p.favoriteCount >= 2000) { tag = 'Çok beğenilen'; tagCls = 'purple'; }
+        else if (p.gapScore >= 8) { tag = 'Pasif ürün'; tagCls = 'orange'; }
+        else { tag = 'Stabil talep'; tagCls = 'blue'; }
+
+        // Sepette bekleyen sayısı — backend'de yok, deterministic mock üret
+        const cartCount = computeCartCount(p);
+
+        // 4 pazaryeri doygunluk skorları (her ürün için deterministic)
+        const sat = computeSaturation(p);
+
+        return `
+          <article class="product-row" data-id="${p.id}">
+            <div class="pr-thumb" style="background:${thumbGradient(p)};">
+              ${hasImg ? `<img src="${p.image}" alt="${p.name.replace(/"/g, '&quot;')}" loading="lazy">` : `<div class="pr-thumb-fallback">${initials}</div>`}
+              <span class="pr-thumb-label">ÜRÜN<br>PREVIEW</span>
+              <span class="pr-platform">#${i+1}</span>
+            </div>
+            <div class="pr-body">
+              <div class="pr-top">
+                <span class="pr-name">${p.name}</span>
+                <span class="pr-pill ${tagCls}">${tag}</span>
+              </div>
+              <div class="pr-meta-line">${catName}<span class="sep">·</span>${p.platformName || p.platform}<span class="sep">·</span>${fmtPrice(p.price)}</div>
+              <div class="pr-metrics-line">
+                <span class="pr-metric-chip gap">Fırsat <strong>${fmt1(p.gapScore)}</strong></span>
+                <span class="pr-metric-chip sold">Satış <strong>${fmtCount(p.soldCount)}</strong></span>
+                <span class="pr-metric-chip fav">Favori <strong>${fmtCount(p.favoriteCount)}</strong></span>
+                <span class="pr-metric-chip review">Yorum <strong>${fmtCount(p.reviewCount)}</strong></span>
+                <span class="pr-metric-chip cart">Sepette <strong>${fmtCount(cartCount)}</strong></span>
+              </div>
+            </div>
+
+            <!-- 4 pazaryeri doygunluk grafiği — yeşil→kırmızı scale, 0-100 -->
+            <div class="pr-saturation">
+              <div class="pr-sat-title">Pazaryeri Doygunluğu</div>
+              ${['Trendyol','Hepsiburada','N11','Amazon TR'].map((n, k) => {
+                const v = sat[k];
+                // Tek renk: <34 az=yeşil, 34-66 orta=sarı, ≥67 çok=kırmızı
+                const fillCls = v >= 67 ? 'high'   : v >= 34 ? 'mid'    : 'low';
+                const pctCls  = v >= 67 ? 'red'    : v >= 34 ? 'yellow' : 'green';
+                return `
+                  <div class="pr-sat-row">
+                    <span class="pr-sat-name">${n}</span>
+                    <span class="pr-sat-bar"><span class="pr-sat-fill ${fillCls}" style="width:${v}%"></span></span>
+                    <span class="pr-sat-pct ${pctCls}">%${v}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+
+            <!-- AI score (thumb boyutunda kare) -->
+            <div class="pr-score ${verdict.scoreCls}">
+              <small>AI Skor</small>
+              <strong>${score}</strong>
+              <span class="verdict">${verdict.label}</span>
+            </div>
+
+            <!-- 3 buton dikey, eşit yükseklik, tam isim -->
+            <div class="pr-actions">
+              <a class="pr-action" href="${netKarHref}" title="Net Kâr Hesabı'na bu ürünü gönder">
+                <span class="pa-icon">💰</span> Net Kâr Hesabı
+              </a>
+              <a class="pr-action" href="${yasalHref}" title="Yasal Kontrol sayfasında izin/belge sorgula">
+                <span class="pa-icon">⚖️</span> Yasal Kontrol
+              </a>
+              <a class="pr-action" href="${supHref}" title="Tedarikçi Bul sayfasında ürün araması başlat">
+                <span class="pa-icon">🏭</span> Tedarikçi Bul
+              </a>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      renderPagination(totalPages);
     }
 
-    /* ── pagination ── */
-    function renderPagination(list){
-      const total   = getPageCount(list);
-      const current = Math.min(state.page, total);
-      state.page = current;
-
-      if(total <= 1){ pagination.innerHTML = ''; return; }
-
+    function renderPagination(totalPages){
+      const host = document.getElementById('pagination');
+      if (!host) return;
+      if (totalPages <= 1) { host.innerHTML = ''; return; }
+      const current = Math.min(state.page, totalPages);
       let html = '';
-      for(let i = 1; i <= total; i++){
+      for (let i = 1; i <= totalPages; i++) {
         html += `<button class="page-btn ${i === current ? 'active' : ''}" data-page="${i}">${i}</button>`;
       }
-      html += `<span class="page-info">${current} / ${total}</span>`;
-      pagination.innerHTML = html;
-
-      pagination.querySelectorAll('.page-btn').forEach(btn => {
+      html += `<span class="page-info">${current} / ${totalPages} · sayfa başına ${PAGE_SIZE} ürün</span>`;
+      host.innerHTML = html;
+      host.querySelectorAll('.page-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           state.page = Number(btn.dataset.page);
-          render();
+          renderProducts();
+          // En üste değil, ürün listesi başlığına scroll
+          document.getElementById('productList')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
       });
     }
 
-    /* ── sync selection ── */
-    function syncSelectedToFilter(){
-      const filtered = getFilteredProducts();
-      if(!filtered.length){ state.selectedId = products[0].id; return; }
-      if(!filtered.find(p => p.id === state.selectedId)){
-        state.selectedId = filtered[0].id;
-      }
+    // ─── Stat bar (4 kart + 5. kart ticker ayrı render edilir) ───
+    function renderStats(){
+      const items = state.items;
+      const total = items.length;
+      const withSnap = items.filter(i => i.snapshot);
+      const up   = withSnap.filter(i => trendClass(i.snapshot.changePct) === 'up').length;
+      const down = withSnap.filter(i => trendClass(i.snapshot.changePct) === 'down').length;
+      const avg7Vals = withSnap.map(i => i.snapshot.avgInterest7d).filter(Number.isFinite);
+      const avg7 = avg7Vals.length ? avg7Vals.reduce((s,v) => s+v, 0) / avg7Vals.length : null;
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statTotalSub').textContent = withSnap.length === total
+        ? `${total} kategori, hepsinde veri var`
+        : `${withSnap.length}/${total} kategori veriyle`;
+
+      document.getElementById('statUp').textContent = up;
+      document.getElementById('statUpSub').textContent = up === 0 ? 'Şu an yükselen yok' : `+${up} büyüyen kategori`;
+
+      document.getElementById('statDown').textContent = down;
+      document.getElementById('statDownSub').textContent = down === 0 ? 'Düşen kategori yok' : `${down} eriyen kategori`;
+
+      document.getElementById('statAvg7').textContent = avg7 != null ? fmt0(avg7) : '—';
     }
 
-    /* ── right panel ── */
-    function renderSelectedPanel(animated){
-      const p = products.find(x => x.id === state.selectedId) || products[0];
+    // ─── Piyasa Nabzı (Bloomberg-style — tüm kategoriler 4.5sn'de bir döner) ───
+    const TICKER_INTERVAL_MS = 4500;
+    const TICKER_FADE_MS = 280;
 
-      // Flash animation on update
-      if(animated){
-        const els = ['selectedHead','insightGrid'];
-        els.forEach(id => {
-          const el = document.getElementById(id);
-          if(!el) return;
-          el.classList.remove('panel-flash');
-          void el.offsetWidth;
-          el.classList.add('panel-flash');
-        });
-      }
-
-      document.getElementById('selectedName').textContent     = p.title;
-      document.getElementById('selectedCategory').textContent = p.category;
-      document.getElementById('selectedDecision').textContent = p.verdict;
-      document.getElementById('selectedDecision').className   = `pill ${p.verdictClass === 'good' ? 'green' : p.verdictClass === 'mid' ? 'orange' : 'red'}`;
-      document.getElementById('selectedDesc').textContent     = p.desc;
-
-      document.getElementById('compPrice').textContent  = p.competitor.price;
-      document.getElementById('compReview').textContent = p.competitor.review;
-      document.getElementById('compVisual').textContent = p.competitor.visual;
-      document.getElementById('compNote').textContent   = p.competitor.note;
-      // Dynamic border color on compNote based on verdict
-      const compNote = document.getElementById('compNote');
-      compNote.className = `analysis ${p.verdictClass === 'bad' ? 'red' : p.verdictClass === 'mid' ? 'orange' : ''}`;
-
-      document.getElementById('profitSale').textContent   = p.profit.sale;
-      document.getElementById('profitCost').textContent   = p.profit.cost;
-      document.getElementById('profitMargin').textContent = p.profit.margin;
-      document.getElementById('profitNote').textContent   = p.profit.note;
-
-      document.getElementById('riskPlatform').textContent = p.risk.platform;
-      document.getElementById('riskReturn').textContent   = p.risk.return;
-      document.getElementById('riskSeason').textContent   = p.risk.season;
-      document.getElementById('riskNote').textContent     = p.risk.note;
-
-      document.getElementById('action1').textContent = p.actions[0];
-      document.getElementById('action2').textContent = p.actions[1];
-      document.getElementById('action3').textContent = p.actions[2];
-      document.getElementById('action4').textContent = p.actions[3];
-
-      const signalMap = [
-        ['demand','sigDemand','sigDemandLabel'],
-        ['gap',   'sigGap',   'sigGapLabel'],
-        ['profit','sigProfit','sigProfitLabel'],
-        ['entry', 'sigEntry', 'sigEntryLabel'],
-        ['risk',  'sigRisk',  'sigRiskLabel']
-      ];
-      signalMap.forEach(([key, barId, labelId]) => {
-        const val = p.signals[key];
-        document.getElementById(barId).style.width        = `${val}%`;
-        document.getElementById(labelId).textContent      = `${val}/100`;
+    function tickerOrder(){
+      const withSnap = state.items.filter(i => i.snapshot);
+      // Bloomberg: en volatile kategoriler önce (mutlak % değişim desc), sonra alfabetik
+      return withSnap.sort((a,b) => {
+        const da = Math.abs(a.snapshot.changePct ?? 0);
+        const db = Math.abs(b.snapshot.changePct ?? 0);
+        if (db !== da) return db - da;
+        return a.categoryName.localeCompare(b.categoryName, 'tr');
       });
     }
 
-    /* ── hero summary ── */
-    function renderHeroSummary(list){
-      const avg = (arr, key) => arr.length ? arr.reduce((s,x) => s + x[key], 0) / arr.length : 0;
-      const scoreAvg      = Math.round(avg(list,'score'));
-      const marginAvg     = avg(list,'margin').toFixed(1);
-      const saturationAvg = Math.round(avg(list,'saturation'));
-      const highCount     = list.filter(p => p.score >= 80).length;
-      const riskCount     = list.filter(p => p.saturation >= 70).length;
-      const entryValues   = list.map(p => parseInt(p.entry)).filter(v => !isNaN(v));
-      const entryMin      = entryValues.length ? Math.min(...entryValues) : 0;
-      const entryMax      = entryValues.length ? Math.max(...entryValues) : 0;
-      const riskLabel     = saturationAvg >= 70 ? 'Yüksek risk' : saturationAvg >= 50 ? 'Orta risk' : 'Düşük risk';
-      const platformLabel = getSelectedPlatformLabel();
-
-      document.getElementById('heroScanned').textContent   = products.length;
-      document.getElementById('heroHigh').textContent      = `${highCount} yüksek fırsat`;
-      document.getElementById('heroRisk').textContent      = riskCount;
-      document.getElementById('heroPlatform').textContent  = platformLabel;
-      document.getElementById('avgScore').textContent      = scoreAvg || 0;
-      document.getElementById('avgMargin').textContent     = `%${marginAvg}`;
-      document.getElementById('avgEntry').textContent      = entryValues.length ? `${entryMin}–${entryMax} gün giriş` : '—';
-      document.getElementById('avgRisk').textContent       = riskLabel;
-      document.getElementById('avgLabel').textContent      = scoreAvg >= 85 ? 'Güçlü sinyal' : scoreAvg >= 72 ? 'Seçimli giriş' : 'Temkinli izle';
-      document.getElementById('visibleCount').textContent  = list.length;
-      document.getElementById('selectedPlatformText').textContent = platformLabel;
+    function renderTickerDots(total, activeIdx){
+      const card = document.getElementById('tickerCard');
+      let dots = card.querySelector('.ticker-dots');
+      if (!dots){
+        dots = document.createElement('div');
+        dots.className = 'ticker-dots';
+        card.appendChild(dots);
+      }
+      const max = Math.min(8, total);
+      if (dots.children.length !== max){
+        dots.innerHTML = Array.from({length: max}, () => '<span></span>').join('');
+      }
+      const slot = total ? Math.floor((activeIdx / total) * max) : 0;
+      [...dots.children].forEach((el, k) => el.classList.toggle('active', k === slot));
     }
 
-    /* ── main render ── */
+    function paintTickerSlot(){
+      const order = tickerOrder();
+      const nameEl = document.getElementById('tickerName');
+      const arrowEl = document.getElementById('tickerArrow');
+      const pctEl = document.getElementById('tickerPct');
+      const avgEl = document.getElementById('tickerAvg');
+      const changeEl = document.getElementById('tickerChange');
+      const upEl = document.getElementById('tickerTopUp');
+      const downEl = document.getElementById('tickerTopDown');
+
+      if (!order.length){
+        nameEl.textContent = '—';
+        pctEl.textContent = '—';
+        avgEl.textContent = '7g —';
+        upEl.textContent = '▲ —';
+        downEl.textContent = '▼ —';
+        renderTickerDots(0, 0);
+        return;
+      }
+
+      if (state.tickerIndex >= order.length) state.tickerIndex = 0;
+      const cur = order[state.tickerIndex];
+      const snap = cur.snapshot;
+      const cls = trendClass(snap.changePct);
+
+      nameEl.textContent = cur.categoryName;
+      pctEl.textContent = fmtPct(snap.changePct);
+      avgEl.textContent = `7g ort. ${fmt0(snap.avgInterest7d)}`;
+      arrowEl.textContent = cls === 'up' ? '▲' : cls === 'down' ? '▼' : '·';
+      changeEl.classList.remove('up','down','flat');
+      changeEl.classList.add(cls);
+
+      // Alt iki slot — ana kategoriyi hariç tutarak rotasyon
+      const { upSlot, downSlot } = pickSecondaries(order, state.tickerIndex, cur);
+      paintSecondarySlot(upEl, upSlot, '▲');
+      paintSecondarySlot(downEl, downSlot, '▼');
+
+      drawTickerSpark(snap.series, cls);
+      renderTickerDots(order.length, state.tickerIndex);
+    }
+
+    // Alt slotlar — biri yükselen, biri düşen. Tek yön varsa ikisi de aynı yön.
+    // Yöne sadece bir aday varsa sabit kalır, diğeri rotasyona devam eder.
+    function pickSecondaries(order, mainIdx, cur){
+      const risers  = order.filter(i => (i.snapshot.changePct ?? 0) > 0 && i.category !== cur.category);
+      const fallers = order.filter(i => (i.snapshot.changePct ?? 0) < 0 && i.category !== cur.category);
+
+      let upSlot = null, downSlot = null;
+      if (!risers.length && !fallers.length){
+        // Hiçbir aday yok
+      } else if (!risers.length){
+        // Sadece düşenler — iki slot da düşenden, mümkünse farklı
+        upSlot   = fallers[mainIdx % fallers.length];
+        downSlot = fallers.length > 1 ? fallers[(mainIdx + 1) % fallers.length] : fallers[0];
+      } else if (!fallers.length){
+        // Sadece yükselenler — iki slot da yükselenden
+        upSlot   = risers[mainIdx % risers.length];
+        downSlot = risers.length > 1 ? risers[(mainIdx + 1) % risers.length] : risers[0];
+      } else {
+        // Her iki tür de var: üst slot yükselen, alt slot düşen — pool'u rotasyona sok
+        upSlot   = risers[mainIdx % risers.length];
+        downSlot = fallers[mainIdx % fallers.length];
+      }
+      return { upSlot, downSlot };
+    }
+
+    function paintSecondarySlot(el, item, fallbackArrow){
+      el.classList.remove('up-cat', 'down-cat', 'flat-cat');
+      if (!item){
+        el.textContent = `${fallbackArrow} —`;
+        el.classList.add('flat-cat');
+        return;
+      }
+      const pct = item.snapshot.changePct ?? 0;
+      const arrow = pct > 0 ? '▲' : pct < 0 ? '▼' : '·';
+      const cls   = pct > 0 ? 'up-cat' : pct < 0 ? 'down-cat' : 'flat-cat';
+      el.classList.add(cls);
+      el.textContent = `${arrow} ${item.categoryName.split(' ')[0]} ${fmtPct(pct)}`;
+    }
+
+    function advanceTicker(){
+      const order = tickerOrder();
+      if (!order.length) return;
+      const content = document.querySelector('#tickerCard .ticker-content');
+      if (!content){ paintTickerSlot(); return; }
+      content.classList.add('fading');
+      setTimeout(() => {
+        state.tickerIndex = (state.tickerIndex + 1) % order.length;
+        paintTickerSlot();
+        // Force reflow for smooth fade-in
+        void content.offsetWidth;
+        content.classList.remove('fading');
+      }, TICKER_FADE_MS);
+    }
+
+    function startTickerRotation(){
+      stopTickerRotation();
+      paintTickerSlot();
+      const card = document.getElementById('tickerCard');
+      if (!card) return;
+      // Hover'da pause
+      if (!card.dataset.tickerHoverBound){
+        card.addEventListener('mouseenter', () => { state.tickerPaused = true; });
+        card.addEventListener('mouseleave', () => { state.tickerPaused = false; });
+        card.dataset.tickerHoverBound = '1';
+      }
+      state.tickerTimer = setInterval(() => {
+        if (state.tickerPaused) return;
+        advanceTicker();
+      }, TICKER_INTERVAL_MS);
+    }
+
+    function stopTickerRotation(){
+      if (state.tickerTimer){
+        clearInterval(state.tickerTimer);
+        state.tickerTimer = null;
+      }
+    }
+
+    // Geriye uyum için eski isim — ilk render'da çağrılan paintTicker artık rotasyonu başlatır
+    function paintTicker(){
+      state.tickerIndex = 0;
+      startTickerRotation();
+    }
+
+    function drawTickerSpark(series, cls){
+      const svg = document.getElementById('tickerSpark');
+      svg.innerHTML = '';
+      if (!series?.length) return;
+      const W = 200, H = 38;
+      const min = Math.min(...series.map(p => p.interest));
+      const max = Math.max(...series.map(p => p.interest));
+      const span = Math.max(1, max - min);
+      const xs = series.map((_, i) => (i / (series.length - 1)) * W);
+      const ys = series.map(p => H - ((p.interest - min) / span) * (H - 4) - 2);
+      let d = `M ${xs[0].toFixed(2)} ${ys[0].toFixed(2)}`;
+      for (let i = 1; i < xs.length; i++) d += ` L ${xs[i].toFixed(2)} ${ys[i].toFixed(2)}`;
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', d);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-width', '2');
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-linejoin', 'round');
+      const stroke = cls === 'up' ? 'var(--green)' : cls === 'down' ? 'var(--red)' : 'var(--muted)';
+      path.setAttribute('stroke', stroke);
+      svg.appendChild(path);
+    }
+
+    // ─── Render & Load ─────────────────────────────────────
     function render(){
-      const filtered  = getFilteredProducts();
-      const pageCount = getPageCount(filtered);
-      if(state.page > pageCount) state.page = pageCount;
-      syncSelectedToFilter();
       renderToolbar();
-      renderHeroSummary(filtered);
-      renderProducts(filtered);
-      renderPagination(filtered);
-      renderSelectedPanel(false);
+      renderStats();
+      renderProducts();
     }
 
-    render();
-  
+    // ─── MOCK FALLBACK (cron Firestore'u doldurana kadar) ───
+    // Backend products: null veya items boş olduğunda devreye girer.
+    // Gerçek veri gelirse otomatik onun yerine geçer.
+    const MOCK_CATEGORIES = [
+      { id:'elektronik',   name:'Elektronik' },
+      { id:'ev-yasam',     name:'Ev & Yaşam' },
+      { id:'kozmetik',     name:'Kozmetik' },
+      { id:'giyim',        name:'Giyim' },
+      { id:'spor-outdoor', name:'Spor & Outdoor' },
+      { id:'anne-bebek',   name:'Anne & Bebek' },
+      { id:'kirtasiye',    name:'Kırtasiye' },
+      { id:'otomotiv',     name:'Otomotiv' },
+      { id:'supermarket',  name:'Süpermarket' },
+      { id:'kitap-hobi',   name:'Kitap & Hobi' },
+      { id:'mobilya',      name:'Mobilya' },
+      { id:'aksesuar',     name:'Aksesuar & Takı' },
+      { id:'oyuncak',      name:'Oyuncak' },
+      { id:'mutfak',       name:'Mutfak Gereçleri' },
+      { id:'evcil-hayvan', name:'Evcil Hayvan' }
+    ];
+    const MOCK_PLATFORMS = [
+      { id:'trendyol',    name:'Trendyol' },
+      { id:'hepsiburada', name:'Hepsiburada' },
+      { id:'n11',         name:'N11' },
+      { id:'amazon-tr',   name:'Amazon TR' }
+    ];
+    const MOCK_NAMES = {
+      'elektronik':   ['Bluetooth Kulaklık Pro', 'USB-C Hızlı Şarj', 'Akıllı Saat Spor', 'Powerbank 20K mAh', 'HDMI Adapter Set', 'Kablosuz Mouse Şarjlı'],
+      'ev-yasam':     ['Köpük Sabunluk Sensörlü', 'LED Şerit Aydınlatma', 'Vakumlu Kavanoz Set', 'Mıknatıslı Çekmece', 'Aroma Difüzör', 'Katlanır Sandalye'],
+      'kozmetik':     ['Hyaluronik Asit Serum', 'LED Kaş Şekillendirici', 'Kalıcı Oje 12li', 'Nemlendirici Krem', 'Saç Maskesi Argan', 'Cilt Bakım Cihazı'],
+      'giyim':        ['Oversize Tişört', 'Dad Sneaker Beyaz', 'Bel Bağlı Pantolon', 'Bucket Şapka', 'Crossbody Çanta', 'Triko Kazak'],
+      'spor-outdoor': ['Yoga Matı 6mm', 'Direnç Lastiği Set', 'Akıllı İp Atlama', 'Çelik Su Şişesi 1L', 'Spor Eşofman Set', 'Termos 750ml'],
+      'anne-bebek':   ['Bebek Beslenme Seti', 'Silikon Diş Halkası', 'Mama Sandalyesi', 'Bebek Monitörü', 'Yumuşak Oyuncak Ayı', 'Beşik Mobil'],
+      'kirtasiye':    ['Pastel Defter Seti', 'Akrilik Boya 24lü', 'Mekanik Kalem 0.5', 'Çıkartma Pak', 'Etkinlik Kitabı', 'Dijital Çizim Tableti'],
+      'otomotiv':     ['Manyetik Telefon Tutucu', 'Araç İçi Aspiratör', 'LED Far Ampul H7', 'Boyun Yastığı', 'Cam Suyu Konsantre', 'Anahtarlık'],
+      'supermarket':  ['Organik Bal 1kg', 'Detoks Çay Karışımı', 'Antibakteriyel Mendil', 'Bambu Diş Fırçası', 'Yeniden Doldurulabilir Şişe', 'Premium Kuruyemiş'],
+      'kitap-hobi':   ['Kişisel Gelişim Kitabı', 'Suluboya Set 24lü', 'Yapboz 1000 Parça', 'Mini Bonsai Kit', 'Astronomi Kitabı', 'El Yapımı Mum Seti'],
+      'mobilya':      ['Katlanır Çalışma Masası', 'Akıllı Yatak Başı', 'Modüler Kitaplık', 'Kanepe Örtü', 'Köşe Sehpa Mermer', 'Asma Raf'],
+      'aksesuar':     ['Minimal Altın Kaplama Kolye', 'Yedek Saat Kayışı', 'Polarize Güneş Gözlüğü', 'Kemer Çift Taraflı', 'Kart Cüzdan', 'Bere Şapka'],
+      'oyuncak':      ['Mıknatıslı Yapı Bloğu', 'Eğitici Kodlama Robotu', 'STEM Set 8 Yaş', 'Pixel Sanat Kit', 'Suluboya Kitap', 'Ahşap Yapboz'],
+      'mutfak':       ['Silikon Spatula Seti', 'Vakumlu Sürahi 1.5L', 'Akıllı Mutfak Tartısı', 'Sıvı Yağ Spreyi', 'Bambu Kesme Tahtası', 'Çelik Saklama Kabı'],
+      'evcil-hayvan': ['Otomatik Mama Kabı', 'Oyuncak Top Set', 'Tüy Toplama Tarağı', 'Kedi Tırmanma Direği', 'GPS Tasması', 'Eğitim Tıkırtısı']
+    };
 
-</script>
+    function hashStr(s){ let h=0; for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))|0; return Math.abs(h); }
+
+    function buildMockSeries(seed){
+      const series = [];
+      const today = new Date();
+      for (let i = 29; i >= 0; i--){
+        const d = new Date(today); d.setUTCDate(d.getUTCDate() - i);
+        const noise = Math.sin((i + seed) / 4) * 12 + Math.sin((i + seed) / 9) * 8;
+        const interest = Math.max(0, Math.min(100, 55 + noise + (((seed * 7 + i) % 11) - 5)));
+        series.push({ date: d.toISOString().slice(0,10), interest: Math.round(interest) });
+      }
+      return series;
+    }
+
+    function buildMockProducts(category){
+      const names = MOCK_NAMES[category.id] || ['Ürün A','Ürün B','Ürün C','Ürün D','Ürün E','Ürün F'];
+      const all = [];
+      for (const platform of MOCK_PLATFORMS){
+        names.forEach((name, i) => {
+          const seed = hashStr(`${platform.id}-${category.id}-${i}`);
+          const fav = 100 + (seed * 9) % 4500;
+          const q   = 5 + (seed * 3) % 200;
+          const rev = 10 + (seed * 7) % 800;
+          const sold = (seed % 100) + 1;
+          const price = 49 + (seed * 11) % 950;
+          const gapScore = Math.round(((fav + q*5) / Math.max(1, sold)) * 10) / 10;
+          all.push({
+            id: `${platform.id}-${category.id}-${i}`,
+            platform: platform.id,
+            platformName: platform.name,
+            category: category.id,
+            name,
+            image: '',
+            price,
+            url: `https://example.com/${platform.id}/${category.id}/${i}`,
+            favoriteCount: fav,
+            questionCount: q,
+            reviewCount: rev,
+            rating: 3.5 + ((seed % 16) / 10),
+            soldCount: sold,
+            gapScore,
+            source: 'placeholder'
+          });
+        });
+      }
+      const sortBy = (key) => [...all].sort((a,b) => (Number(b[key])||0) - (Number(a[key])||0)).slice(0, 12);
+      return {
+        passive: sortBy('gapScore'),
+        bestSellers: sortBy('soldCount'),
+        mostFavorited: sortBy('favoriteCount'),
+        mostReviewed: sortBy('reviewCount')
+      };
+    }
+
+    function buildMockItems(){
+      const now = Date.now();
+      return MOCK_CATEGORIES.map(cat => {
+        const seed = hashStr(cat.id);
+        const series = buildMockSeries(seed);
+        const last7 = series.slice(-7);
+        const avg7 = last7.reduce((s,p)=>s+p.interest,0) / 7;
+        const avg30 = series.reduce((s,p)=>s+p.interest,0) / series.length;
+        const changePct = avg30 > 0 ? ((avg7 - avg30) / avg30) * 100 : 0;
+        const trend = changePct > 8 ? 'yukseliyor' : changePct < -8 ? 'dusuyor' : 'sabit';
+        return {
+          category: cat.id,
+          categoryName: cat.name,
+          snapshot: {
+            fetchedAt: now,
+            avgInterest7d: Math.round(avg7 * 10) / 10,
+            avgInterest30d: Math.round(avg30 * 10) / 10,
+            trend,
+            changePct: Math.round(changePct * 10) / 10,
+            series,
+            source: 'placeholder',
+            products: buildMockProducts(cat),
+            productCount: 24
+          }
+        };
+      });
+    }
+
+    function shouldUseMock(items){
+      if (!items?.length) return true;
+      const anyWithProducts = items.some(it => it.snapshot?.products && (
+        (it.snapshot.products.passive?.length || 0) +
+        (it.snapshot.products.bestSellers?.length || 0) +
+        (it.snapshot.products.mostFavorited?.length || 0) +
+        (it.snapshot.products.mostReviewed?.length || 0) > 0
+      ));
+      return !anyWithProducts;
+    }
+
+    async function load({ force = false } = {}){
+      errorBanner.style.display = 'none';
+      if (force) invalidatePlan();
+
+      let mockUsed = false;
+      try {
+        const data = await getTrends();
+        state.items = Array.isArray(data?.items) ? data.items : [];
+        state.tier = data?.tier || null;
+        state.plan = data?.plan || null;
+
+        if (shouldUseMock(state.items)){
+          state.items = buildMockItems();
+          mockUsed = true;
+        }
+      } catch (err) {
+        const handled = handleApiError(err);
+        if (!handled){
+          // 500/network → mock'a düş, en azından UI çalışsın
+          state.items = buildMockItems();
+          mockUsed = true;
+        } else {
+          // Plan/quota hatası — sadece toast göster, mock'a geçme
+          productList.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">⚠️</div>
+              <strong>Erişim engellendi</strong>
+              <p>Plan/kota kısıtlaması nedeniyle veri alınamadı.</p>
+            </div>
+          `;
+          return;
+        }
+      }
+
+      render();
+      paintTicker();
+
+      const fetchedTimes = state.items.map(i => i.snapshot?.fetchedAt).filter(Number.isFinite);
+      if (fetchedTimes.length){
+        const newest = Math.max(...fetchedTimes);
+        refreshTime.textContent = mockUsed ? `mock · ${fmtClock(newest)}` : `son: ${fmtClock(newest)}`;
+      } else {
+        refreshTime.textContent = 'henüz yok';
+      }
+
+      // Mock kullanıldıysa kullanıcıyı bilgilendir (status pill)
+      const statusPill = document.getElementById('streamStatus');
+      if (statusPill){
+        if (mockUsed){
+          statusPill.textContent = 'TEST VERİSİ';
+          statusPill.className = 'tag orange';
+        } else {
+          statusPill.textContent = 'CANLI';
+          statusPill.className = 'tag blue';
+        }
+      }
+
+    }
+
+    errorRetry.addEventListener('click', () => load({ force: true }));
+
+    load();
+  </script>
 </body>
 </html>
