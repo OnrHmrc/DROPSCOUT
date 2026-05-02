@@ -680,14 +680,14 @@ import { getInitials, paintAvatar } from '/src/js/profile-bar.js';
 import { getMyPlan, getMyUsage, exportMyData, deleteMyAccount } from '/src/js/api.js';
 
 const PLAN_COPY = {
-  start:    { chip: 'START',    label: 'Start',    desc: 'Link Analizi (1/gün), 1 mağaza, temel özellikler.' },
-  pro:      { chip: 'PRO',      label: 'Pro',      desc: 'Link Analizi (5/gün), 3 mağaza, Trend Radar günlük.' },
-  business: { chip: 'BUSINESS', label: 'Business', desc: 'Sınırsız mağaza, Gap Radar, 6 saatlik trend, haftalık otomatik rapor.' }
+  start:    { chip: 'BAŞLANGIÇ',   label: 'Başlangıç',   desc: 'Link Analizi (2/gün), 1 mağaza, temel özellikler.' },
+  pro:      { chip: 'ESNAF',       label: 'Esnaf',       desc: 'Link Analizi (8/gün), 3 mağaza, Trend Radar günlük.' },
+  business: { chip: 'PROFESYONEL', label: 'Profesyonel', desc: '10 mağaza, Gap Radar (20/ay), 6 saatlik trend, haftalık otomatik rapor.' }
 };
 
 const NEXT_PLAN = {
-  start:    { id: 'pro',      label: 'Pro',      desc: 'Daha fazla analiz, 3 mağaza ve günlük Trend Radar.' },
-  pro:      { id: 'business', label: 'Business', desc: 'Sınırsız limit, Gap Radar ve haftalık otomatik rapor.' },
+  start:    { id: 'pro',      label: 'Esnaf',       desc: 'Daha fazla analiz, 3 mağaza ve günlük Trend Radar.' },
+  pro:      { id: 'business', label: 'Profesyonel', desc: '10 mağaza, Gap Radar ve haftalık otomatik rapor.' },
   business: { id: null,       label: 'En üst plan', desc: 'Tüm özellikler aktif — teşekkürler!' }
 };
 
@@ -695,7 +695,8 @@ const METER_LABELS = {
   linkAnalysis:         'Link Analizi',
   storeProductAnalysis: 'Mağaza Ürün Analizi',
   legalCheck:           'Yasal Kontrol',
-  supplier:             'Tedarikçi Bul'
+  supplier:             'Tedarikçi Bul',
+  gapRadar:             'Gap Radar'
 };
 
 const TOGGLE_KEYS = {
@@ -787,7 +788,7 @@ function renderPlan(planData) {
   const statusEl = $('summaryProfileStatus');
   if (planData.status === 'trialing' && planData.trialEndsAt) {
     const daysLeft = Math.max(0, Math.ceil((planData.trialEndsAt - Date.now()) / 86400000));
-    statusEl.textContent = `PRO TRIAL · ${daysLeft} GÜN KALDI`;
+    statusEl.textContent = `ESNAF DENEME · ${daysLeft} GÜN KALDI`;
     statusEl.classList.add('green');
   } else if (planData.status === 'expired') {
     statusEl.textContent = 'PLAN SÜRESİ DOLDU';

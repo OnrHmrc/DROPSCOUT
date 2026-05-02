@@ -5,7 +5,13 @@ import type { AuthRequest } from '../middleware/auth';
 import '../lib/firebase-admin';
 import { getUserPlan, getQuotaStatus } from '../middleware/plan';
 import { PLANS, monthKey } from '../lib/plans';
-import { calcClaudeCostUsd, ZERO_USAGE, type TokenUsage } from '../lib/pricing';
+import {
+  calcClaudeCostUsd,
+  calcMonthlyCostUsd,
+  ZERO_USAGE,
+  type TokenUsage,
+  type MonthlyUsageDoc
+} from '../lib/pricing';
 
 /**
  * GET /api/me/plan
@@ -22,7 +28,12 @@ export async function getMyPlanHandler(req: AuthRequest, res: Response): Promise
 
   const resolved = await getUserPlan(uid);
   const definition = PLANS[resolved.plan];
-  const quotas = await getQuotaStatus(uid, resolved.plan);
+  const db = getFirestore();
+  const [quotas, monthSnap] = await Promise.all([
+    getQuotaStatus(uid, resolved.plan),
+    db.collection('users').doc(uid).collection('usageMonthly').doc(monthKey()).get()
+  ]);
+  const monthlyCostUsd = calcMonthlyCostUsd(monthSnap.data() as MonthlyUsageDoc | undefined);
 
   res.json({
     plan: resolved.plan,
@@ -32,9 +43,16 @@ export async function getMyPlanHandler(req: AuthRequest, res: Response): Promise
     definition: {
       name: definition.name,
       priceTl: definition.priceTl,
+      priceTlYearly: definition.priceTlYearly,
+      costCapUsd: definition.costCapUsd,
       features: definition.features
     },
-    quotas
+    quotas,
+    cost: {
+      monthlyCostUsd,
+      costCapUsd: definition.costCapUsd,
+      remainingUsd: Math.max(0, definition.costCapUsd - monthlyCostUsd)
+    }
   });
 }
 

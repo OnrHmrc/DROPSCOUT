@@ -4,12 +4,14 @@ import type { AuthRequest } from './auth';
 import '../lib/firebase-admin';
 import {
   PLANS,
+  ALL_METERS,
   type PlanId,
   type MeterId,
   planAtLeast,
   todayKey,
   monthKey
 } from '../lib/plans';
+import { calcMonthlyCostUsd, type MonthlyUsageDoc } from '../lib/pricing';
 
 export interface PlanRequest extends AuthRequest {
   plan?: PlanId;
@@ -137,13 +139,19 @@ export function requirePlan(minPlan: PlanId) {
 
 export interface ConsumeResult {
   ok: boolean;
-  reason?: 'daily_quota_exceeded' | 'monthly_quota_exceeded' | 'feature_not_in_plan';
+  reason?:
+    | 'daily_quota_exceeded'
+    | 'monthly_quota_exceeded'
+    | 'feature_not_in_plan'
+    | 'cost_cap_reached';
   usedDaily?: number;
   usedMonthly?: number;
   remainingDaily?: number | null;
   remainingMonthly?: number | null;
   limitDaily?: number | null;
   limitMonthly?: number | null;
+  monthlyCostUsd?: number;
+  costCapUsd?: number;
 }
 
 /**
@@ -201,6 +209,25 @@ export async function consumeQuota(
         remainingMonthly: 0,
         limitDaily: quota.daily,
         limitMonthly: quota.monthly
+      };
+    }
+
+    // Hard cost cap (panic switch) — quota gecse bile cost cap'i asarsa blockla.
+    // Normal kullanimda asla tetiklenmez; bug, cache miss patlamasi vs. icin tampon.
+    const monthlyCostUsd = calcMonthlyCostUsd(monthSnap.data() as MonthlyUsageDoc | undefined);
+    const costCapUsd = PLANS[plan].costCapUsd;
+    if (monthlyCostUsd >= costCapUsd) {
+      return {
+        ok: false,
+        reason: 'cost_cap_reached',
+        usedDaily,
+        usedMonthly,
+        remainingDaily: quota.daily !== null ? Math.max(0, quota.daily - usedDaily) : null,
+        remainingMonthly: quota.monthly !== null ? Math.max(0, quota.monthly - usedMonthly) : null,
+        limitDaily: quota.daily,
+        limitMonthly: quota.monthly,
+        monthlyCostUsd,
+        costCapUsd
       };
     }
 
@@ -275,10 +302,9 @@ export async function getQuotaStatus(
   const dayData = (daySnap.data() ?? {}) as Record<string, number | Timestamp>;
   const monthData = (monthSnap.data() ?? {}) as Record<string, number | Timestamp>;
 
-  const meters: MeterId[] = ['linkAnalysis', 'storeProductAnalysis', 'legalCheck', 'supplier'];
   const out = {} as Record<MeterId, ConsumeResult>;
 
-  for (const meter of meters) {
+  for (const meter of ALL_METERS) {
     const quota = PLANS[plan].quotas[meter];
     const usedDaily = (dayData[meter] as number | undefined) ?? 0;
     const usedMonthly = (monthData[meter] as number | undefined) ?? 0;

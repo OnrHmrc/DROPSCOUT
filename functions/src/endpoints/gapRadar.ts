@@ -11,7 +11,7 @@
 
 import type { Response } from 'express';
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
-import type { PlanRequest } from '../middleware/plan';
+import { type PlanRequest, consumeQuota, refundQuota } from '../middleware/plan';
 import '../lib/firebase-admin';
 import { TRACKED_CATEGORIES } from '../lib/trends';
 import { runGapPipeline, type PipelineResult } from '../lib/gapPipeline';
@@ -59,7 +59,22 @@ export async function getGapRadarHandler(req: PlanRequest, res: Response): Promi
     }
   }
 
-  // Cache miss → pipeline çalıştır
+  // Cache miss → kota tüket, sonra pipeline çalıştır.
+  // Pipeline fail olursa refund. Plan zaten requirePlan('business') ile garanti.
+  const plan = req.plan ?? 'business';
+  const consume = await consumeQuota(uid, 'gapRadar', plan);
+  if (!consume.ok) {
+    res.status(429).json({
+      error: consume.reason ?? 'quota_exceeded',
+      message:
+        consume.reason === 'cost_cap_reached'
+          ? 'Aylık maliyet üst sınırına ulaşıldı. Lütfen sonraki ay dönemini bekleyin veya destek ile iletişime geçin.'
+          : 'Gap Radar aylık kotanız doldu',
+      ...consume
+    });
+    return;
+  }
+
   let snapshot: GapRadarSnapshot;
   try {
     const result = await runGapPipeline({
@@ -69,6 +84,7 @@ export async function getGapRadarHandler(req: PlanRequest, res: Response): Promi
     });
     snapshot = { ...result, categoryName: cat.name };
   } catch (err) {
+    await refundQuota(uid, 'gapRadar');
     console.error('[gapRadar] pipeline hatası', {
       categoryId: cat.id,
       error: err instanceof Error ? err.message : String(err)

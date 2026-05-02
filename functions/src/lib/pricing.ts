@@ -35,3 +35,33 @@ export function calcClaudeCostUsd(usage: Partial<TokenUsage>): number {
     (cacheCreation * CLAUDE_HAIKU_PRICING.cacheCreation) / 1_000_000;
   return Math.round(cost * 1_000_000) / 1_000_000;
 }
+
+// ─────────────────────────────────────────────────────────
+// Apify cagri basina maliyet tahminleri (USD).
+// Conservative tahmin — gercek rakamlar Apify Console'dan netlesince
+// burada revize edilir. Hard cost cap matematigi bu degerlere bagli.
+// ─────────────────────────────────────────────────────────
+export const APIFY_COST_USD = {
+  supplier: 0.25,
+  gapRadar: 0.40
+} as const;
+
+export interface MonthlyUsageDoc {
+  tokens?: Partial<TokenUsage>;
+  supplier?: number;
+  gapRadar?: number;
+  [key: string]: unknown;
+}
+
+/**
+ * Aylik toplam maliyet (USD). Claude tokens + Apify supplier + Apify gapRadar.
+ * Hard cost cap karsilastirmasi icin kullanilir.
+ */
+export function calcMonthlyCostUsd(monthData: MonthlyUsageDoc | undefined | null): number {
+  if (!monthData) return 0;
+  const claudeCost = calcClaudeCostUsd(monthData.tokens ?? {});
+  const supplierCost = (monthData.supplier ?? 0) * APIFY_COST_USD.supplier;
+  const gapRadarCost = (monthData.gapRadar ?? 0) * APIFY_COST_USD.gapRadar;
+  const total = claudeCost + supplierCost + gapRadarCost;
+  return Math.round(total * 1_000_000) / 1_000_000;
+}
