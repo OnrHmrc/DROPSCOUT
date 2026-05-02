@@ -23,15 +23,11 @@
 </script>
 <style>
 /* ═══════════════════════════════════
-   GAP RADAR — Page-Specific Styles
+   GAP RADAR — Asya Domestic 3 Sekme
    ═══════════════════════════════════ */
 .nav-item.blue-active{background:var(--blue-dim);color:var(--blue);border-color:var(--focus-blue-border);box-shadow:var(--key-shadow-strong)}
 .nav-item.blue-active::before{content:'';position:absolute;left:0;top:18%;bottom:18%;width:3px;background:var(--blue);border-radius:999px}
-.nb-green{background:var(--green);color:#fff}
-.platform-pills{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--key-shadow)}
-.pp{padding:6px 12px;font-size:10px;font-family:'Geist Mono',monospace;color:var(--muted2);cursor:pointer;transition:all .15s}
-.pp.active{background:var(--blue);color:#fff;font-weight:700}
-.pp:hover:not(.active){background:var(--surface2);color:var(--text)}
+.nb-purple{background:var(--purple);color:#fff}
 
 .hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-bottom:18px}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--key-shadow);overflow:hidden}
@@ -55,8 +51,10 @@
 .tag-green{background:var(--green-dim);color:var(--green)}
 .tag-yellow{background:var(--yellow-dim);color:var(--yellow)}
 .tag-red{background:var(--red-dim);color:var(--red)}
+.tag-purple{background:var(--purple-dim);color:var(--purple)}
+.tag-orange{background:var(--orange-dim,var(--yellow-dim));color:var(--orange,var(--yellow))}
 
-.filter-card{margin-bottom:18px}
+.filter-card{margin-bottom:14px}
 .filter-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:16px 18px}
 .param-group{display:flex;flex-direction:column;gap:6px}
 .param-label{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase}
@@ -71,6 +69,20 @@
 .filter-note{font-size:11px;color:var(--muted2);line-height:1.7}
 .filter-note strong{color:var(--text)}
 
+/* ── Tab strip ─────────────────────── */
+.tab-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.tab-btn{
+  padding:12px 18px;border-radius:14px;border:1px solid var(--border);background:var(--surface);
+  cursor:pointer;font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;color:var(--muted);
+  display:inline-flex;align-items:center;gap:8px;transition:all .18s ease;
+}
+.tab-btn:hover{transform:translateY(-1px);border-color:var(--focus-blue-border)}
+.tab-btn.active{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-color:transparent;box-shadow:var(--button-shadow)}
+.tab-btn .tab-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:rgba(255,255,255,.2);font-size:10px;font-weight:800}
+.tab-btn:not(.active) .tab-count{background:var(--surface2);color:var(--text)}
+.tab-desc{font-size:11px;color:var(--muted2);line-height:1.6;padding:0 4px;margin-bottom:14px}
+.tab-desc strong{color:var(--text)}
+
 .content-grid{display:grid;grid-template-columns:minmax(0,1.55fr) 360px;gap:14px;align-items:start}
 .list-shell{display:flex;flex-direction:column;gap:12px}
 .list-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 18px}
@@ -78,47 +90,55 @@
 .count-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:var(--blue-dim);color:var(--blue);font-size:10px;font-weight:700;font-family:'Geist Mono',monospace}
 .opportunity-list{display:flex;flex-direction:column;gap:12px}
 
+/* ── Op-card (Asya kaynak) ─────────── */
 .op-card{
   background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;
   box-shadow:var(--key-shadow);transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;cursor:pointer;
 }
 .op-card:hover{transform:translateY(-1px);box-shadow:var(--key-shadow-strong);border-color:var(--focus-blue-border)}
 .op-card.selected{border-color:var(--focus-blue-border);box-shadow:var(--key-shadow-strong)}
-.op-top{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:12px;align-items:start}
+.op-top{display:grid;grid-template-columns:88px minmax(0,1fr) auto;gap:14px;align-items:start}
 .op-thumb{
-  width:56px;height:56px;border-radius:16px;display:flex;align-items:center;justify-content:center;
+  width:88px;height:88px;border-radius:14px;display:flex;align-items:center;justify-content:center;
   background:linear-gradient(180deg,var(--surface2),color-mix(in srgb,var(--surface2) 72%,var(--panel-highlight)));
-  border:1px solid var(--border);font-size:26px;box-shadow:var(--soft-shadow)
+  border:1px solid var(--border);font-size:32px;box-shadow:var(--soft-shadow);overflow:hidden;position:relative;flex-shrink:0
 }
+.op-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.op-thumb .src-flag{position:absolute;left:6px;bottom:6px;font-size:11px;background:rgba(0,0,0,.55);color:#fff;padding:2px 6px;border-radius:999px;font-family:'Geist Mono',monospace;font-weight:700;letter-spacing:.5px}
 .op-main{min-width:0}
-.op-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.op-name-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
 .op-name{font-size:14px;font-weight:800;letter-spacing:-.2px}
-.op-desc{font-size:11px;color:var(--muted);line-height:1.7}
-.op-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.op-orig{font-size:11px;color:var(--muted);font-style:italic;margin-bottom:6px;direction:ltr}
+.op-orig::before{content:'orijinal: ';color:var(--muted2);font-style:normal;font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:.5px;text-transform:uppercase;margin-right:4px}
+.op-desc{font-size:11px;color:var(--muted);line-height:1.7;margin-bottom:8px}
+.op-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .meta-pill{
   display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:999px;border:1px solid var(--border);
   background:linear-gradient(180deg,var(--surface2),color-mix(in srgb,var(--surface2) 72%,var(--panel-highlight)));
   font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);text-decoration:none
 }
 .meta-pill strong{color:var(--text)}
+.meta-pill.attrib{background:var(--purple-dim);color:var(--purple);border-color:color-mix(in srgb,var(--purple) 22%, transparent)}
+.meta-pill.placeholder{background:var(--yellow-dim);color:var(--yellow);border-color:color-mix(in srgb,var(--yellow) 22%, transparent)}
 .op-score-stack{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .score-ring{
-  width:56px;height:56px;border-radius:50%;display:grid;place-items:center;position:relative;flex-shrink:0;
+  width:60px;height:60px;border-radius:50%;display:grid;place-items:center;position:relative;flex-shrink:0;
   background:conic-gradient(var(--green) calc(var(--score)*1%), color-mix(in srgb,var(--text) 8%, transparent) 0);
 }
+.score-ring.cls-orta{background:conic-gradient(var(--yellow) calc(var(--score)*1%), color-mix(in srgb,var(--text) 8%, transparent) 0)}
+.score-ring.cls-early{background:conic-gradient(var(--purple) calc(var(--score)*1%), color-mix(in srgb,var(--text) 8%, transparent) 0)}
 .score-ring::after{
   content:'';position:absolute;inset:7px;background:var(--surface);border-radius:50%;
 }
-.score-ring span{position:relative;z-index:1;font-size:12px;font-weight:800}
-.entry-chip{
+.score-ring span{position:relative;z-index:1;font-size:13px;font-weight:800}
+.cls-chip{
   padding:5px 9px;border-radius:999px;font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;
-  background:var(--purple-dim);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 22%, transparent)
+  text-align:center;letter-spacing:.5px;
 }
-.early-chip{
-  padding:5px 9px;border-radius:999px;font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;
-  background:var(--green-dim);color:var(--green);border:1px solid color-mix(in srgb,var(--green) 22%, transparent)
-}
-.op-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px}
+.cls-chip.safe{background:var(--green-dim);color:var(--green);border:1px solid color-mix(in srgb,var(--green) 22%, transparent)}
+.cls-chip.orta{background:var(--yellow-dim);color:var(--yellow);border:1px solid color-mix(in srgb,var(--yellow) 22%, transparent)}
+.cls-chip.early{background:var(--purple-dim);color:var(--purple);border:1px solid color-mix(in srgb,var(--purple) 22%, transparent)}
+.op-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:14px}
 .metric{
   padding:11px 12px;border:1px solid var(--border);border-radius:14px;background:linear-gradient(180deg,var(--surface2),color-mix(in srgb,var(--surface2) 72%,var(--panel-highlight)));
 }
@@ -127,11 +147,14 @@
 .metric-sub{font-size:10px;color:var(--muted2);margin-top:4px;line-height:1.5}
 .metric-value.good{color:var(--green)}
 .metric-value.mid{color:var(--yellow)}
-.metric-value.warn{color:var(--orange)}
+.metric-value.warn{color:var(--orange,var(--yellow))}
 .metric-value.bad{color:var(--red)}
+.metric-value.purple{color:var(--purple)}
 
-.op-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px}
-.legal-wrap{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.op-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px dashed var(--border)}
+.op-attrib{font-size:10px;color:var(--muted);font-family:'Geist Mono',monospace;line-height:1.5}
+.op-attrib a{color:var(--blue);text-decoration:none}
+.op-attrib a:hover{text-decoration:underline}
 .cta-row{display:flex;gap:8px;flex-wrap:wrap}
 .cta-btn{
   padding:9px 12px;border-radius:10px;font-size:10px;font-weight:700;font-family:'Geist Mono',monospace;cursor:pointer;border:1px solid var(--border);
@@ -140,7 +163,6 @@
 .cta-btn:hover{transform:translateY(-1px);border-color:var(--focus-blue-border)}
 .cta-btn.primary{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-color:transparent;box-shadow:var(--button-shadow)}
 .cta-btn.saved{background:var(--green-dim);color:var(--green);border-color:color-mix(in srgb,var(--green) 16%, transparent)}
-
 
 .hero-ai-card .card-copy{display:flex;flex-direction:column;gap:0;height:100%}
 .hero-ai-card .mini-metrics{margin:10px 0 0}
@@ -153,9 +175,6 @@
 .ai-subcard{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:18px;box-shadow:var(--key-shadow);display:flex;flex-direction:column;min-height:auto}
 .ai-subcard-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .ai-subcard .list-points{display:flex;flex-direction:column;gap:10px;overflow:visible;min-height:0;padding-right:0}
-
-.ai-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:16px;box-shadow:var(--key-shadow)}
-.ai-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
 .ai-card-title{font-size:13px;font-weight:700}
 
 .score-big-row{display:flex;align-items:center;gap:12px;padding:12px;background:var(--green-dim);border:1px solid var(--focus-green-border);border-radius:14px;margin-bottom:12px}
@@ -163,8 +182,6 @@
 .score-big-label{font-size:10px;color:var(--muted2);margin-bottom:3px}
 .score-big-decision{font-size:15px;font-weight:800;color:var(--green)}
 .brief-text{font-size:11.5px;color:var(--muted);line-height:1.75;padding:11px 12px;background:var(--surface2);border-radius:12px;border-left:2px solid var(--purple);margin-bottom:12px}
-.detail-block{margin-top:12px}
-.detail-title{font-family:'Geist Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:9px}
 .list-points{display:flex;flex-direction:column;gap:8px}
 .point{
   display:flex;align-items:flex-start;gap:8px;padding:10px 11px;border-radius:12px;background:linear-gradient(180deg,var(--surface2),color-mix(in srgb,var(--surface2) 72%,var(--panel-highlight)));
@@ -176,7 +193,7 @@
 .mm{padding:10px;background:var(--surface2);border-radius:12px;border:1px solid var(--border)}
 .mm-l{font-family:'Geist Mono',monospace;font-size:8px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
 .mm-v{font-size:14px;font-weight:700}
-.mm-v.g{color:var(--green)} .mm-v.o{color:var(--orange)} .mm-v.p{color:var(--purple)} .mm-v.y{color:var(--yellow)} .mm-v.r{color:var(--red)}
+.mm-v.g{color:var(--green)} .mm-v.o{color:var(--orange,var(--yellow))} .mm-v.p{color:var(--purple)} .mm-v.y{color:var(--yellow)} .mm-v.r{color:var(--red)}
 
 .empty-state{
   padding:28px 16px;border-radius:18px;border:1px dashed var(--border2);background:linear-gradient(180deg,var(--nav-item-bg-start),var(--nav-item-bg-end));
@@ -189,6 +206,15 @@
 .snackbar.show{opacity:1;transform:translateY(0)}
 .spinner-ring{width:16px;height:16px;border:2px solid rgba(99,102,241,0.2);border-top-color:var(--blue);border-radius:50%;animation:gr-spin 0.8s linear infinite;display:inline-block;vertical-align:middle}
 @keyframes gr-spin{to{transform:rotate(360deg)}}
+
+.mode-banner{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:12px;margin-bottom:12px;
+  font-family:'Geist Mono',monospace;font-size:11px;font-weight:700;letter-spacing:.5px;
+}
+.mode-banner.placeholder{background:var(--yellow-dim);color:var(--yellow);border:1px solid color-mix(in srgb,var(--yellow) 25%, transparent)}
+.mode-banner.mixed{background:var(--blue-dim);color:var(--blue);border:1px solid var(--focus-blue-border)}
+.mode-banner.live{background:var(--green-dim);color:var(--green);border:1px solid var(--focus-green-border)}
+.mode-banner-detail{font-weight:500;color:inherit;opacity:.8;font-size:10px;letter-spacing:.3px}
 
 @media (max-width:1200px){
   .hero-grid{grid-template-columns:1fr}
@@ -221,8 +247,8 @@
   .mini-overview{grid-template-columns:1fr}
   .filter-grid{grid-template-columns:1fr}
   .filter-footer{flex-direction:column;align-items:flex-start}
-  .op-top{grid-template-columns:48px minmax(0,1fr);gap:10px}
-  .op-thumb{width:48px;height:48px;font-size:22px}
+  .op-top{grid-template-columns:64px minmax(0,1fr);gap:10px}
+  .op-thumb{width:64px;height:64px;font-size:24px}
   .op-score-stack{grid-column:2;align-items:flex-start;flex-direction:row;flex-wrap:wrap}
   .op-metrics{grid-template-columns:1fr 1fr}
   .op-footer{flex-direction:column;align-items:flex-start}
@@ -230,6 +256,8 @@
   .cta-btn{flex:1}
   .mini-metrics{grid-template-columns:1fr}
   .ai-insight-grid{height:auto}
+  .tab-strip{flex-direction:column}
+  .tab-btn{justify-content:space-between}
 }
 @media (max-width:480px){
   .main{padding:14px 12px 22px}
@@ -305,7 +333,6 @@
         </label>
       </div>
     </div>
-
   </div>
 </aside>
 
@@ -316,8 +343,8 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
       <div>
-        <div class="page-title">Gap Radar — Kategori Fırsat Taraması</div>
-        <div class="page-meta" id="pageMeta">// APIFY TARAMASI + AI FIRSAT ANALİZİ · 24 SAATLİK CACHE</div>
+        <div class="page-title">Gap Radar — Asya Domestic Keşif</div>
+        <div class="page-meta" id="pageMeta">// DOUYIN · XIAOHONGSHU · TAOBAO · COUPANG · RAKUTEN · MERCARI JP · 7G CACHE</div>
       </div>
     </div>
     <div class="topbar-right">
@@ -326,25 +353,25 @@
   </div>
 
   <section class="stat-strip" id="kpiStrip">
-    <div class="stat-box p">
-      <div class="sb-label">Bulunan Fırsat</div>
-      <div class="sb-value p" id="kpiOpportunities">—</div>
-      <div class="sb-sub">Kategori taraması</div>
-    </div>
     <div class="stat-box g">
-      <div class="sb-label">Az Rakipli Fırsat</div>
-      <div class="sb-value g" id="kpiLowCompetition">—</div>
-      <div class="sb-sub">10 rakip altı</div>
-    </div>
-    <div class="stat-box o">
-      <div class="sb-label">Ortalama Fiyat</div>
-      <div class="sb-value o" id="kpiEntryDays">—</div>
-      <div class="sb-sub">Pazar örneği</div>
+      <div class="sb-label">🔥 SAFE GAP</div>
+      <div class="sb-value g" id="kpiSafe">—</div>
+      <div class="sb-sub">Talep var, arz yok</div>
     </div>
     <div class="stat-box y">
-      <div class="sb-label">Ort. Aylık Satış</div>
-      <div class="sb-value y" id="kpiMargin">—</div>
-      <div class="sb-sub">Adet tahmini</div>
+      <div class="sb-label">⚡ ORTA GAP</div>
+      <div class="sb-value y" id="kpiOrta">—</div>
+      <div class="sb-sub">Talep + rekabet</div>
+    </div>
+    <div class="stat-box p">
+      <div class="sb-label">💎 EARLY GAP</div>
+      <div class="sb-value p" id="kpiEarly">—</div>
+      <div class="sb-sub">İlk girene değer</div>
+    </div>
+    <div class="stat-box o">
+      <div class="sb-label">Toplam Aday</div>
+      <div class="sb-value o" id="kpiTotal">—</div>
+      <div class="sb-sub" id="kpiSourcesSub">Asya kaynaklarından</div>
     </div>
   </section>
 
@@ -352,43 +379,42 @@
     <div class="card">
       <div class="card-head">
         <div>
-          <div class="card-title">Kategori fırsat taraması</div>
+          <div class="card-title">2x2 sınıflandırma matrisi</div>
         </div>
         <div class="tag-row">
-          <div class="ct-tag tag-blue">BACKEND</div>
-          <div class="ct-tag tag-green">AI DETAY</div>
+          <div class="ct-tag tag-purple">ASYA DOMESTIC</div>
+          <div class="ct-tag tag-green">7G CACHE</div>
         </div>
       </div>
       <div class="card-copy">
         <div class="kicker">Karar mantığı</div>
         <div class="hero-copy">
-          Gap Radar, Türkiye pazaryerlerinde yüksek talep–düşük rekabet kesişimindeki ürünleri tarar.
-          Her fırsat; <strong>fırsat skoru</strong>, <strong>aylık tahmini satış</strong>, <strong>rakip sayısı</strong> ve
-          <strong>ortalama pazar fiyatı</strong> ile sıralanır. Bir ürüne tıkladığında
-          <strong>Claude AI</strong> karar brief'i üretir: güçlü yönler, riskler ve ilk aksiyonlar.
+          Gap Radar, <strong>Çin / Kore / Japonya iç pazar</strong> kaynaklarından (Douyin, Xiaohongshu, Taobao, Coupang, Rakuten, Mercari JP)
+          viralleşen ürünleri tespit eder ve <strong>4-7 ay önde sinyal</strong> verir. Her aday <strong>çeviri katmanı</strong>nden
+          (Claude Haiku) geçer, ardından <strong>TR talep + arz</strong> üzerinden 2x2 matriste sınıflandırılır.
         </div>
 
         <div class="signal-row">
-          <div class="signal-pill">📡 <span>Kaynak <strong id="pulseEntryWindow">—</strong></span></div>
-          <div class="signal-pill">🕐 <span>Tazelik <strong id="pulseSaturation">—</strong></span></div>
-          <div class="signal-pill">🛡️ <span>Güven <strong>24 saat cache</strong></span></div>
+          <div class="signal-pill">📡 <span>Mod <strong id="pulseMode">—</strong></span></div>
+          <div class="signal-pill">🕐 <span>Tazelik <strong id="pulseFreshness">—</strong></span></div>
+          <div class="signal-pill">🌐 <span>Talep kaynağı <strong id="pulseDemand">—</strong></span></div>
         </div>
 
         <div class="mini-overview">
           <div class="mini">
-            <div class="ml">Ort. fırsat skoru</div>
-            <div class="mv" id="miniGapIntensity">—</div>
-            <div class="ms">Backend taraması ortalaması</div>
+            <div class="ml">🔥 SAFE</div>
+            <div class="mv" id="miniSafe">—</div>
+            <div class="ms">Talep var · TR'de yok = hızlı satış</div>
           </div>
           <div class="mini">
-            <div class="ml">Yüksek fırsat adedi</div>
-            <div class="mv" id="miniTrFit">—</div>
-            <div class="ms">Skor 70+ ürün sayısı</div>
+            <div class="ml">⚡ ORTA</div>
+            <div class="mv" id="miniOrta">—</div>
+            <div class="ms">Talep var · rekabet var = farklılaş</div>
           </div>
           <div class="mini">
-            <div class="ml">Az rakipli adedi</div>
-            <div class="mv" id="miniQuickWins">—</div>
-            <div class="ms">5 rakip altı ürün sayısı</div>
+            <div class="ml">💎 EARLY</div>
+            <div class="mv" id="miniEarly">—</div>
+            <div class="ms">Henüz aranmıyor = ilk giren kazanır</div>
           </div>
         </div>
       </div>
@@ -415,20 +441,20 @@
 
         <div class="mini-metrics hero-mini-metrics">
           <div class="mm">
-            <div class="mm-l">Ort. fiyat</div>
+            <div class="mm-l">TR Trend</div>
             <div class="mm-v p" id="aiTrendMetric">—</div>
           </div>
           <div class="mm">
-            <div class="mm-l">Rakip sayısı</div>
-            <div class="mm-v o" id="aiSaturationMetric">—</div>
+            <div class="mm-l">Sınıflandırma</div>
+            <div class="mm-v g" id="aiClassMetric">—</div>
           </div>
           <div class="mm">
-            <div class="mm-l">Aylık satış</div>
-            <div class="mm-v y" id="aiEntryMetric">—</div>
+            <div class="mm-l">Sosyal sinyal</div>
+            <div class="mm-v y" id="aiSocialMetric">—</div>
           </div>
           <div class="mm">
             <div class="mm-l">Kaynak</div>
-            <div class="mm-v g" id="aiMarginMetric">—</div>
+            <div class="mm-v o" id="aiSourceMetric">—</div>
           </div>
         </div>
 
@@ -441,9 +467,9 @@
     <div class="card-head">
       <div>
         <div class="card-title">Kategori taraması</div>
-        <div class="list-sub">Kategori seçtiğinde backend taramayı tetikler (ya da 24 saat cache'ten döner). İlk yüklemede Elektronik gelir.</div>
+        <div class="list-sub">Kategori seçtiğinde 6 Asya kaynak paralel taranır (ya da 7g cache'ten döner). 5 adımlı pipeline çalışır: keşif → çeviri → TR arz → TR talep → sınıflandırma.</div>
       </div>
-      <div class="ct-tag tag-blue" id="dataSourceTag">BACKEND</div>
+      <div class="ct-tag tag-blue" id="dataSourceTag">PIPELINE</div>
     </div>
     <div class="filter-grid">
       <div class="param-group">
@@ -451,13 +477,15 @@
         <select class="param-select" id="categoryFilter"></select>
       </div>
       <div class="param-group">
-        <label class="param-label" for="sortFilter">Sıralama</label>
-        <select class="param-select" id="sortFilter">
-          <option value="score-desc">Fırsat skoru ↓</option>
-          <option value="competitors-asc">Az rakip ↑</option>
-          <option value="sales-desc">Aylık satış ↓</option>
-          <option value="price-asc">Fiyat ↑</option>
-          <option value="price-desc">Fiyat ↓</option>
+        <label class="param-label" for="sourceFilter">Kaynak</label>
+        <select class="param-select" id="sourceFilter">
+          <option value="all">Tüm kaynaklar</option>
+          <option value="douyin">Douyin (CN)</option>
+          <option value="xiaohongshu">Xiaohongshu (CN)</option>
+          <option value="taobao">Taobao (CN)</option>
+          <option value="coupang">Coupang (KR)</option>
+          <option value="rakuten">Rakuten (JP)</option>
+          <option value="mercari-jp">Mercari JP</option>
         </select>
       </div>
       <div class="param-group">
@@ -472,14 +500,25 @@
     </div>
     <div class="filter-footer">
       <div class="filter-note">
-        <strong>Not:</strong> Ürün bazlı AI brief'i (güçlü/zayıf yön + strateji + aksiyon) kart üzerindeki "AI fırsat analizi" butonuna tıkladığında üretilir. Cache hit'ler ücretsiz.
+        <strong>Not:</strong> Ürün AI brief'i kart üzerindeki "AI fırsat analizi" butonuyla üretilir. Cache hit ücretsiz.
+        Görseller kaynak platform CDN'inden (Douyin/Coupang vs.) referans alınır — DropScout sunucusunda host edilmez.
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="action-button secondary" id="resetFiltersBtn">Sıfırla</button>
-        <button class="action-button primary" id="showBestBtn">Yüksek fırsat + az rakip</button>
       </div>
     </div>
   </section>
+
+  <div id="modeBanner"></div>
+
+  <div class="tab-strip">
+    <button class="tab-btn active" data-tab="safe">🔥 SAFE GAP <span class="tab-count" id="tabCountSafe">0</span></button>
+    <button class="tab-btn" data-tab="orta">⚡ ORTA GAP <span class="tab-count" id="tabCountOrta">0</span></button>
+    <button class="tab-btn" data-tab="early">💎 EARLY GAP <span class="tab-count" id="tabCountEarly">0</span></button>
+  </div>
+  <div class="tab-desc" id="tabDesc">
+    <strong>SAFE GAP</strong> — TR'de talep var ama arz yok. Düşük risk, hızlı dönüş. Yeni başlayan satıcı için ideal.
+  </div>
 
   <section class="content-grid">
     <div class="list-shell">
@@ -487,7 +526,7 @@
         <div class="list-head">
           <div>
             <div class="card-title">Fırsat Listesi</div>
-            <div class="list-sub">Kartlar backend'in döndürdüğü fırsat skoru, fiyat, tahmini aylık satış ve rakip sayısını gösterir. "AI fırsat analizi" butonuna tıkladığında Claude Haiku 4.5 karar brief'i üretir.</div>
+            <div class="list-sub">Her aday: orijinal başlık (Çince/Japonca/Korece) + Türkçe çeviri + kaynak attribution + fırsat skoru.</div>
           </div>
           <div class="count-badge" id="listCountBadge">—</div>
         </div>
@@ -548,6 +587,7 @@
 import { analyzeProduct, getGapRadar } from '/src/js/api.js';
 import { ensureQuota, handleApiError } from '/src/js/plan.js';
 
+// ─── Sabitler ────────────────────────────────────────────
 const CATEGORY_OPTIONS = [
   { id: 'elektronik',   name: 'Elektronik',        emoji: '📱' },
   { id: 'ev-yasam',     name: 'Ev & Yaşam',        emoji: '🏠' },
@@ -568,26 +608,51 @@ const CATEGORY_OPTIONS = [
 const CATEGORY_EMOJI  = Object.fromEntries(CATEGORY_OPTIONS.map(c => [c.id, c.emoji]));
 const CATEGORY_BY_ID  = Object.fromEntries(CATEGORY_OPTIONS.map(c => [c.id, c]));
 
+const SOURCE_FLAG = {
+  douyin:        '🇨🇳',
+  xiaohongshu:   '🇨🇳',
+  taobao:        '🇨🇳',
+  coupang:       '🇰🇷',
+  rakuten:       '🇯🇵',
+  'mercari-jp':  '🇯🇵'
+};
+const SOURCE_NAME = {
+  douyin:        'Douyin',
+  xiaohongshu:   'Xiaohongshu',
+  taobao:        'Taobao',
+  coupang:       'Coupang',
+  rakuten:       'Rakuten',
+  'mercari-jp':  'Mercari JP'
+};
+
+const TAB_DESC = {
+  safe:  '<strong>SAFE GAP</strong> — TR\'de talep var ama arz yok. Düşük risk, hızlı dönüş. Yeni başlayan satıcı için ideal.',
+  orta:  '<strong>ORTA GAP</strong> — TR\'de talep doğrulanmış, ama rekabet de var. Farklılaşma stratejisi gerekir (paket, fiyat, niş).',
+  early: '<strong>EARLY GAP</strong> — Asya\'da viral, TR\'de henüz aranmıyor. İlk giren kazanır. Tecrübeli satıcı için.'
+};
+
 const $ = (id) => document.getElementById(id);
 const els = {
   opportunityList:   $('opportunityList'),
   listCountBadge:    $('listCountBadge'),
-  kpiOpportunities:  $('kpiOpportunities'),
-  kpiLowCompetition: $('kpiLowCompetition'),
-  kpiEntryDays:      $('kpiEntryDays'),
-  kpiMargin:         $('kpiMargin'),
-  pulseEntryWindow:  $('pulseEntryWindow'),
-  pulseSaturation:   $('pulseSaturation'),
-  miniGapIntensity:  $('miniGapIntensity'),
-  miniTrFit:         $('miniTrFit'),
-  miniQuickWins:     $('miniQuickWins'),
+  kpiSafe:           $('kpiSafe'),
+  kpiOrta:           $('kpiOrta'),
+  kpiEarly:          $('kpiEarly'),
+  kpiTotal:          $('kpiTotal'),
+  kpiSourcesSub:     $('kpiSourcesSub'),
+  pulseMode:         $('pulseMode'),
+  pulseFreshness:    $('pulseFreshness'),
+  pulseDemand:       $('pulseDemand'),
+  miniSafe:          $('miniSafe'),
+  miniOrta:          $('miniOrta'),
+  miniEarly:         $('miniEarly'),
   aiScore:           $('aiScore'),
   aiDecision:        $('aiDecision'),
   aiSummary:         $('aiSummary'),
   aiTrendMetric:     $('aiTrendMetric'),
-  aiSaturationMetric:$('aiSaturationMetric'),
-  aiEntryMetric:     $('aiEntryMetric'),
-  aiMarginMetric:    $('aiMarginMetric'),
+  aiClassMetric:     $('aiClassMetric'),
+  aiSocialMetric:    $('aiSocialMetric'),
+  aiSourceMetric:    $('aiSourceMetric'),
   aiCachedTag:       $('aiCachedTag'),
   aiCardTag:         $('aiCardTag'),
   aiSummaryNote:     $('aiSummaryNote'),
@@ -599,29 +664,30 @@ const els = {
   firstActions:      $('firstActions'),
   snackbar:          $('snackbar'),
   categoryFilter:    $('categoryFilter'),
-  sortFilter:        $('sortFilter'),
+  sourceFilter:      $('sourceFilter'),
   minScoreFilter:    $('minScoreFilter'),
   resetBtn:          $('resetFiltersBtn'),
-  showBestBtn:       $('showBestBtn'),
-  refreshBtn:        $('refreshBtn')
+  refreshBtn:        $('refreshBtn'),
+  modeBanner:        $('modeBanner'),
+  tabDesc:           $('tabDesc'),
+  tabCountSafe:      $('tabCountSafe'),
+  tabCountOrta:      $('tabCountOrta'),
+  tabCountEarly:     $('tabCountEarly')
 };
 
 const state = {
   categoryId: 'elektronik',
-  items: [],
+  snapshot: null,        // { groups: { safe, orta, early, eleme }, meta, fetchedAt, ... }
   loading: false,
   error: null,
   selectedId: null,
-  snapshot: null
+  activeTab: 'safe'
 };
 const saved = new Set();
 
+// ─── Yardımcılar ────────────────────────────────────────
 function escHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-}
-function formatTl(v) {
-  if (v == null || !isFinite(v)) return '—';
-  return new Intl.NumberFormat('tr-TR', { maximumFractionDigits: 0 }).format(v) + ' ₺';
 }
 function formatNum(v) {
   if (v == null || !isFinite(v)) return '—';
@@ -635,9 +701,6 @@ function freshnessLabel(fetchedAt) {
   const d = Math.round(h / 24);
   return `${d} gün önce`;
 }
-function sourceLabel(s) {
-  return s === 'apify' ? 'Apify (canlı)' : 'Örnek veri';
-}
 function showToast(text) {
   els.snackbar.textContent = text;
   els.snackbar.classList.add('show');
@@ -649,105 +712,127 @@ function scoreClass(score) {
   if (score >= 60) return 'mid';
   return 'warn';
 }
-function competitorClass(n) {
-  if (n <= 10) return 'good';
-  if (n <= 20) return 'mid';
-  return 'warn';
+function classChipText(cls) {
+  return cls === 'safe' ? '🔥 SAFE' : cls === 'orta' ? '⚡ ORTA' : cls === 'early' ? '💎 EARLY' : 'ELEME';
 }
-function itemUid(item, idx) {
-  return `gap-${state.categoryId}-${idx}`;
+function itemUid(item) {
+  return `${item.sourceId}-${item.externalId}`;
 }
 
+// ─── Render ─────────────────────────────────────────────
 function populateCategorySelect() {
   els.categoryFilter.innerHTML = CATEGORY_OPTIONS
     .map(c => `<option value="${c.id}">${c.emoji} ${c.name}</option>`).join('');
   els.categoryFilter.value = state.categoryId;
 }
 
-function applyFilters(items) {
+function getActiveItems() {
+  if (!state.snapshot?.groups) return [];
+  const items = state.snapshot.groups[state.activeTab] || [];
   const minScore = Number(els.minScoreFilter.value) || 0;
-  const sort = els.sortFilter.value;
-  const filtered = items.filter(it => (it.opportunityScore ?? 0) >= minScore);
-  return [...filtered].sort((a, b) => {
-    if (sort === 'competitors-asc') return (a.competitorCount ?? 0) - (b.competitorCount ?? 0);
-    if (sort === 'sales-desc')      return (b.estimatedMonthlySales ?? 0) - (a.estimatedMonthlySales ?? 0);
-    if (sort === 'price-asc')       return (a.avgPrice ?? 0) - (b.avgPrice ?? 0);
-    if (sort === 'price-desc')      return (b.avgPrice ?? 0) - (a.avgPrice ?? 0);
-    return (b.opportunityScore ?? 0) - (a.opportunityScore ?? 0);
-  });
+  const sourceFilter = els.sourceFilter.value;
+  return items
+    .filter(it => (it.opportunityScore ?? 0) >= minScore)
+    .filter(it => sourceFilter === 'all' || it.sourceId === sourceFilter);
 }
 
 function renderProductCard(item) {
-  const id = item._uid;
+  const id = itemUid(item);
   const selected = id === state.selectedId ? 'selected' : '';
   const saveClass = saved.has(id) ? 'saved' : '';
   const saveText  = saved.has(id) ? 'Takipte' : 'Takibe al';
   const emoji     = CATEGORY_EMOJI[state.categoryId] || '📦';
   const score     = Math.round(item.opportunityScore ?? 0);
-  const compCount = item.competitorCount ?? 0;
-  const sales     = item.estimatedMonthlySales ?? 0;
-  const price     = item.avgPrice ?? 0;
-  const keywords  = Array.isArray(item.keywords) ? item.keywords.slice(0, 4) : [];
-  const isHot     = score >= 75 && compCount <= 10;
-  const sampleUrl = Array.isArray(item.sampleUrls) && item.sampleUrls[0];
+  const flag      = SOURCE_FLAG[item.sourceId] || '🌍';
+  const sourceName = SOURCE_NAME[item.sourceId] || item.sourceName || item.sourceId;
+  const cls       = item.classification || 'safe';
+  const ringCls   = `cls-${cls}`;
+
+  const m = item.metric || {};
+  const posts = m.posts;
+  const likes = m.likes;
+  const sales = m.sales;
+  const rank  = m.rank;
+  const rating = m.rating;
+
+  const titleTr = item.titleTr || item.title || 'İsimsiz ürün';
+  const titleOriginal = (item.title && item.title !== titleTr) ? item.title : '';
+  const descriptionTr = item.descriptionTr || '';
+
+  // Görsel: image varsa CDN'den göster, yoksa kategori emoji
+  const thumbInner = item.image
+    ? `<img src="${escHtml(item.image)}" alt="" loading="lazy" onerror="this.style.display='none';this.parentNode.insertAdjacentHTML('afterbegin','${escHtml(emoji)}');"><span class="src-flag">${flag}</span>`
+    : `${emoji}<span class="src-flag">${flag}</span>`;
+
+  // Metrikler — sosyal vs marketplace ayrımı kart UI'sını basitleştirmek için tek grid
+  const metric1 = posts != null
+    ? { label: 'Gönderi', value: formatNum(posts), cls: posts >= 1000 ? 'good' : posts >= 200 ? 'mid' : '' }
+    : { label: 'Satış', value: formatNum(sales), cls: sales >= 500 ? 'good' : sales >= 100 ? 'mid' : '' };
+  const metric2 = likes != null
+    ? { label: 'Beğeni', value: formatNum(likes), cls: likes >= 5000 ? 'good' : likes >= 800 ? 'mid' : '' }
+    : { label: 'Sıra', value: rank ? `#${rank}` : '—', cls: rank && rank <= 10 ? 'good' : rank && rank <= 30 ? 'mid' : '' };
+  const metric3 = { label: 'Fırsat skoru', value: score, cls: scoreClass(score) };
+  const metric4 = { label: 'Puan', value: rating ? rating.toFixed(1) : '—', cls: rating && rating >= 4.5 ? 'good' : rating && rating >= 4.0 ? 'mid' : '' };
+
+  // Attribution metni
+  const creator = item.creator ? escHtml(item.creator) : '';
+  const sourceUrlEsc = escHtml(item.sourceUrl || '#');
+  const detectedDate = item.detectedAt ? new Date(item.detectedAt).toLocaleDateString('tr-TR') : '—';
+  const attribLine = `Görsel: ${escHtml(sourceName)}${creator ? ' · ' + creator : ''} · ${detectedDate}`;
 
   return `
     <article class="op-card ${selected}" data-id="${escHtml(id)}">
       <div class="op-top">
-        <div class="op-thumb">${emoji}</div>
+        <div class="op-thumb">${thumbInner}</div>
         <div class="op-main">
           <div class="op-name-row">
-            <div class="op-name">${escHtml(item.productName || 'İsimsiz ürün')}</div>
-            ${isHot ? '<div class="early-chip">YÜKSEK FIRSAT</div>' : ''}
+            <div class="op-name">${escHtml(titleTr)}</div>
+            ${item.isPlaceholder ? '<div class="meta-pill placeholder">TEST VERİSİ</div>' : ''}
           </div>
-          ${keywords.length
-            ? `<div class="op-desc">Anahtar kelimeler: ${keywords.map(k => escHtml(k)).join(' · ')}</div>`
-            : '<div class="op-desc">Ek anahtar kelime yok.</div>'}
+          ${titleOriginal ? `<div class="op-orig">${escHtml(titleOriginal)}</div>` : ''}
+          ${descriptionTr ? `<div class="op-desc">${escHtml(descriptionTr)}</div>` : ''}
           <div class="op-meta">
-            <div class="meta-pill">Kategori <strong>${escHtml(item.category || CATEGORY_BY_ID[state.categoryId]?.name || '—')}</strong></div>
-            <div class="meta-pill">Kaynak <strong>${sourceLabel(item.source)}</strong></div>
+            <div class="meta-pill attrib">${flag} <strong>${escHtml(sourceName)}</strong></div>
+            <div class="meta-pill">Kategori <strong>${escHtml(CATEGORY_BY_ID[state.categoryId]?.name || state.categoryId)}</strong></div>
+            ${item.demandSource === 'serpapi'
+              ? `<div class="meta-pill">TR Talep <strong>${item.trendScore}</strong> ${item.trendDirection === 'up' ? '↑' : item.trendDirection === 'down' ? '↓' : '→'}</div>`
+              : `<div class="meta-pill">TR Talep <strong>tahmini</strong></div>`}
           </div>
         </div>
         <div class="op-score-stack">
-          <div class="score-ring" style="--score:${score}">
+          <div class="score-ring ${ringCls}" style="--score:${score}">
             <span>${score}</span>
           </div>
-          <div class="entry-chip">Fırsat skoru</div>
+          <div class="cls-chip ${cls}">${classChipText(cls)}</div>
         </div>
       </div>
 
       <div class="op-metrics">
         <div class="metric">
-          <div class="metric-label">Fırsat skoru</div>
-          <div class="metric-value ${scoreClass(score)}">${score}</div>
-          <div class="metric-sub">Backend</div>
+          <div class="metric-label">${metric1.label}</div>
+          <div class="metric-value ${metric1.cls}">${metric1.value}</div>
+          <div class="metric-sub">${posts != null ? 'Sosyal' : 'Marketplace'}</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Ortalama fiyat</div>
-          <div class="metric-value">${formatTl(price)}</div>
-          <div class="metric-sub">Pazar örneği</div>
+          <div class="metric-label">${metric2.label}</div>
+          <div class="metric-value ${metric2.cls}">${metric2.value}</div>
+          <div class="metric-sub">${likes != null ? 'Etkileşim' : 'Sıralama'}</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Aylık satış tahmini</div>
-          <div class="metric-value ${sales >= 1000 ? 'good' : sales >= 300 ? 'mid' : 'warn'}">${formatNum(sales)}</div>
-          <div class="metric-sub">Adet / ay</div>
+          <div class="metric-label">${metric3.label}</div>
+          <div class="metric-value ${metric3.cls}">${metric3.value}</div>
+          <div class="metric-sub">DropScout</div>
         </div>
         <div class="metric">
-          <div class="metric-label">Rakip sayısı</div>
-          <div class="metric-value ${competitorClass(compCount)}">${compCount}</div>
-          <div class="metric-sub">Düşük olan iyi</div>
-        </div>
-        <div class="metric">
-          <div class="metric-label">Anahtar kelime</div>
-          <div class="metric-value">${keywords.length}</div>
-          <div class="metric-sub">Etiket adedi</div>
+          <div class="metric-label">${metric4.label}</div>
+          <div class="metric-value ${metric4.cls}">${metric4.value}</div>
+          <div class="metric-sub">Müşteri puanı</div>
         </div>
       </div>
 
       <div class="op-footer">
-        <div class="legal-wrap">
-          <div class="meta-pill">Skor seviyesi <strong>${score >= 80 ? 'Çok yüksek' : score >= 60 ? 'Orta' : 'Düşük'}</strong></div>
-          ${sampleUrl ? `<a class="meta-pill" href="${escHtml(sampleUrl)}" target="_blank" rel="noopener">Pazaryerinde gör ↗</a>` : ''}
+        <div class="op-attrib">
+          ${attribLine} · <a href="${sourceUrlEsc}" target="_blank" rel="noopener noreferrer">kaynağa git ↗</a>
         </div>
         <div class="cta-row">
           <button class="cta-btn ${saveClass}" data-save="${escHtml(id)}">${saveText}</button>
@@ -758,60 +843,88 @@ function renderProductCard(item) {
   `;
 }
 
-function updateKpis(filtered) {
-  const count = filtered.length;
-  const lowComp  = filtered.filter(it => (it.competitorCount ?? 0) <= 10).length;
-  const avgPrice = count ? Math.round(filtered.reduce((s, it) => s + (it.avgPrice || 0), 0) / count) : 0;
-  const avgSales = count ? Math.round(filtered.reduce((s, it) => s + (it.estimatedMonthlySales || 0), 0) / count) : 0;
-  const avgScore = count ? Math.round(filtered.reduce((s, it) => s + (it.opportunityScore || 0), 0) / count) : 0;
-  const highOpp  = filtered.filter(it => (it.opportunityScore ?? 0) >= 70).length;
-  const fewComp  = filtered.filter(it => (it.competitorCount ?? 0) <= 5).length;
-
-  els.kpiOpportunities.textContent  = count || '—';
-  els.kpiLowCompetition.textContent = count ? lowComp : '—';
-  els.kpiEntryDays.textContent      = count ? formatTl(avgPrice) : '—';
-  els.kpiMargin.textContent         = count ? formatNum(avgSales) : '—';
-  els.listCountBadge.textContent    = count ? `${count} fırsat` : '—';
-  els.miniGapIntensity.textContent  = count ? avgScore : '—';
-  els.miniTrFit.textContent         = count ? highOpp : '—';
-  els.miniQuickWins.textContent     = count ? fewComp : '—';
-  els.pulseEntryWindow.textContent  = state.snapshot ? sourceLabel(state.snapshot.source) : '—';
-  els.pulseSaturation.textContent   = state.snapshot?.fetchedAt ? freshnessLabel(state.snapshot.fetchedAt) : '—';
-  els.dataSourceTag.textContent     = state.snapshot?.source === 'apify' ? 'APIFY CANLI' : 'ÖRNEK VERİ';
+function findItem(uid) {
+  if (!state.snapshot?.groups) return null;
+  for (const cls of ['safe', 'orta', 'early', 'eleme']) {
+    const arr = state.snapshot.groups[cls] || [];
+    const hit = arr.find(it => itemUid(it) === uid);
+    if (hit) return hit;
+  }
+  return null;
 }
 
-function resetAiPanel() {
-  els.aiScore.textContent         = '—';
-  els.aiDecision.textContent      = 'Bir ürün seç';
-  els.aiSummary.textContent       = 'Listeden bir ürüne tıkladığında Claude AI, o ürün için Türkçe karar özeti üretir (3–8 saniye, cache\'li tekrarlar anlık).';
-  els.aiTrendMetric.textContent   = '—';
-  els.aiSaturationMetric.textContent = '—';
-  els.aiEntryMetric.textContent   = '—';
-  els.aiMarginMetric.textContent  = '—';
-  els.aiCachedTag.style.display   = 'none';
-  els.strategyCard.style.display  = 'none';
-  els.strategyContent.textContent = '';
-  els.whyOpportunity.innerHTML    = '<div class="empty-state" style="padding:10px;">Ürün seçildiğinde AI üretir.</div>';
-  els.whyRisk.innerHTML           = '<div class="empty-state" style="padding:10px;">—</div>';
-  els.firstActions.innerHTML      = '<div class="empty-state" style="padding:10px;">—</div>';
+function updateKpis() {
+  const g = state.snapshot?.groups;
+  const meta = state.snapshot?.meta;
+  if (!g) {
+    els.kpiSafe.textContent = els.kpiOrta.textContent = els.kpiEarly.textContent = els.kpiTotal.textContent = '—';
+    els.miniSafe.textContent = els.miniOrta.textContent = els.miniEarly.textContent = '—';
+    els.tabCountSafe.textContent = els.tabCountOrta.textContent = els.tabCountEarly.textContent = '0';
+    els.pulseMode.textContent = els.pulseFreshness.textContent = els.pulseDemand.textContent = '—';
+    els.kpiSourcesSub.textContent = 'Asya kaynaklarından';
+    return;
+  }
+  const safeN = (g.safe || []).length;
+  const ortaN = (g.orta || []).length;
+  const earlyN = (g.early || []).length;
+  const total = safeN + ortaN + earlyN + (g.eleme || []).length;
+
+  els.kpiSafe.textContent = safeN;
+  els.kpiOrta.textContent = ortaN;
+  els.kpiEarly.textContent = earlyN;
+  els.kpiTotal.textContent = total;
+  els.miniSafe.textContent = safeN;
+  els.miniOrta.textContent = ortaN;
+  els.miniEarly.textContent = earlyN;
+  els.tabCountSafe.textContent = safeN;
+  els.tabCountOrta.textContent = ortaN;
+  els.tabCountEarly.textContent = earlyN;
+  els.pulseMode.textContent = (meta?.mode || '—').toUpperCase();
+  els.pulseFreshness.textContent = freshnessLabel(state.snapshot.fetchedAt);
+  els.pulseDemand.textContent = meta?.demandSource === 'serpapi' ? 'SerpAPI canlı' : 'Tahmini (TEST)';
+  els.kpiSourcesSub.textContent = `${meta?.sourcesUsed ?? 0} kaynak · ${meta?.totalCandidates ?? 0} aday`;
+  els.dataSourceTag.textContent = meta?.mode === 'live' ? 'PIPELINE · CANLI' : meta?.mode === 'mixed' ? 'PIPELINE · KARMA' : 'PIPELINE · TEST';
 }
 
-function fillSelectedItemMetrics(item) {
-  els.aiScore.textContent            = Math.round(item.opportunityScore ?? 0);
-  els.aiTrendMetric.textContent      = formatTl(item.avgPrice ?? 0);
-  els.aiSaturationMetric.textContent = formatNum(item.competitorCount ?? 0);
-  els.aiEntryMetric.textContent      = formatNum(item.estimatedMonthlySales ?? 0);
-  els.aiMarginMetric.textContent     = sourceLabel(item.source);
+function renderModeBanner() {
+  const meta = state.snapshot?.meta;
+  if (!meta) {
+    els.modeBanner.innerHTML = '';
+    return;
+  }
+  if (meta.mode === 'live') {
+    els.modeBanner.innerHTML = `
+      <div class="mode-banner live">
+        ✅ CANLI VERİ
+        <span class="mode-banner-detail">6 Asya kaynak Apify üzerinden tarandı · ${meta.totalCandidates} aday · ${meta.translationCalls} çeviri yapıldı</span>
+      </div>`;
+  } else if (meta.mode === 'mixed') {
+    els.modeBanner.innerHTML = `
+      <div class="mode-banner mixed">
+        🟦 KARMA MOD
+        <span class="mode-banner-detail">Bazı kaynaklar canlı, bazıları test verisi (Apify aktör eksik veya hata) · ${meta.totalCandidates} aday</span>
+      </div>`;
+  } else {
+    els.modeBanner.innerHTML = `
+      <div class="mode-banner placeholder">
+        🟡 TEST MODU
+        <span class="mode-banner-detail">Apify hesabı / aktör ID'leri henüz set edilmedi — pipeline placeholder veriyle çalışıyor. Hesap aktif olunca canlıya geçer.</span>
+      </div>`;
+  }
+}
+
+function renderTabDesc() {
+  els.tabDesc.innerHTML = TAB_DESC[state.activeTab] || '';
 }
 
 function renderList() {
-  const filtered = applyFilters(state.items);
+  const filtered = getActiveItems();
 
   if (state.loading) {
     els.opportunityList.innerHTML = `
       <div class="empty-state" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px;">
         <div class="spinner-ring" style="width:32px;height:32px;border-width:3px;"></div>
-        <div>Kategori taranıyor…</div>
+        <div>5 adımlı pipeline çalışıyor (Asya kaynak tarama + çeviri + sınıflandırma)…</div>
       </div>
     `;
     els.listCountBadge.textContent = 'yükleniyor…';
@@ -825,12 +938,13 @@ function renderList() {
   }
 
   if (!filtered.length) {
-    els.opportunityList.innerHTML = `<div class="empty-state">Bu kategori ve filtrelerle eşleşen ürün bulunamadı. Filtreleri gevşet veya başka bir kategori dene.</div>`;
+    els.opportunityList.innerHTML = `<div class="empty-state">Bu sekme + filtrelerle eşleşen ürün yok. Filtreleri gevşet veya başka kategori dene.</div>`;
     els.listCountBadge.textContent = '0 fırsat';
     return;
   }
 
   els.opportunityList.innerHTML = filtered.map(renderProductCard).join('');
+  els.listCountBadge.textContent = `${filtered.length} fırsat`;
 
   els.opportunityList.querySelectorAll('.op-card').forEach(card => {
     card.addEventListener('click', (event) => {
@@ -858,12 +972,41 @@ function renderList() {
   });
 }
 
+function resetAiPanel() {
+  els.aiScore.textContent         = '—';
+  els.aiDecision.textContent      = 'Bir ürün seç';
+  els.aiSummary.textContent       = 'Listeden bir ürüne tıkladığında Claude AI, o ürün için Türkçe karar özeti üretir (3–8 saniye, cache\'li tekrarlar anlık).';
+  els.aiTrendMetric.textContent   = '—';
+  els.aiClassMetric.textContent   = '—';
+  els.aiSocialMetric.textContent  = '—';
+  els.aiSourceMetric.textContent  = '—';
+  els.aiCachedTag.style.display   = 'none';
+  els.strategyCard.style.display  = 'none';
+  els.strategyContent.textContent = '';
+  els.whyOpportunity.innerHTML    = '<div class="empty-state" style="padding:10px;">Ürün seçildiğinde AI üretir.</div>';
+  els.whyRisk.innerHTML           = '<div class="empty-state" style="padding:10px;">—</div>';
+  els.firstActions.innerHTML      = '<div class="empty-state" style="padding:10px;">—</div>';
+}
+
+function fillSelectedItemMetrics(item) {
+  const m = item.metric || {};
+  els.aiScore.textContent         = Math.round(item.opportunityScore ?? 0);
+  els.aiTrendMetric.textContent   = item.trendScore != null
+    ? `${item.trendScore} ${item.trendDirection === 'up' ? '↑' : item.trendDirection === 'down' ? '↓' : '→'}`
+    : '—';
+  els.aiClassMetric.textContent   = classChipText(item.classification || 'safe');
+  els.aiSocialMetric.textContent  = m.likes != null ? formatNum(m.likes)
+                                  : m.sales != null ? `${formatNum(m.sales)} satış`
+                                  : '—';
+  els.aiSourceMetric.textContent  = `${SOURCE_FLAG[item.sourceId] || '🌍'} ${SOURCE_NAME[item.sourceId] || item.sourceId}`;
+}
+
 function selectItem(id, { triggerAI = false } = {}) {
-  const item = state.items.find(it => it._uid === id);
+  const item = findItem(id);
   if (!item) return;
   state.selectedId = id;
   fillSelectedItemMetrics(item);
-  els.aiDecision.textContent      = item.productName || 'Seçili ürün';
+  els.aiDecision.textContent      = item.titleTr || item.title || 'Seçili ürün';
   els.aiSummary.textContent       = 'Bu ürün için AI analizi yapmak üzere "AI fırsat analizi" butonuna tıkla. Analiz 30 gün boyunca cache\'te saklanır.';
   els.aiCachedTag.style.display   = 'none';
   els.strategyCard.style.display  = 'none';
@@ -878,12 +1021,13 @@ function selectItem(id, { triggerAI = false } = {}) {
 let _aiInsightReqId = 0;
 async function loadAIInsight(item) {
   const reqId = ++_aiInsightReqId;
+  const itemTitle = item.titleTr || item.title;
   els.aiCachedTag.style.display = 'none';
   els.aiDecision.textContent    = 'Hazırlanıyor…';
   els.aiSummary.innerHTML       = `
     <div style="display:flex;align-items:center;gap:10px;color:var(--muted);">
       <span class="spinner-ring"></span>
-      <span>Claude Haiku 4.5 <strong>${escHtml(item.productName)}</strong> için fırsat brief'i hazırlıyor…</span>
+      <span>Claude Haiku 4.5 <strong>${escHtml(itemTitle)}</strong> için fırsat brief'i hazırlıyor…</span>
     </div>
   `;
   els.whyOpportunity.innerHTML = '<div class="empty-state" style="padding:10px;">Yükleniyor…</div>';
@@ -901,19 +1045,18 @@ async function loadAIInsight(item) {
   try {
     const result = await analyzeProduct({
       source: 'store_product',
-      platform: 'trendyol',
-      category: item.category || CATEGORY_BY_ID[state.categoryId]?.name || state.categoryId,
-      salePrice: item.avgPrice ?? undefined,
-      competitorCount: item.competitorCount ?? undefined,
-      monthlySales: item.estimatedMonthlySales ?? undefined,
+      platform: 'gap-radar',
+      category: CATEGORY_BY_ID[state.categoryId]?.name || state.categoryId,
+      monthlySales: item.metric?.sales ?? undefined,
       dropScore: Math.round(item.opportunityScore ?? 0),
-      url: (Array.isArray(item.sampleUrls) && item.sampleUrls[0]) || undefined
+      url: item.sourceUrl || undefined,
+      trend: item.trendDirection === 'up' ? 'yükseliyor' : item.trendDirection === 'down' ? 'düşüyor' : 'sabit'
     });
 
     if (reqId !== _aiInsightReqId) return;
 
     const ins = result.insight || {};
-    els.aiDecision.textContent      = item.productName || 'Seçili ürün';
+    els.aiDecision.textContent      = itemTitle;
     els.aiSummary.textContent       = ins.scoreReasoning || 'Özet üretilemedi.';
     els.strategyCard.style.display  = ins.strategy ? 'flex' : 'none';
     els.strategyContent.textContent = ins.strategy || '';
@@ -943,11 +1086,11 @@ async function loadAIInsight(item) {
 async function loadGapRadar() {
   state.loading = true;
   state.error = null;
-  state.items = [];
-  state.selectedId = null;
   state.snapshot = null;
+  state.selectedId = null;
   resetAiPanel();
-  updateKpis([]);
+  updateKpis();
+  renderModeBanner();
   renderList();
 
   try {
@@ -955,7 +1098,6 @@ async function loadGapRadar() {
     const snapshot = resp?.snapshot;
     if (!snapshot) throw new Error('Snapshot boş döndü');
     state.snapshot = snapshot;
-    state.items = (snapshot.items || []).map((it, idx) => ({ ...it, _uid: itemUid(it, idx) }));
   } catch (err) {
     if (handleApiError(err)) {
       state.error = err?.body?.message || err?.message || 'Plan gerektiren özellik.';
@@ -964,7 +1106,8 @@ async function loadGapRadar() {
     }
   } finally {
     state.loading = false;
-    updateKpis(applyFilters(state.items));
+    updateKpis();
+    renderModeBanner();
     renderList();
   }
 }
@@ -972,31 +1115,31 @@ async function loadGapRadar() {
 // ── Event handlers ──
 populateCategorySelect();
 resetAiPanel();
-updateKpis([]);
+updateKpis();
+renderTabDesc();
 
 els.categoryFilter.addEventListener('change', () => {
   state.categoryId = els.categoryFilter.value;
   loadGapRadar();
 });
-els.sortFilter.addEventListener('change', renderList);
-els.minScoreFilter.addEventListener('change', () => {
-  updateKpis(applyFilters(state.items));
-  renderList();
-});
+els.sourceFilter.addEventListener('change', renderList);
+els.minScoreFilter.addEventListener('change', renderList);
 els.resetBtn.addEventListener('click', () => {
-  els.sortFilter.value = 'score-desc';
+  els.sourceFilter.value = 'all';
   els.minScoreFilter.value = '0';
-  updateKpis(applyFilters(state.items));
   renderList();
-});
-els.showBestBtn.addEventListener('click', () => {
-  els.sortFilter.value = 'score-desc';
-  els.minScoreFilter.value = '70';
-  updateKpis(applyFilters(state.items));
-  renderList();
-  showToast('Yüksek fırsat filtresi uygulandı');
 });
 els.refreshBtn.addEventListener('click', () => loadGapRadar());
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.activeTab = btn.dataset.tab;
+    renderTabDesc();
+    renderList();
+  });
+});
 
 // ── Initial load ──
 loadGapRadar();

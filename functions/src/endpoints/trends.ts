@@ -6,14 +6,17 @@ import { getUserPlan } from '../middleware/plan';
 import { PLANS } from '../lib/plans';
 import { selectForTier, TRACKED_CATEGORIES, type TrendSnapshot } from '../lib/trends';
 
+const PENDING_MESSAGE =
+  'Bu kategori için araştırma başlatıldı, tamamlandığında bilgilendirileceksiniz.';
+
 /**
  * GET /api/trends?category=elektronik
- * GET /api/trends            (tum kategoriler ozet)
+ * GET /api/trends            (tüm kategoriler özet)
  *
- * Plan tier'ina gore farkli tazelikteki snapshot'i doner:
- *   business → en taze (her 6h)
- *   pro      → ~24h gecikme
- *   start    → ~72h gecikme
+ * Yeni mimari (2026-04-28): Trend Radar verisi resmi Satıcı API'leri +
+ * anonim kullanıcı havuzundan beslenir. Havuz hazır olana kadar
+ * snapshot yok, response status='pending'. Frontend bu durumda
+ * "araştırma başlatıldı" mesajı / mock fallback gösterir.
  */
 export async function getTrendsHandler(req: AuthRequest, res: Response): Promise<void> {
   const uid = req.uid;
@@ -33,10 +36,15 @@ export async function getTrendsHandler(req: AuthRequest, res: Response): Promise
     const ref = collection.doc(requestedCategory);
     const snap = await ref.get();
     if (!snap.exists) {
-      res.status(404).json({
-        error: 'category_not_found',
+      const known = TRACKED_CATEGORIES.find((c) => c.id === requestedCategory);
+      res.json({
         category: requestedCategory,
-        message: 'Bu kategori henüz takip edilmiyor'
+        categoryName: known?.name ?? requestedCategory,
+        tier,
+        plan: resolvedPlan.plan,
+        status: 'pending',
+        message: PENDING_MESSAGE,
+        snapshot: null
       });
       return;
     }
@@ -51,42 +59,56 @@ export async function getTrendsHandler(req: AuthRequest, res: Response): Promise
       categoryName: data.categoryName ?? requestedCategory,
       tier,
       plan: resolvedPlan.plan,
-      snapshot: tierSnapshot,
-      products: tierSnapshot?.products ?? null
+      status: tierSnapshot ? 'ready' : 'pending',
+      message: tierSnapshot ? null : PENDING_MESSAGE,
+      snapshot: tierSnapshot
     });
     return;
   }
 
-  // Tum kategoriler ozet
+  // Tüm kategoriler özet
   const snap = await collection.get();
   const items: Array<{
     category: string;
     categoryName: string;
+    status: 'ready' | 'pending';
     snapshot: TrendSnapshot | null;
   }> = [];
+
+  const seen = new Set<string>();
   for (const doc of snap.docs) {
     const data = doc.data() as {
       categoryName?: string;
       history?: TrendSnapshot[];
     };
+    const tierSnapshot = selectForTier(data.history || [], tier);
     items.push({
       category: doc.id,
       categoryName: data.categoryName ?? doc.id,
-      snapshot: selectForTier(data.history || [], tier)
+      status: tierSnapshot ? 'ready' : 'pending',
+      snapshot: tierSnapshot
     });
+    seen.add(doc.id);
   }
 
-  // Henuz cron calismadiysa veya hicbir snapshot yoksa, kategori listesini
-  // bos snapshot'larla don (frontend "yakinda" gosterebilir)
-  if (!items.length) {
-    for (const cat of TRACKED_CATEGORIES) {
-      items.push({ category: cat.id, categoryName: cat.name, snapshot: null });
+  // Henüz hiç yazı yoksa veya bazı kategoriler eksikse, takip listesini doldur
+  for (const cat of TRACKED_CATEGORIES) {
+    if (!seen.has(cat.id)) {
+      items.push({
+        category: cat.id,
+        categoryName: cat.name,
+        status: 'pending',
+        snapshot: null
+      });
     }
   }
 
+  const allPending = items.every((it) => it.status === 'pending');
   res.json({
     tier,
     plan: resolvedPlan.plan,
+    status: allPending ? 'pending' : 'ready',
+    message: allPending ? PENDING_MESSAGE : null,
     items
   });
 }

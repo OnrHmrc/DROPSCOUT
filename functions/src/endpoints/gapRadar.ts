@@ -1,62 +1,25 @@
+// ─────────────────────────────────────────────────────────
+// DropScout TR — Gap Radar endpoint (Asya domestic kaynaklar)
+// Mimari: docs/architecture.md §5
+//
+// GET /api/gap-radar?category=<categoryId>
+// → Business plan gerektirir (router'da gate'lendi)
+// → 5 adımlı pipeline çalıştırır (lib/gapPipeline)
+// → cache/gapRadar/items/{categoryId} 7g TTL
+// → Response: { snapshot, cached }
+// ─────────────────────────────────────────────────────────
+
 import type { Response } from 'express';
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
 import type { PlanRequest } from '../middleware/plan';
 import '../lib/firebase-admin';
 import { TRACKED_CATEGORIES } from '../lib/trends';
-import { hasApifyToken, requireGapActorId, runActorSync } from '../lib/apify';
+import { runGapPipeline, type PipelineResult } from '../lib/gapPipeline';
 
-const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 gün
 
-export interface GapRadarItem {
-  productName: string;
-  category: string;
-  avgPrice: number;
-  estimatedMonthlySales: number;
-  competitorCount: number;
-  opportunityScore: number; // 0-100
-  keywords: string[];
-  sampleUrls: string[];
-  source: 'apify' | 'placeholder';
-}
-
-export interface GapRadarSnapshot {
-  categoryId: string;
+export interface GapRadarSnapshot extends PipelineResult {
   categoryName: string;
-  fetchedAt: number;
-  items: GapRadarItem[];
-  source: 'apify' | 'placeholder';
-}
-
-interface ApifyGapInput {
-  category: string;
-  query: string;
-  marketplace: 'trendyol' | 'hepsiburada' | 'n11';
-  maxItems: number;
-}
-
-function placeholderSnapshot(cat: typeof TRACKED_CATEGORIES[number]): GapRadarSnapshot {
-  const seed = cat.id.split('').reduce((s, c) => s + c.charCodeAt(0), 0);
-  const rand = (n: number) => Math.abs(Math.sin(seed * (n + 1))) ;
-
-  const items: GapRadarItem[] = Array.from({ length: 8 }).map((_, i) => ({
-    productName: `${cat.name} trend ürünü #${i + 1}`,
-    category: cat.name,
-    avgPrice: Math.round(80 + rand(i) * 400),
-    estimatedMonthlySales: Math.round(200 + rand(i + 7) * 1800),
-    competitorCount: Math.round(3 + rand(i + 13) * 40),
-    opportunityScore: Math.round(55 + rand(i + 21) * 40),
-    keywords: [cat.query, `ucuz ${cat.query}`, `toptan ${cat.query}`].slice(0, 3),
-    sampleUrls: [],
-    source: 'placeholder'
-  }));
-
-  return {
-    categoryId: cat.id,
-    categoryName: cat.name,
-    fetchedAt: Date.now(),
-    items,
-    source: 'placeholder'
-  };
 }
 
 export async function getGapRadarHandler(req: PlanRequest, res: Response): Promise<void> {
@@ -96,37 +59,25 @@ export async function getGapRadarHandler(req: PlanRequest, res: Response): Promi
     }
   }
 
-  // Cache miss → Apify veya placeholder
+  // Cache miss → pipeline çalıştır
   let snapshot: GapRadarSnapshot;
-  if (hasApifyToken()) {
-    try {
-      const actorId = requireGapActorId();
-      const input: ApifyGapInput = {
-        category: cat.name,
-        query: cat.query,
-        marketplace: 'trendyol',
-        maxItems: 20
-      };
-      const items = await runActorSync<ApifyGapInput, GapRadarItem>(actorId, input, {
-        timeoutSecs: 180,
-        maxItems: 20
-      });
-      snapshot = {
-        categoryId: cat.id,
-        categoryName: cat.name,
-        fetchedAt: Date.now(),
-        items: items.map((it) => ({ ...it, source: 'apify' as const })),
-        source: 'apify'
-      };
-    } catch (err) {
-      console.warn('[gapRadar] Apify basarisiz, placeholder', {
-        category: cat.id,
-        error: err instanceof Error ? err.message : String(err)
-      });
-      snapshot = placeholderSnapshot(cat);
-    }
-  } else {
-    snapshot = placeholderSnapshot(cat);
+  try {
+    const result = await runGapPipeline({
+      categoryId: cat.id,
+      categoryName: cat.name,
+      query: cat.query
+    });
+    snapshot = { ...result, categoryName: cat.name };
+  } catch (err) {
+    console.error('[gapRadar] pipeline hatası', {
+      categoryId: cat.id,
+      error: err instanceof Error ? err.message : String(err)
+    });
+    res.status(502).json({
+      error: 'pipeline_failed',
+      message: 'Gap Radar veri toplama hatası, daha sonra tekrar dene'
+    });
+    return;
   }
 
   await docRef.set({
