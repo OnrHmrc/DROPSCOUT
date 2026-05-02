@@ -1,7 +1,7 @@
 import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { getFirestore, FieldValue, Timestamp } from 'firebase-admin/firestore';
 import '../lib/firebase-admin';
-import { decryptJSON, ENCRYPTION_KEY } from '../lib/crypto';
+import { decryptJSON } from '../lib/crypto';
 import {
   getAdapter,
   isPlatformId,
@@ -51,7 +51,7 @@ export const scheduledSyncActiveStores = onSchedule(
     region: 'europe-west1',
     memory: '512MiB',
     timeoutSeconds: 540,
-    secrets: [ENCRYPTION_KEY, SENTRY_DSN, ALERT_WEBHOOK_URL],
+    secrets: [SENTRY_DSN, ALERT_WEBHOOK_URL],
     retryCount: 0
   },
   async () => runWithSentry('syncActiveStores', async () => {
@@ -84,7 +84,7 @@ export const scheduledSyncActiveStores = onSchedule(
       }
 
       try {
-        const creds = decryptJSON<PlatformCredentials>(data.credentialsEncrypted as never);
+        const creds = await decryptJSON<PlatformCredentials>(data.credentialsEncrypted as never);
         const adapter = getAdapter(platform);
         const storeName = typeof data.storeName === 'string' ? data.storeName : undefined;
 

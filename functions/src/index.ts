@@ -11,25 +11,26 @@ import {
   getPlatformStatusHandler,
   disconnectPlatformHandler
 } from './endpoints/platforms';
-import { getMyPlanHandler, getMyUsageHandler } from './endpoints/me';
+import { getMyPlanHandler, getMyUsageHandler, getDataExportHandler, deleteAccountHandler } from './endpoints/me';
 import { getTrendsHandler } from './endpoints/trends';
 import { getGapRadarHandler } from './endpoints/gapRadar';
 import { searchSuppliersHandler } from './endpoints/suppliers';
 import { requirePlan } from './middleware/plan';
 import { CLAUDE_API_KEY } from './lib/claude';
-import { ENCRYPTION_KEY } from './lib/crypto';
 import { SENTRY_DSN, initSentry, sentryErrorHandler } from './lib/sentry';
 import { ALERT_WEBHOOK_URL } from './lib/alerts';
-import { SERPAPI_KEY } from './lib/serpapi';
 import {
   APIFY_TOKEN,
   APIFY_GAP_ACTOR_ID,
   APIFY_SUPPLIER_ACTOR_ID,
-  APIFY_TRENDYOL_ACTOR_ID,
-  APIFY_HEPSIBURADA_ACTOR_ID,
-  APIFY_N11_ACTOR_ID,
-  APIFY_AMAZON_TR_ACTOR_ID
+  APIFY_DOUYIN_ACTOR_ID,
+  APIFY_XIAOHONGSHU_ACTOR_ID,
+  APIFY_TAOBAO_ACTOR_ID,
+  APIFY_COUPANG_ACTOR_ID,
+  APIFY_RAKUTEN_ACTOR_ID,
+  APIFY_MERCARI_JP_ACTOR_ID
 } from './lib/apify';
+import { SERPAPI_KEY } from './lib/serpapi';
 
 // Sentry init — cold start'ta bir kez
 initSentry();
@@ -50,6 +51,8 @@ router.use(rateLimit);
 router.get('/health', healthHandler);
 router.get('/me/plan', getMyPlanHandler);
 router.get('/me/usage', getMyUsageHandler);
+router.get('/me/data-export', getDataExportHandler);
+router.post('/me/delete-account', deleteAccountHandler);
 router.get('/trends', getTrendsHandler);
 router.post('/analyze-product', analyzeProductHandler);
 router.post('/platforms/connect', connectPlatformHandler);
@@ -70,6 +73,7 @@ app.use(sentryErrorHandler());
 
 // Generic 500 fallback
 app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('[api 500]', err);
   const message = err instanceof Error ? err.message : 'Internal Server Error';
   res.status(500).json({ error: 'internal_error', message });
 });
@@ -78,17 +82,18 @@ export const api = onRequest(
   {
     secrets: [
       CLAUDE_API_KEY,
-      ENCRYPTION_KEY,
       SENTRY_DSN,
       ALERT_WEBHOOK_URL,
-      SERPAPI_KEY,
       APIFY_TOKEN,
       APIFY_GAP_ACTOR_ID,
       APIFY_SUPPLIER_ACTOR_ID,
-      APIFY_TRENDYOL_ACTOR_ID,
-      APIFY_HEPSIBURADA_ACTOR_ID,
-      APIFY_N11_ACTOR_ID,
-      APIFY_AMAZON_TR_ACTOR_ID
+      APIFY_DOUYIN_ACTOR_ID,
+      APIFY_XIAOHONGSHU_ACTOR_ID,
+      APIFY_TAOBAO_ACTOR_ID,
+      APIFY_COUPANG_ACTOR_ID,
+      APIFY_RAKUTEN_ACTOR_ID,
+      APIFY_MERCARI_JP_ACTOR_ID,
+      SERPAPI_KEY
     ]
   },
   app
@@ -97,6 +102,5 @@ export const api = onRequest(
 export {
   scheduledCleanupCache,
   scheduledSyncActiveStores,
-  scheduledRefreshTrends,
   scheduledCleanupOldUsage
 } from './schedulers';

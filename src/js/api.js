@@ -236,4 +236,28 @@ export async function searchSuppliers(input) {
   });
 }
 
+// ─── KVKK m.11 — Veri haklari ─────────────────
+
+/**
+ * Kullanicinin tum verilerini JSON olarak doner (KVKK m.11 / GDPR right to portability).
+ * @returns {Promise<object>} — { exportedAt, auth, profile, platforms, products, watchlist, usage }
+ */
+export async function exportMyData() {
+  return apiFetch('/api/me/data-export', { method: 'GET', timeout: 30_000 });
+}
+
+/**
+ * Hesabi ve tum kullanici verilerini KALICI siler (KVKK m.11 / GDPR right to erasure).
+ * Sira: Firestore recursive delete -> Firebase Auth user delete.
+ * Sonrasi: ID token gecersiz olur; cagiran sayfa logout + login redirect yapmali.
+ * @returns {Promise<{ ok: true }>}
+ */
+export async function deleteMyAccount() {
+  return apiFetch('/api/me/delete-account', {
+    method: 'POST',
+    body: JSON.stringify({ confirmation: 'HESABIMI_KALICI_SIL' }),
+    timeout: 30_000
+  });
+}
+
 export { ApiError };

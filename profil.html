@@ -642,6 +642,32 @@
           </div>
         </div>
 
+        <!-- 5) VERİ HAKLARI (KVKK m.11) -->
+        <div class="profile-card">
+          <div class="profile-card-head">
+            <div class="profile-card-title">Veri Hakları (KVKK m.11)</div>
+            <div class="profile-card-tag">DATA RIGHTS</div>
+          </div>
+
+          <div class="settings-list">
+            <div class="security-row">
+              <div>
+                <div class="security-title">Verilerimi İndir</div>
+                <div class="security-sub">KVKK m.11 / taşınabilirlik hakkı: hesabınıza ait tüm verilerin (profil, mağaza bağlantıları, ürünler, kullanım geçmişi) JSON formatında dışa aktarımı.</div>
+              </div>
+              <button class="profile-btn" id="dataExportBtn" type="button">JSON İndir</button>
+            </div>
+
+            <div class="security-row">
+              <div>
+                <div class="security-title">Hesabımı Kalıcı Sil</div>
+                <div class="security-sub">Hesabınız, tüm bağlı mağazalar, ürünler ve kullanım kayıtları kalıcı olarak silinir. Bu işlem geri alınamaz.</div>
+              </div>
+              <button class="profile-btn danger" id="accountDeleteBtn" type="button">Hesabımı Sil</button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
@@ -651,7 +677,7 @@
 import { onAuthChange, logout, resetPassword } from '/src/js/auth.js';
 import { getUserProfile, updateUserProfile } from '/src/js/store.js';
 import { getInitials, paintAvatar } from '/src/js/profile-bar.js';
-import { getMyPlan, getMyUsage } from '/src/js/api.js';
+import { getMyPlan, getMyUsage, exportMyData, deleteMyAccount } from '/src/js/api.js';
 
 const PLAN_COPY = {
   start:    { chip: 'START',    label: 'Start',    desc: 'Link Analizi (1/gün), 1 mağaza, temel özellikler.' },
@@ -1053,6 +1079,63 @@ $('topProfileBtn').addEventListener('click', () => {
 $('accountLogoutBtn').addEventListener('click', async () => {
   await logout();
   window.location.href = './login.html';
+});
+
+// KVKK m.11 — Verilerimi indir
+$('dataExportBtn').addEventListener('click', async () => {
+  const btn = $('dataExportBtn');
+  const original = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Hazırlanıyor…';
+  try {
+    const data = await exportMyData();
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `dropscout-export-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    alert('Veri dışa aktarma başarısız: ' + (e.message || e));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+});
+
+// KVKK m.11 — Hesabımı kalıcı sil
+$('accountDeleteBtn').addEventListener('click', async () => {
+  if (!currentUser?.email) {
+    alert('E-posta bilgisi okunamadı, sayfayı yenileyip tekrar deneyin.');
+    return;
+  }
+  const typed = prompt(
+    'BU İŞLEM GERİ ALINAMAZ.\n\n' +
+    'Hesabınız ve tüm verileriniz kalıcı olarak silinecek.\n\n' +
+    'Onaylamak için e-posta adresinizi tam olarak yazın:\n' + currentUser.email
+  );
+  if (typed === null) return;
+  if (typed.trim().toLowerCase() !== currentUser.email.toLowerCase()) {
+    alert('E-posta eşleşmedi. İşlem iptal edildi.');
+    return;
+  }
+  if (!confirm('Son onay: hesabınızı şimdi silmek istediğinizden emin misiniz?')) return;
+
+  const btn = $('accountDeleteBtn');
+  btn.disabled = true;
+  btn.textContent = 'Siliniyor…';
+  try {
+    await deleteMyAccount();
+    await logout();
+    window.location.href = './login.html?deleted=1';
+  } catch (e) {
+    alert('Hesap silme başarısız: ' + (e.message || e));
+    btn.disabled = false;
+    btn.textContent = 'Hesabımı Sil';
+  }
 });
 
 // Şifre sıfırlama

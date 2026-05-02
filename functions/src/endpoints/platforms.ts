@@ -99,7 +99,17 @@ export async function connectPlatformHandler(req: AuthRequest, res: Response): P
     }
   }
 
-  const test = await adapter.testConnection(validated as PlatformCredentials);
+  let test: { ok: boolean; error?: string };
+  try {
+    test = await adapter.testConnection(validated as PlatformCredentials);
+  } catch (err) {
+    console.error('[connectPlatform testConnection error]', err);
+    res.status(400).json({
+      error: 'connection_failed',
+      message: err instanceof Error ? err.message : 'Bağlantı doğrulanamadı'
+    });
+    return;
+  }
   if (!test.ok) {
     res.status(400).json({
       error: 'connection_failed',
@@ -117,7 +127,17 @@ export async function connectPlatformHandler(req: AuthRequest, res: Response): P
     return;
   }
 
-  const credentialsEncrypted = encryptJSON(validated);
+  let credentialsEncrypted: EncryptedPayload;
+  try {
+    credentialsEncrypted = await encryptJSON(validated);
+  } catch (err) {
+    console.error('[connectPlatform encrypt error]', err);
+    res.status(500).json({
+      error: 'encrypt_failed',
+      message: err instanceof Error ? err.message : 'Şifreleme başarısız'
+    });
+    return;
+  }
   const entry = buildLogEntry(
     `<strong>Bağlantı kuruldu.</strong> ${store.totalProducts} ürün çekildi, ${store.categories.length} kategori tespit edildi.`
   );
@@ -125,17 +145,26 @@ export async function connectPlatformHandler(req: AuthRequest, res: Response): P
   const db = getFirestore();
   const ref = db.collection('users').doc(uid).collection('platforms').doc(platform);
 
-  await ref.set({
-    platform,
-    connected: true,
-    storeName: storeName || store.name,
-    credentialsEncrypted,
-    store,
-    syncHistory: [entry],
-    connectedAt: FieldValue.serverTimestamp(),
-    updatedAt: FieldValue.serverTimestamp(),
-    lastSyncAt: FieldValue.serverTimestamp()
-  });
+  try {
+    await ref.set({
+      platform,
+      connected: true,
+      storeName: storeName || store.name,
+      credentialsEncrypted,
+      store,
+      syncHistory: [entry],
+      connectedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
+      lastSyncAt: FieldValue.serverTimestamp()
+    });
+  } catch (err) {
+    console.error('[connectPlatform firestore write error]', err);
+    res.status(500).json({
+      error: 'firestore_write_failed',
+      message: err instanceof Error ? err.message : 'Kayıt başarısız'
+    });
+    return;
+  }
 
   res.json({
     connected: true,
@@ -183,7 +212,7 @@ export async function syncPlatformHandler(req: AuthRequest, res: Response): Prom
 
   let creds: PlatformCredentials;
   try {
-    creds = decryptJSON<PlatformCredentials>(data.credentialsEncrypted);
+    creds = await decryptJSON<PlatformCredentials>(data.credentialsEncrypted);
   } catch {
     res.status(500).json({
       error: 'decrypt_failed',
