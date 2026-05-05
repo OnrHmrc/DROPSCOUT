@@ -1,6 +1,54 @@
+# ─── Bağımlılıklar ───
 node_modules/
+
+# ─── Build çıktıları ───
 dist/
+functions/lib/
+*.tsbuildinfo
+
+# ─── Firebase ───
 .firebase/
-.DS_Store
-*.local
+firebase-debug.log*
+firebase-debug.*.log
 firestore-debug.log
+ui-debug.log
+pubsub-debug.log
+
+# ─── Çevre değişkenleri (secret) — örnek dosya commit'te kalır ───
+.env
+.env.*
+!.env.example
+
+# ─── Service account / kripto anahtarları ───
+service-account*.json
+firebase-adminsdk*.json
+*.pem
+*.key
+*.p12
+
+# ─── Test ve coverage ───
+coverage/
+.nyc_output/
+
+# ─── Editor / IDE ───
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ─── Cache ───
+.cache/
+.eslintcache
+.parcel-cache/
+
+# ─── Log'lar ───
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ─── Vite local override ───
+*.local
