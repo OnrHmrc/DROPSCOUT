@@ -2,6 +2,7 @@ import { parseStringPromise } from 'xml2js';
 import type {
   N11Credentials,
   PlatformAdapter,
+  PlatformProduct,
   PlatformStoreSnapshot,
   TestResult
 } from './types';
@@ -54,8 +55,12 @@ function buildEnvelope(method: string, body: string, creds: N11Credentials): str
 }
 
 interface ParsedProduct {
+  productCode?: string;
+  title?: string;
   category?: string;
+  image?: string;
   price?: number;
+  listPrice?: number;
   stock?: number;
   active?: boolean;
 }
@@ -118,9 +123,16 @@ async function callGetProductList(
     const stock = Array.isArray(stockItem)
       ? stockItem.reduce((sum: number, s: any) => sum + Number(s.quantity ?? 0), 0)
       : Number(stockItem?.quantity ?? 0);
+    const imageRaw = p.images?.image;
+    const firstImage = Array.isArray(imageRaw) ? imageRaw[0] : imageRaw;
+    const imageUrl = typeof firstImage === 'string' ? firstImage : firstImage?.url;
     return {
+      productCode: String(p.productSellerCode || p.id || ''),
+      title: String(p.title || p.subtitle || ''),
       category: p.category?.name || p.category?.fullName,
+      image: imageUrl,
       price: Number(p.displayPrice ?? p.price ?? 0),
+      listPrice: p.price ? Number(p.price) : undefined,
       stock,
       active: p.saleStatus !== 'Suspended' && stock > 0
     };
@@ -203,6 +215,17 @@ export const n11Adapter: PlatformAdapter<N11Credentials> = {
     const activeRatio = sample.length > 0 ? activeCount / sample.length : 1;
     const estimatedActive = Math.round(totalProducts * activeRatio);
 
+    const platformProducts: PlatformProduct[] = sample.slice(0, 50).map((p) => ({
+      productCode: String(p.productCode || ''),
+      name: String(p.title || 'İsimsiz Ürün'),
+      category: p.category,
+      image: p.image,
+      price: Number(p.price ?? 0),
+      listPrice: p.listPrice,
+      stock: Number(p.stock ?? 0),
+      active: !!p.active
+    }));
+
     const categories = Array.from(categoryMap.entries())
       .sort((a, b) => b[1].count - a[1].count)
       .slice(0, 8)
@@ -236,7 +259,8 @@ export const n11Adapter: PlatformAdapter<N11Credentials> = {
       rating: undefined,
       joinDate: null,
       categories,
-      avgCommission
+      avgCommission,
+      products: platformProducts
     };
   }
 };

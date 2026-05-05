@@ -75,6 +75,35 @@
 .fl-icon{font-size:14px;min-width:20px;text-align:center}
 .fl-check{margin-left:auto;font-family:'Geist Mono',monospace;font-size:9px;padding:2px 6px;border-radius:4px;background:var(--green-dim);color:var(--green);font-weight:700}
 .fl-soon{margin-left:auto;font-family:'Geist Mono',monospace;font-size:9px;padding:2px 6px;border-radius:4px;background:var(--yellow-dim);color:var(--yellow);font-weight:700}
+.connected-card{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,var(--green-dim),color-mix(in srgb,var(--green-dim) 30%,var(--surface2)));border:1px solid color-mix(in srgb,var(--green) 25%,transparent)}
+.cc-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--green);color:#fff;flex-shrink:0;box-shadow:0 2px 8px color-mix(in srgb,var(--green) 35%,transparent)}
+.cc-info{flex:1;min-width:0}
+.cc-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;margin:0 0 3px}
+.cc-sub{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.3px}
+.cc-actions{display:flex;gap:8px;flex-wrap:wrap}
+.cc-actions .af-btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.products-toolbar{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.products-search{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:12px;color:var(--text);outline:none;font-family:'Inter',sans-serif}
+.products-search:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
+.products-count{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap}
+.products-table-wrap{overflow-x:auto;max-height:560px;overflow-y:auto}
+.products-table{width:100%;border-collapse:collapse;font-size:12px}
+.products-table thead{position:sticky;top:0;background:var(--surface);z-index:1}
+.products-table th{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);white-space:nowrap;font-weight:700}
+.products-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.products-table tr:hover td{background:var(--surface2)}
+.pt-thumb{width:38px;height:38px;border-radius:8px;background:var(--surface2);object-fit:cover;border:1px solid var(--border);display:block}
+.pt-thumb-fallback{width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,var(--surface2),var(--surface3));border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted)}
+.pt-name{font-weight:600;color:var(--text);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.pt-code{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted2);margin-top:2px;display:block}
+.pt-cat{font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.pt-price{font-family:'Geist Mono',monospace;font-weight:700;color:var(--text);white-space:nowrap}
+.pt-list{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted2);text-decoration:line-through;margin-left:6px}
+.pt-stock{font-family:'Geist Mono',monospace;font-weight:700}
+.pt-stock.ok{color:var(--green)}.pt-stock.low{color:var(--orange)}.pt-stock.out{color:var(--red)}
+.pt-status{font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:999px;display:inline-block}
+.pt-status.active{background:var(--green-dim);color:var(--green)}
+.pt-status.passive{background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--muted)}
 .empty-state{padding:40px 20px;text-align:center}
 .empty-icon{font-size:40px;margin-bottom:12px;opacity:.6}
 .empty-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;margin-bottom:6px}
@@ -158,9 +187,23 @@
       </div>
       <div class="af-actions">
         <button class="af-btn primary" id="connectBtn">Bağlantıyı Test Et ve Kaydet</button>
-        <button class="af-btn secondary" id="disconnectBtn" style="display:none">Bağlantıyı Kes</button>
         <span class="af-msg" id="formMsg"></span>
       </div>
+    </div>
+
+    <div class="connected-card" id="connectedCard" style="display:none">
+      <div class="cc-icon">✓</div>
+      <div class="cc-info">
+        <div class="cc-title" id="ccStoreName">—</div>
+        <div class="cc-sub" id="ccStoreMeta">—</div>
+      </div>
+      <div class="cc-actions">
+        <a class="af-btn secondary" href="./profil.html#section-marketplaces">⚙ Ayarlardan Yönet</a>
+        <button class="af-btn secondary" id="disconnectBtn">Bağlantıyı Kes</button>
+      </div>
+    </div>
+    <div class="af-actions" id="connectedMsgRow" style="display:none;margin-top:10px;padding:0">
+      <span class="af-msg" id="formMsg2"></span>
     </div>
   </div>
 
@@ -170,6 +213,12 @@
         <div class="card-head"><div class="card-title">Mağaza Bilgileri</div><div class="ct-tag tag-orange" id="storeTag">BAĞLANTI BEKLENİYOR</div></div>
         <div id="storeContent">
           <div class="empty-state"><div class="empty-icon">🔌</div><div class="empty-title">Mağaza henüz bağlanmadı</div><div class="empty-desc">Yukarıdaki forma API bilgilerinizi girerek Hepsiburada mağazanızı bağlayın.</div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px" id="productsCard">
+        <div class="card-head"><div class="card-title">Mağaza Ürünleri</div><div class="ct-tag tag-blue" id="productsTag">CANLI VERİ</div></div>
+        <div id="productsContent">
+          <div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">Ürün listesi bekleniyor</div><div class="empty-desc">Mağaza bağlandıktan sonra Hepsiburada Merchant API'den çekilen ürünler burada listelenecektir.</div></div>
         </div>
       </div>
       <div class="card" style="margin-top:14px" id="paramsCard">
@@ -267,22 +316,98 @@ function renderKPIs() {
 function renderConnectionStatus() {
   const el = document.getElementById('connStatus');
   const txt = document.getElementById('connStatusText');
+  const apiForm = document.getElementById('apiForm');
+  const connectedCard = document.getElementById('connectedCard');
+  const connectedMsgRow = document.getElementById('connectedMsgRow');
   if (state.connected) {
     el.className = 'cm-status connected';
     txt.textContent = 'BAĞLI';
-    document.getElementById('disconnectBtn').style.display = '';
-    document.getElementById('connectBtn').textContent = 'Bağlantıyı Güncelle';
-    document.getElementById('inputMerchantId').value = state.store?.storeId || '';
-    document.getElementById('inputApiUser').value = '';
-    document.getElementById('inputApiPass').value = '';
-    document.getElementById('inputStoreName').value = state.storeName || '';
-    document.getElementById('inputApiUser').placeholder = 'Güncellemek için yeniden girin';
-    document.getElementById('inputApiPass').placeholder = 'Güncellemek için yeniden girin';
+    apiForm.style.display = 'none';
+    connectedCard.style.display = 'flex';
+    connectedMsgRow.style.display = 'flex';
+    const s = state.store;
+    document.getElementById('ccStoreName').textContent = state.storeName || s?.name || 'Hepsiburada Mağaza';
+    const meta = [];
+    if (s?.storeId) meta.push(`Merchant ID: ${s.storeId}`);
+    if (typeof s?.totalProducts === 'number') meta.push(`${Number(s.totalProducts).toLocaleString('tr-TR')} ürün`);
+    document.getElementById('ccStoreMeta').textContent = meta.join(' · ') || 'Bağlantı aktif';
   } else {
     el.className = 'cm-status disconnected';
     txt.textContent = 'BAĞLI DEĞİL';
-    document.getElementById('disconnectBtn').style.display = 'none';
+    apiForm.style.display = '';
+    connectedCard.style.display = 'none';
+    connectedMsgRow.style.display = 'none';
     document.getElementById('connectBtn').textContent = 'Bağlantıyı Test Et ve Kaydet';
+  }
+}
+
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function buildProductRow(p) {
+  const stock = Number(p.stock || 0);
+  const stockClass = stock === 0 ? 'out' : (stock < 5 ? 'low' : 'ok');
+  const stockText = stock === 0 ? 'Tükendi' : `${stock} adet`;
+  const thumb = p.image
+    ? `<img class="pt-thumb" src="${escapeHtml(p.image)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;pt-thumb-fallback&quot;>📦</div>'">`
+    : `<div class="pt-thumb-fallback">📦</div>`;
+  const list = p.listPrice && p.listPrice > p.price
+    ? `<span class="pt-list">₺${Number(p.listPrice).toLocaleString('tr-TR')}</span>` : '';
+  return `<tr>
+    <td>${thumb}</td>
+    <td><span class="pt-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>${p.productCode ? `<span class="pt-code">${escapeHtml(p.productCode)}</span>` : ''}</td>
+    <td><span class="pt-cat" title="${escapeHtml(p.category || '—')}">${escapeHtml(p.category || '—')}</span></td>
+    <td><span class="pt-price">₺${Number(p.price || 0).toLocaleString('tr-TR')}</span>${list}</td>
+    <td><span class="pt-stock ${stockClass}">${stockText}</span></td>
+    <td><span class="pt-status ${p.active ? 'active' : 'passive'}">${p.active ? 'AKTİF' : 'PASİF'}</span></td>
+  </tr>`;
+}
+
+function renderProducts() {
+  const content = document.getElementById('productsContent');
+  const tag = document.getElementById('productsTag');
+  if (!state.connected || !state.store) {
+    tag.textContent = 'BAĞLANTI BEKLENİYOR';
+    tag.className = 'ct-tag tag-orange';
+    content.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">Ürün listesi bekleniyor</div><div class="empty-desc">Mağaza bağlandıktan sonra çekilen ürünler burada listelenecektir.</div></div>';
+    return;
+  }
+  const products = state.store.products || [];
+  if (products.length === 0) {
+    tag.textContent = 'VERİ YOK';
+    tag.className = 'ct-tag tag-yellow';
+    content.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">Henüz ürün gelmedi</div><div class="empty-desc">Mağazanızda yayında ürün olmayabilir veya senkronizasyon henüz tamamlanmadı. ↻ Senkronize Et butonu ile güncelleyebilirsiniz.</div></div>';
+    return;
+  }
+  tag.textContent = `${products.length} ÜRÜN`;
+  tag.className = 'ct-tag tag-blue';
+  const rows = products.map(buildProductRow).join('');
+  content.innerHTML = `
+    <div class="products-toolbar">
+      <input type="text" id="productSearch" class="products-search" placeholder="Ürün adı veya kodu ara…" autocomplete="off">
+      <span class="products-count">${products.length} / ${Number(state.store.totalProducts || 0).toLocaleString('tr-TR')} ürün</span>
+    </div>
+    <div class="products-table-wrap">
+      <table class="products-table">
+        <thead><tr><th></th><th>Ürün</th><th>Kategori</th><th>Fiyat</th><th>Stok</th><th>Durum</th></tr></thead>
+        <tbody id="productsTbody">${rows}</tbody>
+      </table>
+    </div>`;
+  const search = document.getElementById('productSearch');
+  if (search) {
+    search.addEventListener('input', () => {
+      const q = search.value.trim().toLowerCase();
+      const tbody = document.getElementById('productsTbody');
+      const filtered = q ? products.filter(p =>
+        (p.name || '').toLowerCase().includes(q) ||
+        (p.productCode || '').toLowerCase().includes(q) ||
+        (p.category || '').toLowerCase().includes(q)
+      ) : products;
+      tbody.innerHTML = filtered.length === 0
+        ? `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);font-size:11px">"${escapeHtml(search.value)}" için sonuç bulunamadı</td></tr>`
+        : filtered.map(buildProductRow).join('');
+    });
   }
 }
 
@@ -336,6 +461,7 @@ function renderAll() {
   renderKPIs();
   renderConnectionStatus();
   renderStoreInfo();
+  renderProducts();
   renderParams();
   renderSyncLog();
 }
@@ -385,9 +511,13 @@ document.getElementById('connectBtn').addEventListener('click', async () => {
 });
 
 document.getElementById('disconnectBtn').addEventListener('click', async () => {
+  if (!confirm('Hepsiburada mağaza bağlantısını silmek istediğinize emin misiniz? Mağaza verileri ve şifrelenmiş API kimlik bilgileri kaldırılacak.')) return;
+  const msg2 = document.getElementById('formMsg2');
   const msg = document.getElementById('formMsg');
   const btn = document.getElementById('disconnectBtn');
   btn.disabled = true;
+  msg2.textContent = 'Bağlantı kaldırılıyor...';
+  msg2.className = 'af-msg';
   try {
     await disconnectPlatform(PLATFORM);
     state.connected = false;
@@ -398,11 +528,12 @@ document.getElementById('disconnectBtn').addEventListener('click', async () => {
     document.getElementById('inputApiUser').value = '';
     document.getElementById('inputApiPass').value = '';
     document.getElementById('inputStoreName').value = '';
-    msg.textContent = '';
+    msg.textContent = 'Bağlantı kaldırıldı.';
     msg.className = 'af-msg';
+    msg2.textContent = '';
   } catch (err) {
-    msg.textContent = errorMessage(err);
-    msg.className = 'af-msg error';
+    msg2.textContent = errorMessage(err);
+    msg2.className = 'af-msg error';
   } finally {
     btn.disabled = false;
     renderAll();

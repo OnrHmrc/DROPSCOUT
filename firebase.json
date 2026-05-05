@@ -27,6 +27,9 @@
       "**/.*",
       "**/node_modules/**"
     ],
+    "predeploy": [
+      "npm run build"
+    ],
     "redirects": [],
     "rewrites": [
       {

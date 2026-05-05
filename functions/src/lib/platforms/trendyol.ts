@@ -1,5 +1,6 @@
 import type {
   PlatformAdapter,
+  PlatformProduct,
   PlatformStoreSnapshot,
   TestResult,
   TrendyolCredentials
@@ -113,6 +114,24 @@ export const trendyolAdapter: PlatformAdapter<TrendyolCredentials> = {
     const activeRatio = sample.length > 0 ? activeCount / sample.length : 1;
     const estimatedActive = Math.round(totalProducts * activeRatio);
 
+    const products: PlatformProduct[] = sample.slice(0, 50).map((p: any) => {
+      const imgRaw = Array.isArray(p.images) ? p.images[0] : p.images;
+      const image = typeof imgRaw === 'string' ? imgRaw : imgRaw?.url;
+      const stock = Number(p.quantity ?? 0);
+      const isActive = p.archived === false && p.onSale !== false && stock > 0;
+      return {
+        productCode: String(p.barcode || p.productMainId || p.stockCode || p.id || ''),
+        name: String(p.title || p.productName || 'İsimsiz Ürün'),
+        category: p.categoryName || p.pimCategoryName || undefined,
+        brand: p.brand || undefined,
+        image: image || undefined,
+        price: Number(p.salePrice ?? p.listPrice ?? 0),
+        listPrice: p.listPrice ? Number(p.listPrice) : undefined,
+        stock,
+        active: isActive
+      };
+    });
+
     const categories = Array.from(categoryMap.entries())
       .sort((a, b) => b[1].count - a[1].count)
       .slice(0, 8)
@@ -145,7 +164,8 @@ export const trendyolAdapter: PlatformAdapter<TrendyolCredentials> = {
       rating: undefined,
       joinDate: null,
       categories,
-      avgCommission
+      avgCommission,
+      products
     };
   }
 };

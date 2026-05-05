@@ -1,6 +1,7 @@
 import type {
   HepsiburadaCredentials,
   PlatformAdapter,
+  PlatformProduct,
   PlatformStoreSnapshot,
   TestResult
 } from './types';
@@ -45,10 +46,14 @@ interface HbListingsResponse {
     hepsiburadaSku?: string;
     merchantSku?: string;
     productName?: string;
+    brand?: string;
     categoryName?: string;
     price?: number | string;
+    listPrice?: number | string;
     availableStock?: number;
     isSalable?: boolean;
+    image?: string;
+    imageUrl?: string;
   }>;
 }
 
@@ -133,6 +138,24 @@ export const hepsiburadaAdapter: PlatformAdapter<HepsiburadaCredentials> = {
     const activeRatio = sample.length > 0 ? activeCount / sample.length : 1;
     const estimatedActive = Math.round(totalProducts * activeRatio);
 
+    const products: PlatformProduct[] = sample.slice(0, 50).map((item) => {
+      const stock = Number(item.availableStock ?? 0);
+      const price = Number(item.price ?? 0);
+      const listPrice = item.listPrice !== undefined ? Number(item.listPrice) : undefined;
+      const isActive = item.isSalable !== false && stock > 0;
+      return {
+        productCode: String(item.hepsiburadaSku || item.merchantSku || ''),
+        name: String(item.productName || 'İsimsiz Ürün'),
+        category: item.categoryName || undefined,
+        brand: item.brand || undefined,
+        image: item.image || item.imageUrl || undefined,
+        price,
+        listPrice,
+        stock,
+        active: isActive
+      };
+    });
+
     const categories = Array.from(categoryMap.entries())
       .sort((a, b) => b[1].count - a[1].count)
       .slice(0, 8)
@@ -166,7 +189,8 @@ export const hepsiburadaAdapter: PlatformAdapter<HepsiburadaCredentials> = {
       rating: undefined,
       joinDate: null,
       categories,
-      avgCommission
+      avgCommission,
+      products
     };
   }
 };

@@ -49,6 +49,7 @@
   border-radius:16px;box-shadow:var(--key-shadow);
   padding:20px;position:relative;overflow:hidden;
 }
+.profile-section-anchor{scroll-margin-top:24px}
 .profile-card::before{
   content:'';position:absolute;top:0;left:0;right:0;height:1.5px;
   background:linear-gradient(90deg,var(--blue),var(--purple),transparent);
@@ -287,6 +288,27 @@
   font-family:'Geist Mono',monospace;font-weight:700;color:var(--blue);
 }
 
+/* ── Marketplace connections list ── */
+.mp-list{display:flex;flex-direction:column;gap:10px}
+.mp-row{
+  display:grid;grid-template-columns:auto 1fr auto;gap:14px;
+  align-items:center;padding:14px;border-radius:12px;
+  background:var(--surface2);border:1px solid var(--border);
+}
+.mp-logo{
+  width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-size:22px;background:var(--surface);border:1px solid var(--border);flex-shrink:0;
+}
+.mp-info{min-width:0}
+.mp-name{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.mp-badge{font-family:'Geist Mono',monospace;font-size:8px;font-weight:700;padding:3px 8px;border-radius:999px;letter-spacing:.5px}
+.mp-badge.connected{background:var(--green-dim);color:var(--green)}
+.mp-badge.disconnected{background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--muted)}
+.mp-meta{font-family:'Geist Mono',monospace;font-size:10.5px;color:var(--muted);letter-spacing:.3px;line-height:1.55;overflow:hidden;text-overflow:ellipsis}
+.mp-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.mp-actions .profile-btn{padding:8px 14px;font-size:10px}
+.mp-empty-note{font-size:11px;color:var(--muted);line-height:1.6}
+
 /* ── Responsive ── */
 @media(max-width:900px){
   .mobile-menu-btn{display:flex}
@@ -301,6 +323,8 @@
   .switch-stack{justify-content:space-between}
   .top-profile-copy{display:none}
   .usage-summary-grid{grid-template-columns:1fr}
+  .mp-row{grid-template-columns:auto 1fr;row-gap:10px}
+  .mp-actions{grid-column:1/-1;justify-content:flex-start}
 }
 </style>
 </head>
@@ -642,6 +666,24 @@
           </div>
         </div>
 
+        <!-- 4.5) PAZARYERI BAĞLANTILARI -->
+        <div class="profile-card profile-section-anchor" id="section-marketplaces">
+          <div class="profile-card-head">
+            <div class="profile-card-title">Pazaryeri Bağlantıları</div>
+            <div class="profile-card-tag">MARKETPLACES</div>
+          </div>
+
+          <div class="profile-note">
+            <strong>Bağlı mağazalarınız:</strong> Mağaza bilgilerini güncellemek için ilgili pazaryeri sayfasına gidin, yeni API kimlik bilgilerinizle yeniden bağlanın. Bağlantıyı iptal etmek için aşağıdaki "Bağlantıyı Sil" butonunu kullanabilirsiniz.
+          </div>
+
+          <div class="mp-list" id="marketplaceList">
+            <div class="mp-empty-note" style="padding:18px 14px;text-align:center;background:var(--surface2);border-radius:12px;border:1px dashed var(--border2)">
+              Yükleniyor…
+            </div>
+          </div>
+        </div>
+
         <!-- 5) VERİ HAKLARI (KVKK m.11) -->
         <div class="profile-card">
           <div class="profile-card-head">
@@ -677,7 +719,7 @@
 import { onAuthChange, logout, resetPassword } from '/src/js/auth.js';
 import { getUserProfile, updateUserProfile } from '/src/js/store.js';
 import { getInitials, paintAvatar } from '/src/js/profile-bar.js';
-import { getMyPlan, getMyUsage, exportMyData, deleteMyAccount } from '/src/js/api.js';
+import { getMyPlan, getMyUsage, exportMyData, deleteMyAccount, getPlatformStatus, disconnectPlatform } from '/src/js/api.js';
 
 const PLAN_COPY = {
   start:    { chip: 'BAŞLANGIÇ',   label: 'Başlangıç',   desc: 'Link Analizi (2/gün), 1 mağaza, temel özellikler.' },
@@ -710,6 +752,13 @@ const ACCENT_KEY  = 'dropscout-accent';
 const THEME_KEY   = 'dropscout-theme-preference';
 
 const $ = (id) => document.getElementById(id);
+
+const MARKETPLACES = [
+  { id: 'trendyol',    name: 'Trendyol',     icon: '🛍️', page: './trendyol.html',    storeIdLabel: 'Supplier ID' },
+  { id: 'hepsiburada', name: 'Hepsiburada',  icon: '🏪', page: './hepsiburada.html', storeIdLabel: 'Merchant ID' },
+  { id: 'n11',         name: 'N11',          icon: '🔖', page: './n11.html',         storeIdLabel: 'Satıcı Kodu' },
+  { id: 'amazon-tr',   name: 'Amazon TR',    icon: '📦', page: './amazon-tr.html',   storeIdLabel: 'Seller ID', external: true }
+];
 
 let currentUser = null;
 let originalValues = {};
@@ -922,6 +971,114 @@ function formatUsd(v) {
   return `$${v.toFixed(2)}`;
 }
 
+// ── Pazaryeri Bağlantıları ──────────────────────────
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderMarketplaces(statuses) {
+  const list = $('marketplaceList');
+  if (!list) return;
+  list.innerHTML = MARKETPLACES.map(mp => {
+    const st = statuses[mp.id] || { connected: false };
+    const connected = !!st.connected;
+    const storeName = st.storeName || st.store?.name || '';
+    const storeId = st.store?.storeId || '';
+    const lastSync = st.lastSyncAt ? new Date(st.lastSyncAt) : null;
+    const meta = [];
+    if (connected) {
+      if (storeName) meta.push(escapeHtml(storeName));
+      if (storeId && storeId !== 'n11') meta.push(`${mp.storeIdLabel}: ${escapeHtml(storeId)}`);
+      if (typeof st.store?.totalProducts === 'number') meta.push(`${Number(st.store.totalProducts).toLocaleString('tr-TR')} ürün`);
+      if (lastSync) meta.push(`Son senkron: ${lastSync.toLocaleDateString('tr-TR')}`);
+    } else {
+      meta.push('Henüz bağlanmadı');
+    }
+    const actions = connected
+      ? `<a class="profile-btn ghost" href="${mp.page}">Bilgileri Güncelle</a>
+         <button class="profile-btn danger" type="button" data-mp-disconnect="${mp.id}">Bağlantıyı Sil</button>`
+      : `<a class="profile-btn primary" href="${mp.page}">Mağaza Bağla</a>`;
+    return `
+      <div class="mp-row" data-mp-id="${mp.id}">
+        <div class="mp-logo">${mp.icon}</div>
+        <div class="mp-info">
+          <div class="mp-name">
+            ${escapeHtml(mp.name)}
+            <span class="mp-badge ${connected ? 'connected' : 'disconnected'}">${connected ? 'BAĞLI' : 'BAĞLI DEĞİL'}</span>
+          </div>
+          <div class="mp-meta">${meta.join(' · ')}</div>
+        </div>
+        <div class="mp-actions">${actions}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Bağla/Sil butonlarına event bağla
+  list.querySelectorAll('[data-mp-disconnect]').forEach(btn => {
+    btn.addEventListener('click', () => disconnectMarketplace(btn.dataset.mpDisconnect, btn));
+  });
+}
+
+async function loadMarketplaces() {
+  const list = $('marketplaceList');
+  if (!list) return;
+  // Backend platformları (trendyol, hepsiburada, n11) için status çek
+  const backendIds = MARKETPLACES.filter(m => !m.external).map(m => m.id);
+  try {
+    const results = await Promise.allSettled(backendIds.map(id => getPlatformStatus(id)));
+    const statuses = {};
+    results.forEach((r, i) => {
+      const id = backendIds[i];
+      statuses[id] = r.status === 'fulfilled' ? r.value : { connected: false };
+    });
+    // Amazon (local store) — store.js getPlatformConnection
+    try {
+      const { getPlatformConnection } = await import('/src/js/store.js');
+      if (currentUser) {
+        const az = await getPlatformConnection(currentUser.uid, 'amazon-tr');
+        statuses['amazon-tr'] = az
+          ? {
+              connected: !!az.connected,
+              storeName: az.storeName || az.credentials?.storeName || '',
+              store: { storeId: az.credentials?.sellerId || '', name: az.storeName || '' },
+              lastSyncAt: null
+            }
+          : { connected: false };
+      } else {
+        statuses['amazon-tr'] = { connected: false };
+      }
+    } catch (e) {
+      statuses['amazon-tr'] = { connected: false };
+    }
+    renderMarketplaces(statuses);
+  } catch (e) {
+    console.warn('[profil] pazaryeri bağlantıları yüklenemedi:', e);
+    list.innerHTML = '<div class="mp-empty-note" style="padding:18px 14px;text-align:center;background:var(--surface2);border-radius:12px;border:1px dashed var(--border2)">Pazaryeri bağlantıları yüklenemedi. Sayfayı yenileyin.</div>';
+  }
+}
+
+async function disconnectMarketplace(platformId, btn) {
+  const mp = MARKETPLACES.find(m => m.id === platformId);
+  if (!mp) return;
+  if (!confirm(`${mp.name} mağaza bağlantısını silmek istediğinize emin misiniz? Mağaza verileri ve API kimlik bilgileri kaldırılacak.`)) return;
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Siliniyor…';
+  try {
+    if (mp.external) {
+      const { deletePlatformConnection } = await import('/src/js/store.js');
+      if (currentUser) await deletePlatformConnection(currentUser.uid, platformId);
+    } else {
+      await disconnectPlatform(platformId);
+    }
+    await loadMarketplaces();
+  } catch (e) {
+    alert(`Bağlantı silinemedi: ${e.message || e}`);
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
 function snapshotForm() {
   originalValues = {
     name:        $('accountNameInput').value,
@@ -1051,6 +1208,8 @@ onAuthChange(async (user) => {
   }
   // Plan + usage paralel çek — profil render'ından bağımsız
   loadPlanAndUsage();
+  // Pazaryeri bağlantıları paralel çek
+  loadMarketplaces();
 });
 
 // Edit / Save / Cancel

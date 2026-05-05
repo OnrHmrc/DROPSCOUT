@@ -33,6 +33,18 @@ export interface PlatformCategory {
   buybox?: string;
 }
 
+export interface PlatformProduct {
+  productCode: string;
+  name: string;
+  category?: string;
+  brand?: string;
+  image?: string;
+  price: number;
+  listPrice?: number;
+  stock: number;
+  active: boolean;
+}
+
 export interface PlatformStoreSnapshot {
   name: string;
   storeId: string;
@@ -42,6 +54,7 @@ export interface PlatformStoreSnapshot {
   joinDate?: string | null;
   categories: PlatformCategory[];
   avgCommission: number;
+  products?: PlatformProduct[];
 }
 
 export interface TestResult {

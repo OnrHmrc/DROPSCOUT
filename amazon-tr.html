@@ -76,6 +76,35 @@
 .fl-icon{font-size:14px;min-width:20px;text-align:center}
 .fl-check{margin-left:auto;font-family:'Geist Mono',monospace;font-size:9px;padding:2px 6px;border-radius:4px;background:var(--green-dim);color:var(--green);font-weight:700}
 .fl-soon{margin-left:auto;font-family:'Geist Mono',monospace;font-size:9px;padding:2px 6px;border-radius:4px;background:var(--yellow-dim);color:var(--yellow);font-weight:700}
+.connected-card{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;background:linear-gradient(135deg,var(--green-dim),color-mix(in srgb,var(--green-dim) 30%,var(--surface2)));border:1px solid color-mix(in srgb,var(--green) 25%,transparent)}
+.cc-icon{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--green);color:#fff;flex-shrink:0;box-shadow:0 2px 8px color-mix(in srgb,var(--green) 35%,transparent)}
+.cc-info{flex:1;min-width:0}
+.cc-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;margin:0 0 3px}
+.cc-sub{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:.3px}
+.cc-actions{display:flex;gap:8px;flex-wrap:wrap}
+.cc-actions .af-btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center}
+.products-toolbar{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--surface2)}
+.products-search{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;font-size:12px;color:var(--text);outline:none;font-family:'Inter',sans-serif}
+.products-search:focus{border-color:var(--focus-blue-border);box-shadow:0 0 0 3px var(--blue-dim)}
+.products-count{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted);white-space:nowrap}
+.products-table-wrap{overflow-x:auto;max-height:560px;overflow-y:auto}
+.products-table{width:100%;border-collapse:collapse;font-size:12px}
+.products-table thead{position:sticky;top:0;background:var(--surface);z-index:1}
+.products-table th{font-family:'Geist Mono',monospace;font-size:9px;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;text-align:left;padding:10px 14px;border-bottom:1px solid var(--border);white-space:nowrap;font-weight:700}
+.products-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.products-table tr:hover td{background:var(--surface2)}
+.pt-thumb{width:38px;height:38px;border-radius:8px;background:var(--surface2);object-fit:cover;border:1px solid var(--border);display:block}
+.pt-thumb-fallback{width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,var(--surface2),var(--surface3));border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted)}
+.pt-name{font-weight:600;color:var(--text);max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.pt-code{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted2);margin-top:2px;display:block}
+.pt-cat{font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.pt-price{font-family:'Geist Mono',monospace;font-weight:700;color:var(--text);white-space:nowrap}
+.pt-list{font-family:'Geist Mono',monospace;font-size:10px;color:var(--muted2);text-decoration:line-through;margin-left:6px}
+.pt-stock{font-family:'Geist Mono',monospace;font-weight:700}
+.pt-stock.ok{color:var(--green)}.pt-stock.low{color:var(--orange)}.pt-stock.out{color:var(--red)}
+.pt-status{font-family:'Geist Mono',monospace;font-size:9px;font-weight:700;padding:3px 8px;border-radius:999px;display:inline-block}
+.pt-status.active{background:var(--green-dim);color:var(--green)}
+.pt-status.passive{background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--muted)}
 .empty-state{padding:40px 20px;text-align:center}
 .empty-icon{font-size:40px;margin-bottom:12px;opacity:.6}
 .empty-title{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;margin-bottom:6px}
@@ -171,9 +200,23 @@
       </div>
       <div class="af-actions">
         <button class="af-btn primary" id="connectBtn">Bağlantıyı Test Et ve Kaydet</button>
-        <button class="af-btn secondary" id="disconnectBtn" style="display:none">Bağlantıyı Kes</button>
         <span class="af-msg" id="formMsg"></span>
       </div>
+    </div>
+
+    <div class="connected-card" id="connectedCard" style="display:none">
+      <div class="cc-icon">✓</div>
+      <div class="cc-info">
+        <div class="cc-title" id="ccStoreName">—</div>
+        <div class="cc-sub" id="ccStoreMeta">—</div>
+      </div>
+      <div class="cc-actions">
+        <a class="af-btn secondary" href="./profil.html#section-marketplaces">⚙ Ayarlardan Yönet</a>
+        <button class="af-btn secondary" id="disconnectBtn">Bağlantıyı Kes</button>
+      </div>
+    </div>
+    <div class="af-actions" id="connectedMsgRow" style="display:none;margin-top:10px;padding:0">
+      <span class="af-msg" id="formMsg2"></span>
     </div>
   </div>
 
@@ -183,6 +226,12 @@
         <div class="card-head"><div class="card-title">Mağaza Bilgileri</div><div class="ct-tag tag-orange" id="storeTag">BAĞLANTI BEKLENİYOR</div></div>
         <div id="storeContent">
           <div class="empty-state"><div class="empty-icon">🔌</div><div class="empty-title">Mağaza henüz bağlanmadı</div><div class="empty-desc">Yukarıdaki forma SP-API bilgilerinizi girerek Amazon TR mağazanızı bağlayın.</div></div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:14px" id="productsCard">
+        <div class="card-head"><div class="card-title">Mağaza Ürünleri</div><div class="ct-tag tag-blue" id="productsTag">CANLI VERİ</div></div>
+        <div id="productsContent">
+          <div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">Ürün listesi bekleniyor</div><div class="empty-desc">Mağaza bağlandıktan sonra Amazon SP-API'den çekilen ürünler burada listelenecektir.</div></div>
         </div>
       </div>
       <div class="card" style="margin-top:14px" id="paramsCard">
@@ -243,7 +292,19 @@ const mockStoreData = {
     { name: 'Spor & Outdoor', commission: 15.0, kdv: 20, products: 24, buybox: '₺79 - ₺2.100' },
     { name: 'Oyuncak', commission: 15.0, kdv: 10, products: 19, buybox: '₺39 - ₺650' }
   ],
-  avgCommission: 12.2, lastSync: null
+  avgCommission: 12.2, lastSync: null,
+  products: [
+    { productCode: 'B0CH8X5K2J', name: 'Bluetooth Kulaklık X-Pro', category: 'Elektronik', price: 449, listPrice: 599, stock: 32, active: true },
+    { productCode: 'B0CR2L9F7M', name: 'Akıllı LED Masa Lambası USB-C', category: 'Ev & Mutfak', price: 189, listPrice: 249, stock: 14, active: true },
+    { productCode: 'B0DT8H3P4N', name: 'Mekanik Klavye RGB Türkçe Q', category: 'Bilgisayar', price: 1299, listPrice: 1599, stock: 8, active: true },
+    { productCode: 'B0DK9V2X1Q', name: 'Termal Mat 60x40 cm Yüksek Yoğunluk', category: 'Spor & Outdoor', price: 379, stock: 21, active: true },
+    { productCode: 'B0CH7Y8K3R', name: 'Akıllı Saat Pulse 5 — Siyah Silikon Kayış', category: 'Elektronik', price: 989, listPrice: 1299, stock: 0, active: false },
+    { productCode: 'B0DM4N8L2W', name: 'Eğitici Yapboz Seti 3-6 Yaş', category: 'Oyuncak', price: 159, stock: 47, active: true },
+    { productCode: 'B0CT2Q9P5J', name: 'Paslanmaz Çelik Su Şişesi 750ml', category: 'Ev & Mutfak', price: 219, listPrice: 279, stock: 3, active: true },
+    { productCode: 'B0DK7M2X1S', name: 'Kablosuz Mouse Ergonomik DPI Ayarlı', category: 'Bilgisayar', price: 349, stock: 19, active: true },
+    { productCode: 'B0DH9N3K5T', name: 'Yoga Bloku Köpük EVA — 2 Adet', category: 'Spor & Outdoor', price: 129, stock: 26, active: true },
+    { productCode: 'B0CN5L8P9V', name: 'USB-C Şarj Kablosu 1.5m Naylon Örgü', category: 'Elektronik', price: 79, stock: 142, active: true }
+  ]
 };
 
 async function loadSavedState(){if(!currentUid)return;try{const data=await getPlatformConnection(currentUid,PLATFORM);if(data&&data.connected){state.connected=true;state.credentials=data.credentials||null;state.syncHistory=data.syncHistory||[];if(state.credentials){mockStoreData.name=state.credentials.storeName||'Mağaza';mockStoreData.sellerId=state.credentials.sellerId||'';state.store=mockStoreData}}}catch(e){console.warn('Platform verisi yüklenemedi:',e)}renderAll()}
@@ -255,14 +316,83 @@ function renderKPIs(){
   if(state.connected&&state.store){el('kpiStatus').textContent='Aktif';el('kpiStatusSub').textContent='Bağlantı kuruldu';el('kpiProducts').textContent=state.store.totalProducts.toLocaleString('tr-TR');el('kpiCommission').textContent='%'+state.store.avgCommission.toFixed(1);if(state.syncHistory.length>0){const l=new Date(state.syncHistory[0].date);el('kpiSync').textContent=l.toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});el('kpiSyncSub').textContent=l.toLocaleDateString('tr-TR')}}
   else{el('kpiStatus').textContent='--';el('kpiStatusSub').textContent='Henüz bağlanmadı';el('kpiProducts').textContent='--';el('kpiSync').textContent='--';el('kpiSyncSub').textContent='Henüz senkronize edilmedi';el('kpiCommission').textContent='--'}
 }
-function renderConnectionStatus(){const el=document.getElementById('connStatus'),txt=document.getElementById('connStatusText');if(state.connected){el.className='cm-status connected';txt.textContent='BAĞLI';document.getElementById('disconnectBtn').style.display='';document.getElementById('connectBtn').textContent='Bağlantıyı Güncelle';if(state.credentials){document.getElementById('inputSellerId').value=state.credentials.sellerId||'';document.getElementById('inputMarketplaceId').value=state.credentials.marketplaceId||'A33AVAJ2PDY3EV';document.getElementById('inputClientId').value=state.credentials.clientId?'••••••••••••':'';document.getElementById('inputClientSecret').value=state.credentials.clientSecret?'••••••••••••':'';document.getElementById('inputRefreshToken').value=state.credentials.refreshToken?'••••••••••••':'';document.getElementById('inputStoreName').value=state.credentials.storeName||''}}else{el.className='cm-status disconnected';txt.textContent='BAĞLI DEĞİL';document.getElementById('disconnectBtn').style.display='none';document.getElementById('connectBtn').textContent='Bağlantıyı Test Et ve Kaydet'}}
+function renderConnectionStatus(){
+  const el=document.getElementById('connStatus'),txt=document.getElementById('connStatusText');
+  const apiForm=document.getElementById('apiForm');
+  const connectedCard=document.getElementById('connectedCard');
+  const connectedMsgRow=document.getElementById('connectedMsgRow');
+  if(state.connected){
+    el.className='cm-status connected';txt.textContent='BAĞLI';
+    apiForm.style.display='none';
+    connectedCard.style.display='flex';
+    connectedMsgRow.style.display='flex';
+    const s=state.store;
+    document.getElementById('ccStoreName').textContent=(state.credentials&&state.credentials.storeName)||s?.name||'Amazon TR Mağaza';
+    const meta=[];
+    if(s?.sellerId) meta.push('Seller ID: '+s.sellerId);
+    if(typeof s?.totalProducts==='number') meta.push(s.totalProducts+' ürün');
+    if(s?.fulfillment) meta.push(s.fulfillment);
+    document.getElementById('ccStoreMeta').textContent=meta.join(' · ')||'Bağlantı aktif';
+  }else{
+    el.className='cm-status disconnected';txt.textContent='BAĞLI DEĞİL';
+    apiForm.style.display='';
+    connectedCard.style.display='none';
+    connectedMsgRow.style.display='none';
+    document.getElementById('connectBtn').textContent='Bağlantıyı Test Et ve Kaydet';
+  }
+}
+
+function escapeHtml(s){return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function buildProductRow(p){
+  const stock=Number(p.stock||0);
+  const stockClass=stock===0?'out':(stock<5?'low':'ok');
+  const stockText=stock===0?'Tükendi':(stock+' adet');
+  const thumb=p.image?`<img class="pt-thumb" src="${escapeHtml(p.image)}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;pt-thumb-fallback&quot;>📦</div>'">`:`<div class="pt-thumb-fallback">📦</div>`;
+  const list=p.listPrice&&p.listPrice>p.price?`<span class="pt-list">₺${Number(p.listPrice).toLocaleString('tr-TR')}</span>`:'';
+  return `<tr><td>${thumb}</td><td><span class="pt-name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</span>${p.productCode?`<span class="pt-code">ASIN: ${escapeHtml(p.productCode)}</span>`:''}</td><td><span class="pt-cat">${escapeHtml(p.category||'—')}</span></td><td><span class="pt-price">₺${Number(p.price||0).toLocaleString('tr-TR')}</span>${list}</td><td><span class="pt-stock ${stockClass}">${stockText}</span></td><td><span class="pt-status ${p.active?'active':'passive'}">${p.active?'AKTİF':'PASİF'}</span></td></tr>`;
+}
+function renderProducts(){
+  const content=document.getElementById('productsContent');
+  const tag=document.getElementById('productsTag');
+  if(!state.connected||!state.store){
+    tag.textContent='BAĞLANTI BEKLENİYOR';tag.className='ct-tag tag-orange';
+    content.innerHTML='<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">Ürün listesi bekleniyor</div><div class="empty-desc">Mağaza bağlandıktan sonra çekilen ürünler burada listelenecektir.</div></div>';
+    return;
+  }
+  const products=state.store.products||[];
+  if(products.length===0){
+    tag.textContent='VERİ YOK';tag.className='ct-tag tag-yellow';
+    content.innerHTML='<div class="empty-state"><div class="empty-icon">📦</div><div class="empty-title">Henüz ürün gelmedi</div><div class="empty-desc">Mağazanızda yayında ürün olmayabilir veya senkronizasyon henüz tamamlanmadı.</div></div>';
+    return;
+  }
+  tag.textContent=products.length+' ÜRÜN';tag.className='ct-tag tag-blue';
+  const rows=products.map(buildProductRow).join('');
+  content.innerHTML=`<div class="products-toolbar"><input type="text" id="productSearch" class="products-search" placeholder="Ürün adı, ASIN veya kategori ara…" autocomplete="off"><span class="products-count">${products.length} / ${Number(state.store.totalProducts||0).toLocaleString('tr-TR')} ürün</span></div><div class="products-table-wrap"><table class="products-table"><thead><tr><th></th><th>Ürün</th><th>Kategori</th><th>Fiyat</th><th>Stok</th><th>Durum</th></tr></thead><tbody id="productsTbody">${rows}</tbody></table></div>`;
+  const search=document.getElementById('productSearch');
+  if(search){
+    search.addEventListener('input',()=>{
+      const q=search.value.trim().toLowerCase();
+      const tbody=document.getElementById('productsTbody');
+      const filtered=q?products.filter(p=>(p.name||'').toLowerCase().includes(q)||(p.productCode||'').toLowerCase().includes(q)||(p.category||'').toLowerCase().includes(q)):products;
+      tbody.innerHTML=filtered.length===0?`<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);font-size:11px">"${escapeHtml(search.value)}" için sonuç bulunamadı</td></tr>`:filtered.map(buildProductRow).join('');
+    });
+  }
+}
 function renderStoreInfo(){const c=document.getElementById('storeContent'),t=document.getElementById('storeTag');if(!state.connected||!state.store){t.textContent='BAĞLANTI BEKLENİYOR';t.className='ct-tag tag-orange';c.innerHTML='<div class="empty-state"><div class="empty-icon">🔌</div><div class="empty-title">Mağaza henüz bağlanmadı</div><div class="empty-desc">SP-API bilgilerinizi girerek Amazon TR mağazanızı bağlayın.</div></div>';return}t.textContent='AKTİF';t.className='ct-tag tag-green';const s=state.store;c.innerHTML=`<div class="store-info"><div class="si-row"><span class="si-label">Mağaza Adı</span><span class="si-value">${s.name||'Belirtilmedi'}</span></div><div class="si-row"><span class="si-label">Seller ID</span><span class="si-value b">${s.sellerId}</span></div><div class="si-row"><span class="si-label">Marketplace</span><span class="si-value">Amazon.com.tr (${s.marketplaceId})</span></div><div class="si-row"><span class="si-label">Toplam Ürün</span><span class="si-value o">${s.totalProducts}</span></div><div class="si-row"><span class="si-label">Aktif Ürün</span><span class="si-value g">${s.activeProducts}</span></div><div class="si-row"><span class="si-label">Fulfillment</span><span class="si-value y">${s.fulfillment}</span></div><div class="si-row"><span class="si-label">Mağaza Puanı</span><span class="si-value y">${s.rating} / 5</span></div></div>`}
 function renderParams(){const c=document.getElementById('paramsContent');if(!state.connected||!state.store){c.innerHTML='<div class="empty-state"><div class="empty-icon">📊</div><div class="empty-title">Veri yok</div><div class="empty-desc">Mağaza bağlandıktan sonra referral fee oranları burada görünecektir.</div></div>';return}let h='<div class="params-grid">';state.store.categories.forEach(cat=>{h+=`<div class="param-box"><div class="pb-label">${cat.name}</div><div class="pb-value" style="color:var(--orange)">%${cat.commission.toFixed(1)}</div><div class="pb-sub">KDV: %${cat.kdv} · ${cat.products} ürün · BuyBox: ${cat.buybox}</div></div>`});h+=`<div class="param-box" style="border-color:var(--focus-blue-border);background:color-mix(in srgb,var(--blue-dim) 30%,var(--surface2))"><div class="pb-label">Ort. Referral Fee</div><div class="pb-value" style="color:var(--blue)">%${state.store.avgCommission.toFixed(1)}</div><div class="pb-sub">Tüm kategoriler ortalaması</div></div></div>`;c.innerHTML=h}
 function renderSyncLog(){const el=document.getElementById('syncLog');if(state.syncHistory.length===0){el.innerHTML='<div class="sl-entry"><span class="sl-time">--:--</span><span class="sl-text">Henüz senkronizasyon yapılmadı.</span></div>';return}el.innerHTML=state.syncHistory.map(s=>`<div class="sl-entry"><span class="sl-time">${s.time}</span><span class="sl-text">${s.text}</span></div>`).join('')}
-function renderAll(){renderKPIs();renderConnectionStatus();renderStoreInfo();renderParams();renderSyncLog()}
+function renderAll(){renderKPIs();renderConnectionStatus();renderStoreInfo();renderProducts();renderParams();renderSyncLog()}
 
 document.getElementById('connectBtn').addEventListener('click',async()=>{const sid=document.getElementById('inputSellerId').value.trim();const mid=document.getElementById('inputMarketplaceId').value.trim();const cid=document.getElementById('inputClientId').value.trim();const cs=document.getElementById('inputClientSecret').value.trim();const rt=document.getElementById('inputRefreshToken').value.trim();const name=document.getElementById('inputStoreName').value.trim();const msg=document.getElementById('formMsg');const btn=document.getElementById('connectBtn');if(!sid||!cid||!cs||!rt){msg.textContent='Seller ID, Client ID, Client Secret ve Refresh Token zorunludur.';msg.className='af-msg error';return}btn.disabled=true;btn.textContent='Test ediliyor...';msg.textContent='SP-API bağlantısı kontrol ediliyor...';msg.className='af-msg';await new Promise(r=>setTimeout(r,2200));state.connected=true;state.credentials={sellerId:sid,marketplaceId:mid,clientId:cid,clientSecret:cs,refreshToken:rt,storeName:name};mockStoreData.name=name||'Amazon TR Mağaza';mockStoreData.sellerId=sid;mockStoreData.marketplaceId=mid;state.store=mockStoreData;addSyncLog('<strong>Bağlantı kuruldu.</strong> Amazon SP-API doğrulandı. '+mockStoreData.totalProducts+' ürün senkronize edildi.');btn.disabled=false;msg.textContent='Bağlantı başarılı!';msg.className='af-msg success';saveState();renderAll()});
-document.getElementById('disconnectBtn').addEventListener('click',async()=>{state.connected=false;state.store=null;state.credentials=null;document.getElementById('inputSellerId').value='';document.getElementById('inputMarketplaceId').value='A33AVAJ2PDY3EV';document.getElementById('inputClientId').value='';document.getElementById('inputClientSecret').value='';document.getElementById('inputRefreshToken').value='';document.getElementById('inputStoreName').value='';document.getElementById('formMsg').textContent='';if(currentUid){try{await deletePlatformConnection(currentUid,PLATFORM)}catch(e){}}state.syncHistory=[];renderAll()});
+document.getElementById('disconnectBtn').addEventListener('click',async()=>{
+  if(!confirm('Amazon TR mağaza bağlantısını silmek istediğinize emin misiniz? Mağaza verileri ve API kimlik bilgileri kaldırılacak.')) return;
+  state.connected=false;state.store=null;state.credentials=null;
+  document.getElementById('inputSellerId').value='';document.getElementById('inputMarketplaceId').value='A33AVAJ2PDY3EV';document.getElementById('inputClientId').value='';document.getElementById('inputClientSecret').value='';document.getElementById('inputRefreshToken').value='';document.getElementById('inputStoreName').value='';
+  document.getElementById('formMsg').textContent='Bağlantı kaldırıldı.';document.getElementById('formMsg').className='af-msg';
+  document.getElementById('formMsg2').textContent='';
+  if(currentUid){try{await deletePlatformConnection(currentUid,PLATFORM)}catch(e){}}
+  state.syncHistory=[];renderAll();
+});
 document.getElementById('syncBtn').addEventListener('click',async()=>{if(!state.connected)return;const btn=document.getElementById('syncBtn');btn.textContent='↻ Senkronize ediliyor...';btn.disabled=true;await new Promise(r=>setTimeout(r,1500));addSyncLog('<strong>Senkronizasyon tamamlandı.</strong> '+mockStoreData.totalProducts+' ürün, '+mockStoreData.categories.length+' kategori güncellendi.');btn.textContent='↻ Senkronize Et';btn.disabled=false;renderAll()});
 
 renderAll();
